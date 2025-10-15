@@ -6,6 +6,8 @@ const Funding = require('../models/Funding');
 const Internship = require('../models/Intership');
 const Patent = require('../models/Patent');
 const Training = require('../models/Training');
+const Collaboration = require('../models/Collaboration');
+const Achievement = require('../models/Achievement');
 const jwt = require('jsonwebtoken');
 
 
@@ -76,6 +78,12 @@ exports.createReport = async (req, res) => {
         break;
       case 'Trainings':
         reportData = await Training.find(filter);
+        break;
+      case 'Collaborations':
+        reportData = await Collaboration.find(filter);
+        break;
+      case 'Achievements':
+        reportData = await Achievement.find(filter);
         break;
       default:
         return res.status(400).json({ message: 'Invalid source type' });

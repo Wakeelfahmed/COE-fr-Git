@@ -6,13 +6,15 @@ import { auth } from '../firebaseConfig';
 
 
 const activityItems = [
-  { name: 'Industry/Commercial Projects', path: '/' },
   { name: 'Trainings', path: '/trainings' },
   { name: 'Internships', path: '/internships' },
   // { name: 'Events', path: '/events' },
 ];
 
 const otherItems = [
+  { name: 'Industry/Commercial Projects', path: '/' },
+  { name: 'Collaborations', path: '/Collaborations' },
+  { name: 'Achievements', path: '/achievements' },
   { name: 'Patents', path: '/patents' },
   { name: 'Fundings', path: '/fundings' },
   { name: 'Publications', path: '/publications' },

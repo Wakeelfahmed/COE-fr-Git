@@ -14,6 +14,8 @@ import PatentsPage from './pages/PatentsPage';
 import FundingsPage from './pages/FundingsPage';
 import PublicationsPage from './pages/PublicationsPage';
 import ReportsPage from './pages/ReportsPage';
+import XYXPage from './pages/XYXPage';
+import AchievementsPage from './pages/AchievementsPage';
 import AuthRedirect from './authRedirect';
 import { UserProvider, useUser } from './context/UserContext';
 import Loading from './components/Loading';
@@ -82,6 +84,8 @@ function App() {
                   <Route path="/trainings" element={<TrainingsPage />} />
                   <Route path="/internships" element={<InternshipsPage />} />
                   <Route path="/events" element={<EventsPage />} />
+                  <Route path="/Collaborations" element={<XYXPage />} />
+                  <Route path="/achievements" element={<AchievementsPage />} />
                   <Route path="/patents" element={<PatentsPage />} />
                   <Route path="/fundings" element={<FundingsPage />} />
                   <Route path="/publications" element={<PublicationsPage />} />

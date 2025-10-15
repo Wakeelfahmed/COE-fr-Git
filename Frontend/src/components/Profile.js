@@ -59,12 +59,12 @@ const Profile = () => {
               </div>
             </div>
             <div className="space-y-4">
-              <div className="flex items-center">
+              {/* <div className="flex items-center">
                 <MapPin className="w-6 h-6 text-gray-500 mr-3" />
                 <span>
                   {user.address.street}, {user.address.city}, {user.address.state} {user.address.zipCode}, {user.address.country}
                 </span>
-              </div>
+              </div> */}
               <div className="flex items-center">
                 <Briefcase className="w-6 h-6 text-gray-500 mr-3" />
                 <span>Joined on {new Date(user.joinDate).toLocaleDateString()}</span>

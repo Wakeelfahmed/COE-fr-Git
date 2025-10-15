@@ -11,7 +11,7 @@ const patentSchema = new mongoose.Schema({
     required: true
   },
   team: {
-    type: String,
+    type: [String],
     required: true
   },
   dateOfSubmission: {
@@ -32,7 +32,14 @@ const patentSchema = new mongoose.Schema({
   dateOfApproval: {
     type: Date
   },
-  fileLink: String  
+  fileLink: String,
+  createdBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
+  }
+}, {
+  timestamps: true
 });
 
 module.exports = mongoose.model('Patent', patentSchema);

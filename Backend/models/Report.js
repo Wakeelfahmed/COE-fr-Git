@@ -14,7 +14,7 @@ const CustomReportSchema = new mongoose.Schema({
   sourceType: {
     type: String,
     required: true,
-    enum: ['Publications', 'Events', 'CommercializationProjects', 'Fundings', 'Internships', 'Patents', 'Trainings']
+    enum: ['Publications', 'Events', 'CommercializationProjects', 'Fundings', 'Internships', 'Patents', 'Trainings', 'Collaborations', 'Achievements']
   },
   filterCriteria: {
     type: Object,

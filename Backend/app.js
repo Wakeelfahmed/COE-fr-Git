@@ -12,6 +12,8 @@ const patentRoutes = require('./routes/patentRoutes');
 const publicationRoutes = require('./routes/publicationRoutes');
 const fundingRoutes = require('./routes/fundingRoutes');
 const reportRoutes = require('./routes/reportRoutes');
+const collaborationRoutes = require('./routes/collaborationRoutes');
+const achievementRoutes = require('./routes/achievementRoutes');
 
 // Load environment variables
 dotenv.config();
@@ -48,6 +50,8 @@ app.use('/api/patents', patentRoutes);
 app.use('/api/publications', publicationRoutes);
 app.use('/api/fundings', fundingRoutes);
 app.use('/api/reports', reportRoutes);
+app.use('/api/collaborations', collaborationRoutes);
+app.use('/api/achievements', achievementRoutes);
 
 // Start the server
 const PORT = process.env.PORT || 4000;
