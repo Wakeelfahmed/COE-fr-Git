@@ -9,13 +9,12 @@ const AchievementsPage = () => {
   const [achievements, setAchievements] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [currentAchievement, setCurrentAchievement] = useState({
-    title: '',
-    category: '',
-    description: '',
-    achievedBy: '',
-    dateAchieved: '',
-    awardingBody: '',
-    significance: ''
+    event: '',
+    organizer: '',
+    date: '',
+    participant: '',
+    participantFromCoEAI: '',
+    roleOfParticipantFromCoEAI: ''
   });
   const [isEditMode, setIsEditMode] = useState(false);
   const { user } = useUser();
@@ -24,10 +23,9 @@ const AchievementsPage = () => {
   const [showReportModal, setShowReportModal] = useState(false);
   const [reportTitle, setReportTitle] = useState('');
   const [filterCriteria, setFilterCriteria] = useState({
-    title: '',
-    category: '',
-    achievedBy: '',
-    significance: ''
+    event: '',
+    organizer: '',
+    participant: ''
   });
 
   useEffect(() => {
@@ -49,13 +47,12 @@ const AchievementsPage = () => {
   const handleNewAchievement = () => {
     setIsEditMode(false);
     setCurrentAchievement({
-      title: '',
-      category: '',
-      description: '',
-      achievedBy: '',
-      dateAchieved: '',
-      awardingBody: '',
-      significance: ''
+      event: '',
+      organizer: '',
+      date: '',
+      participant: '',
+      participantFromCoEAI: '',
+      roleOfParticipantFromCoEAI: ''
     });
     setShowModal(true);
   };
@@ -64,7 +61,7 @@ const AchievementsPage = () => {
     setIsEditMode(true);
     setCurrentAchievement({
       ...achievement,
-      dateAchieved: achievement.dateAchieved ? new Date(achievement.dateAchieved).toISOString().split('T')[0] : ''
+      date: achievement.date ? new Date(achievement.date).toISOString().split('T')[0] : ''
     });
     setShowModal(true);
   };
@@ -113,10 +110,9 @@ const AchievementsPage = () => {
 
   const clearFilters = () => {
     setFilterCriteria({
-      title: '',
-      category: '',
-      achievedBy: '',
-      significance: ''
+      event: '',
+      organizer: '',
+      participant: ''
     });
   };
 
@@ -146,10 +142,9 @@ const AchievementsPage = () => {
   };
 
   const filteredAchievements = achievements.filter(achievement => {
-    return achievement.title.toLowerCase().includes(filterCriteria.title.toLowerCase()) &&
-           achievement.category.toLowerCase().includes(filterCriteria.category.toLowerCase()) &&
-           achievement.achievedBy.toLowerCase().includes(filterCriteria.achievedBy.toLowerCase()) &&
-           (filterCriteria.significance === '' || achievement.significance === filterCriteria.significance);
+    return (achievement.event || '').toLowerCase().includes(filterCriteria.event.toLowerCase()) &&
+           (achievement.organizer || '').toLowerCase().includes(filterCriteria.organizer.toLowerCase()) &&
+           (achievement.participant || '').toLowerCase().includes(filterCriteria.participant.toLowerCase());
   });
 
   return (
@@ -176,43 +171,31 @@ const AchievementsPage = () => {
 
       {showFilters && (
         <div className="mb-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 mb-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 mb-2">
             <input
               type="text"
-              placeholder="Filter by Title"
-              name="title"
-              value={filterCriteria.title}
+              placeholder="Filter by Event"
+              name="event"
+              value={filterCriteria.event}
               onChange={handleFilterChange}
               className="border rounded px-2 py-1"
             />
             <input
               type="text"
-              placeholder="Filter by Category"
-              name="category"
-              value={filterCriteria.category}
+              placeholder="Filter by Organizer"
+              name="organizer"
+              value={filterCriteria.organizer}
               onChange={handleFilterChange}
               className="border rounded px-2 py-1"
             />
             <input
               type="text"
-              placeholder="Filter by Achieved By"
-              name="achievedBy"
-              value={filterCriteria.achievedBy}
+              placeholder="Filter by Participant"
+              name="participant"
+              value={filterCriteria.participant}
               onChange={handleFilterChange}
               className="border rounded px-2 py-1"
             />
-            <select
-              name="significance"
-              value={filterCriteria.significance}
-              onChange={handleFilterChange}
-              className="border rounded px-2 py-1"
-            >
-              <option value="">All Significance</option>
-              <option value="International">International</option>
-              <option value="National">National</option>
-              <option value="Regional">Regional</option>
-              <option value="Institutional">Institutional</option>
-            </select>
           </div>
           <button onClick={clearFilters} className="bg-gray-300 text-gray-700 px-4 py-2 rounded">
             Clear Filters
@@ -228,12 +211,12 @@ const AchievementsPage = () => {
           <thead className="bg-gray-100">
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">#</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Achieved By</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Event</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Organizer</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Awarding Body</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Significance</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Participant</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Participant from CoE-AI</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
             </tr>
           </thead>
@@ -241,12 +224,12 @@ const AchievementsPage = () => {
             {filteredAchievements.map((achievement, index) => (
               <tr key={achievement._id}>
                 <td className="px-6 py-4 whitespace-nowrap">{index + 1}</td>
-                <td className="px-6 py-4 whitespace-nowrap">{achievement.title}</td>
-                <td className="px-6 py-4 whitespace-nowrap">{achievement.category}</td>
-                <td className="px-6 py-4 whitespace-nowrap">{achievement.achievedBy}</td>
-                <td className="px-6 py-4 whitespace-nowrap">{new Date(achievement.dateAchieved).toLocaleDateString()}</td>
-                <td className="px-6 py-4 whitespace-nowrap">{achievement.awardingBody || '-'}</td>
-                <td className="px-6 py-4 whitespace-nowrap">{achievement.significance || '-'}</td>
+                <td className="px-6 py-4 whitespace-nowrap">{achievement.event}</td>
+                <td className="px-6 py-4 whitespace-nowrap">{achievement.organizer}</td>
+                <td className="px-6 py-4 whitespace-nowrap">{new Date(achievement.date).toLocaleDateString()}</td>
+                <td className="px-6 py-4 whitespace-nowrap">{achievement.participant}</td>
+                <td className="px-6 py-4 whitespace-nowrap">{achievement.participantFromCoEAI}</td>
+                <td className="px-6 py-4 whitespace-nowrap">{achievement.roleOfParticipantFromCoEAI}</td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <button onClick={() => handleEditAchievement(achievement)} className="text-blue-600 hover:text-blue-900 mr-2">Edit</button>
                   <button onClick={() => handleDeleteAchievement(achievement._id)} className="text-red-600 hover:text-red-900">Delete</button>
@@ -265,111 +248,85 @@ const AchievementsPage = () => {
             </h3>
             <form onSubmit={handleSubmit}>
               <div className="mb-4">
-                <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="title">
-                  Title
+                <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="event">
+                  Event
                 </label>
                 <input
                   type="text"
-                  id="title"
-                  name="title"
-                  value={currentAchievement.title}
+                  id="event"
+                  name="event"
+                  value={currentAchievement.event}
                   onChange={handleInputChange}
                   className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                   required
                 />
               </div>
               <div className="mb-4">
-                <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="category">
-                  Category
-                </label>
-                <select
-                  id="category"
-                  name="category"
-                  value={currentAchievement.category}
-                  onChange={handleInputChange}
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                  required
-                >
-                  <option value="">Select Category</option>
-                  <option value="Award">Award</option>
-                  <option value="Recognition">Recognition</option>
-                  <option value="Milestone">Milestone</option>
-                  <option value="Competition Win">Competition Win</option>
-                  <option value="Grant Received">Grant Received</option>
-                  <option value="Publication Milestone">Publication Milestone</option>
-                  <option value="Technology Transfer">Technology Transfer</option>
-                  <option value="Other">Other</option>
-                </select>
-              </div>
-              <div className="mb-4">
-                <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="achievedBy">
-                  Achieved By
+                <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="organizer">
+                  Organizer
                 </label>
                 <input
                   type="text"
-                  id="achievedBy"
-                  name="achievedBy"
-                  value={currentAchievement.achievedBy}
+                  id="organizer"
+                  name="organizer"
+                  value={currentAchievement.organizer}
                   onChange={handleInputChange}
                   className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                   required
                 />
               </div>
               <div className="mb-4">
-                <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="dateAchieved">
-                  Date Achieved
+                <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="date">
+                  Date
                 </label>
                 <input
                   type="date"
-                  id="dateAchieved"
-                  name="dateAchieved"
-                  value={currentAchievement.dateAchieved}
+                  id="date"
+                  name="date"
+                  value={currentAchievement.date}
                   onChange={handleInputChange}
                   className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                   required
                 />
               </div>
               <div className="mb-4">
-                <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="awardingBody">
-                  Awarding Body (Optional)
+                <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="participant">
+                  Participant <span className="text-gray-500 font-normal">(e.g., Student, Faculty)</span>
                 </label>
                 <input
                   type="text"
-                  id="awardingBody"
-                  name="awardingBody"
-                  value={currentAchievement.awardingBody}
+                  id="participant"
+                  name="participant"
+                  value={currentAchievement.participant}
                   onChange={handleInputChange}
                   className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                  required
                 />
               </div>
               <div className="mb-4">
-                <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="significance">
-                  Significance (Optional)
+                <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="participantFromCoEAI">
+                  Participant from CoE-AI
                 </label>
-                <select
-                  id="significance"
-                  name="significance"
-                  value={currentAchievement.significance}
+                <input
+                  type="text"
+                  id="participantFromCoEAI"
+                  name="participantFromCoEAI"
+                  value={currentAchievement.participantFromCoEAI}
                   onChange={handleInputChange}
                   className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                >
-                  <option value="">Select Significance</option>
-                  <option value="International">International</option>
-                  <option value="National">National</option>
-                  <option value="Regional">Regional</option>
-                  <option value="Institutional">Institutional</option>
-                </select>
+                  required
+                />
               </div>
               <div className="mb-4">
-                <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="description">
-                  Description
+                <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="roleOfParticipantFromCoEAI">
+                  Role of Participant from CoE-AI <span className="text-gray-500 font-normal">(e.g., Competitor, Organizer)</span>
                 </label>
-                <textarea
-                  id="description"
-                  name="description"
-                  value={currentAchievement.description}
+                <input
+                  type="text"
+                  id="roleOfParticipantFromCoEAI"
+                  name="roleOfParticipantFromCoEAI"
+                  value={currentAchievement.roleOfParticipantFromCoEAI}
                   onChange={handleInputChange}
-                  rows="3"
                   className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                   required
                 />

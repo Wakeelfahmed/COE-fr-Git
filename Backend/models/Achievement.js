@@ -1,48 +1,34 @@
 const mongoose = require('mongoose');
 
 const achievementSchema = new mongoose.Schema({
-  title: {
+  event: {
     type: String,
     required: true,
     trim: true
   },
-  category: {
-    type: String,
-    required: true,
-    enum: [
-      'Award',
-      'Recognition',
-      'Milestone',
-      'Competition Win',
-      'Grant Received',
-      'Publication Milestone',
-      'Technology Transfer',
-      'Other'
-    ]
-  },
-  description: {
+  organizer: {
     type: String,
     required: true,
     trim: true
   },
-  achievedBy: {
-    type: String,
-    required: true,
-    trim: true
-  },
-  dateAchieved: {
+  date: {
     type: Date,
     required: true
   },
-  awardingBody: {
+  participant: {
     type: String,
-    required: false,
+    required: true,
     trim: true
   },
-  significance: {
+  participantFromCoEAI: {
     type: String,
-    required: false,
-    enum: ['International', 'National', 'Regional', 'Institutional', '']
+    required: true,
+    trim: true
+  },
+  roleOfParticipantFromCoEAI: {
+    type: String,
+    required: true,
+    trim: true
   },
   fileLink: {
     type: String,

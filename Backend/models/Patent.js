@@ -14,6 +14,21 @@ const patentSchema = new mongoose.Schema({
     type: [String],
     required: true
   },
+  patentOrg: {
+    type: String,
+    required: false,
+    trim: true
+  },
+  coPi: {
+    type: String,
+    required: false,
+    trim: true
+  },
+  affiliationOfCoPi: {
+    type: String,
+    required: false,
+    trim: true
+  },
   dateOfSubmission: {
     type: Date,
     required: true

@@ -49,6 +49,9 @@ const PatentsView = () => {
     title: '',
     pi: '',
     team: '',
+    patentOrg: '',
+    coPi: '',
+    affiliationOfCoPi: '',
     dateOfSubmission: '',
     scope: '',
     directoryNumber: '',
@@ -124,6 +127,9 @@ const PatentsView = () => {
       title: '',
       pi: '',
       team: '',
+      patentOrg: '',
+      coPi: '',
+      affiliationOfCoPi: '',
       dateOfSubmission: '',
       scope: '',
       directoryNumber: '',
@@ -348,6 +354,9 @@ const PatentsView = () => {
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">PI</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Team</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Patent Org</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Co-PI</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Co-PI Affiliation</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Submission Date</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Scope</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Directory Number</th>
@@ -366,6 +375,9 @@ const PatentsView = () => {
                 <td className="px-6 py-4 whitespace-nowrap">
                   {Array.isArray(patent.team) ? patent.team.join(', ') : patent.team || 'N/A'}
                 </td>
+                <td className="px-6 py-4 whitespace-nowrap">{patent.patentOrg || '-'}</td>
+                <td className="px-6 py-4 whitespace-nowrap">{patent.coPi || '-'}</td>
+                <td className="px-6 py-4 whitespace-nowrap">{patent.affiliationOfCoPi || '-'}</td>
                 <td className="px-6 py-4 whitespace-nowrap">{patent.dateOfSubmission}</td>
                 <td className="px-6 py-4 whitespace-nowrap">{patent.scope}</td>
                 <td className="px-6 py-4 whitespace-nowrap">{patent.directoryNumber}</td>
@@ -461,6 +473,45 @@ const PatentsView = () => {
                     onChange={handleInputChange}
                     className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                     required
+                  />
+                </div>
+                <div className="mb-4">
+                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="patentOrg">
+                    Patent Organization
+                  </label>
+                  <input
+                    type="text"
+                    id="patentOrg"
+                    name="patentOrg"
+                    value={currentPatent.patentOrg}
+                    onChange={handleInputChange}
+                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                  />
+                </div>
+                <div className="mb-4">
+                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="coPi">
+                    Co-PI
+                  </label>
+                  <input
+                    type="text"
+                    id="coPi"
+                    name="coPi"
+                    value={currentPatent.coPi}
+                    onChange={handleInputChange}
+                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                  />
+                </div>
+                <div className="mb-4">
+                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="affiliationOfCoPi">
+                    Affiliation of Co-PI
+                  </label>
+                  <input
+                    type="text"
+                    id="affiliationOfCoPi"
+                    name="affiliationOfCoPi"
+                    value={currentPatent.affiliationOfCoPi}
+                    onChange={handleInputChange}
+                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                   />
                 </div>
                 <div className="mb-4">

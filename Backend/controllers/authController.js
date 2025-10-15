@@ -38,8 +38,8 @@ exports.signup = async (req, res) => {
     
     res.cookie('token', token, { 
       httpOnly: true,
-      sameSite: 'none',
-      secure: true,
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+      secure: process.env.NODE_ENV === 'production',
       maxAge: 24 * 60 * 60 * 1000 // 1 day
     });
 
@@ -66,8 +66,8 @@ exports.login = async (req, res) => {
     // Set the token as an HTTP-only cookie
     res.cookie('token', token, { 
       httpOnly: true,
-      sameSite: 'none',
-      secure: true,
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+      secure: process.env.NODE_ENV === 'production',
       maxAge: 24 * 60 * 60 * 1000 // 1 day
     });
 

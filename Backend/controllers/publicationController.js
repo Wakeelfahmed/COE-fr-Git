@@ -21,15 +21,25 @@ exports.getAllPublications = async (req, res) => {
   const user = getUserFromToken(req);
   if (!user) return res.status(401).json({ message: 'Unauthorized' });
 
+  console.log('=== GET ALL PUBLICATIONS ===');
+  console.log('User ID:', user._id);
+  console.log('User Role:', user.role);
+  console.log('Only Mine:', req.query.onlyMine);
+
   try {
     let publications;
     if (user.role === 'director' && req.query.onlyMine !== 'true') {
+      console.log('Fetching all publications (director mode)');
       publications = await Publication.find();
     } else {
+      console.log('Fetching only user publications');
       publications = await Publication.find({ createdBy: user._id });
     }
+    console.log('Publications found:', publications.length);
+    console.log('Publications:', publications);
     res.json(publications);
   } catch (error) {
+    console.error('Error fetching publications:', error);
     res.status(500).json({ message: error.message });
   }
 };

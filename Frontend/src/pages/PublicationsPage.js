@@ -82,13 +82,20 @@ const PublicationsView = () => {
   }, [showOnlyMine]);
 
   const fetchPublications = async () => {
+    console.log('=== FETCHING PUBLICATIONS ===');
+    console.log('Show Only Mine:', showOnlyMine);
+    console.log('API URL:', `${API_BASE_URL}/publications`);
     try {
       const response = await axios.get(`${API_BASE_URL}/publications`, {
         params: { onlyMine: showOnlyMine }
       });
+      console.log('Publications fetched:', response.data.length, 'records');
+      console.log('Publications data:', response.data);
       setPublications(response.data);
     } catch (error) {
-      console.error('Error fetching publications:', error);
+      console.error('=== ERROR FETCHING PUBLICATIONS ===');
+      console.error('Error:', error);
+      console.error('Error response:', error.response?.data);
       alert('Error fetching publications. Please try again.');
     }
   };
@@ -125,16 +132,30 @@ const PublicationsView = () => {
       lastKnownImpactFactor: parseFloat(currentPublication.lastKnownImpactFactor)
     };
 
+    console.log('=== PUBLICATION SUBMIT DEBUG ===');
+    console.log('Is Edit Mode:', isEditMode);
+    console.log('Publication Data:', publicationData);
+    console.log('API URL:', `${API_BASE_URL}/publications${isEditMode ? '/' + currentPublication._id : ''}`);
+
     try {
+      let response;
       if (isEditMode) {
-        await axios.put(`${API_BASE_URL}/publications/${currentPublication._id}`, publicationData);
+        console.log('Sending PUT request...');
+        response = await axios.put(`${API_BASE_URL}/publications/${currentPublication._id}`, publicationData);
       } else {
-        await axios.post(`${API_BASE_URL}/publications`, publicationData);
+        console.log('Sending POST request...');
+        response = await axios.post(`${API_BASE_URL}/publications`, publicationData);
       }
+      console.log('Response:', response.data);
+      console.log('Publication saved successfully!');
       setShowModal(false);
       fetchPublications();
     } catch (error) {
-      console.error('Error saving publication:', error);
+      console.error('=== ERROR SAVING PUBLICATION ===');
+      console.error('Error object:', error);
+      console.error('Error response:', error.response);
+      console.error('Error response data:', error.response?.data);
+      console.error('Error message:', error.message);
       alert('Error saving publication. Please try again.');
     }
   };
@@ -436,15 +457,18 @@ const PublicationsView = () => {
                 <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="typeOfPublication">
                   Type of Publication
                 </label>
-                <input
-                  type="text"
+                <select
                   id="typeOfPublication"
                   name="typeOfPublication"
                   value={currentPublication.typeOfPublication}
                   onChange={handleInputChange}
                   className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                   required
-                />
+                >
+                  <option value="">Select Type</option>
+                  <option value="Journal">Journal</option>
+                  <option value="Conference">Conference</option>
+                </select>
               </div>
               <div className="mb-4">
                 <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="lastKnownImpactFactor">
@@ -479,15 +503,20 @@ const PublicationsView = () => {
                 <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="hecCategory">
                   HEC Category
                 </label>
-                <input
-                  type="text"
+                <select
                   id="hecCategory"
                   name="hecCategory"
                   value={currentPublication.hecCategory}
                   onChange={handleInputChange}
                   className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                   required
-                />
+                >
+                  <option value="">Select Category</option>
+                  <option value="W">W</option>
+                  <option value="X">X</option>
+                  <option value="Y">Y</option>
+                  <option value="Not Available">Not Available</option>
+                </select>
               </div>
               <div className="flex items-center justify-between">
                 <button
