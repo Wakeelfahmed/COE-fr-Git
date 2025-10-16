@@ -1,17 +1,15 @@
 const mongoose = require('mongoose');
 
-const fundingSchema = new mongoose.Schema({
+const fundingProposalSchema = new mongoose.Schema({
   sNo: Number,
   projectTitle: String,
   pi: String,
   researchTeam: String,
   dateOfSubmission: Date,
-  dateOfApproval: Date,
   fundingSource: String,
   pkr: Number,
   team: String,
   status: String,
-  closingDate: Date,
   amountPkr: Number,
   targetSDG: {
     type: [String],
@@ -28,6 +26,6 @@ const fundingSchema = new mongoose.Schema({
   timestamps: true
 });
 
-const Funding = mongoose.model('Funding', fundingSchema);
+const FundingProposal = mongoose.model('FundingProposal', fundingProposalSchema);
 
-module.exports = Funding;
+module.exports = FundingProposal;

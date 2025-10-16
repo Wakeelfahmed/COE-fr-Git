@@ -12,9 +12,10 @@ const AchievementsPage = () => {
     event: '',
     organizer: '',
     date: '',
-    participant: '',
+    participantOfEvent: '',
     participantFromCoEAI: '',
-    roleOfParticipantFromCoEAI: ''
+    roleOfParticipantFromCoEAI: '',
+    detailsOfAchievement: ''
   });
   const [isEditMode, setIsEditMode] = useState(false);
   const { user } = useUser();
@@ -25,7 +26,9 @@ const AchievementsPage = () => {
   const [filterCriteria, setFilterCriteria] = useState({
     event: '',
     organizer: '',
-    participant: ''
+    participantOfEvent: '',
+    participantFromCoEAI: '',
+    roleOfParticipantFromCoEAI: ''
   });
 
   useEffect(() => {
@@ -50,9 +53,10 @@ const AchievementsPage = () => {
       event: '',
       organizer: '',
       date: '',
-      participant: '',
+      participantOfEvent: '',
       participantFromCoEAI: '',
-      roleOfParticipantFromCoEAI: ''
+      roleOfParticipantFromCoEAI: '',
+      detailsOfAchievement: ''
     });
     setShowModal(true);
   };
@@ -112,7 +116,9 @@ const AchievementsPage = () => {
     setFilterCriteria({
       event: '',
       organizer: '',
-      participant: ''
+      participantOfEvent: '',
+      participantFromCoEAI: '',
+      roleOfParticipantFromCoEAI: ''
     });
   };
 
@@ -144,7 +150,9 @@ const AchievementsPage = () => {
   const filteredAchievements = achievements.filter(achievement => {
     return (achievement.event || '').toLowerCase().includes(filterCriteria.event.toLowerCase()) &&
            (achievement.organizer || '').toLowerCase().includes(filterCriteria.organizer.toLowerCase()) &&
-           (achievement.participant || '').toLowerCase().includes(filterCriteria.participant.toLowerCase());
+           (achievement.participantOfEvent || '').toLowerCase().includes(filterCriteria.participantOfEvent.toLowerCase()) &&
+           (achievement.participantFromCoEAI || '').toLowerCase().includes(filterCriteria.participantFromCoEAI.toLowerCase()) &&
+           (achievement.roleOfParticipantFromCoEAI || '').toLowerCase().includes(filterCriteria.roleOfParticipantFromCoEAI.toLowerCase());
   });
 
   return (
@@ -171,7 +179,7 @@ const AchievementsPage = () => {
 
       {showFilters && (
         <div className="mb-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 mb-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2 mb-2">
             <input
               type="text"
               placeholder="Filter by Event"
@@ -190,9 +198,25 @@ const AchievementsPage = () => {
             />
             <input
               type="text"
-              placeholder="Filter by Participant"
-              name="participant"
-              value={filterCriteria.participant}
+              placeholder="Filter by Participant of Event"
+              name="participantOfEvent"
+              value={filterCriteria.participantOfEvent}
+              onChange={handleFilterChange}
+              className="border rounded px-2 py-1"
+            />
+            <input
+              type="text"
+              placeholder="Filter by Participant from CoE-AI"
+              name="participantFromCoEAI"
+              value={filterCriteria.participantFromCoEAI}
+              onChange={handleFilterChange}
+              className="border rounded px-2 py-1"
+            />
+            <input
+              type="text"
+              placeholder="Filter by Role"
+              name="roleOfParticipantFromCoEAI"
+              value={filterCriteria.roleOfParticipantFromCoEAI}
               onChange={handleFilterChange}
               className="border rounded px-2 py-1"
             />
@@ -214,9 +238,10 @@ const AchievementsPage = () => {
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Event</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Organizer</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Participant</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Participant of Event</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Participant from CoE-AI</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Details of Achievement</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
             </tr>
           </thead>
@@ -227,9 +252,10 @@ const AchievementsPage = () => {
                 <td className="px-6 py-4 whitespace-nowrap">{achievement.event}</td>
                 <td className="px-6 py-4 whitespace-nowrap">{achievement.organizer}</td>
                 <td className="px-6 py-4 whitespace-nowrap">{new Date(achievement.date).toLocaleDateString()}</td>
-                <td className="px-6 py-4 whitespace-nowrap">{achievement.participant}</td>
+                <td className="px-6 py-4 whitespace-nowrap">{achievement.participantOfEvent}</td>
                 <td className="px-6 py-4 whitespace-nowrap">{achievement.participantFromCoEAI}</td>
                 <td className="px-6 py-4 whitespace-nowrap">{achievement.roleOfParticipantFromCoEAI}</td>
+                <td className="px-6 py-4 whitespace-nowrap">{achievement.detailsOfAchievement}</td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <button onClick={() => handleEditAchievement(achievement)} className="text-blue-600 hover:text-blue-900 mr-2">Edit</button>
                   <button onClick={() => handleDeleteAchievement(achievement._id)} className="text-red-600 hover:text-red-900">Delete</button>
@@ -290,14 +316,14 @@ const AchievementsPage = () => {
                 />
               </div>
               <div className="mb-4">
-                <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="participant">
-                  Participant <span className="text-gray-500 font-normal">(e.g., Student, Faculty)</span>
+                <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="participantOfEvent">
+                  Participant of Event <span className="text-gray-500 font-normal">(Student, Faculty, Industry etc)</span>
                 </label>
                 <input
                   type="text"
-                  id="participant"
-                  name="participant"
-                  value={currentAchievement.participant}
+                  id="participantOfEvent"
+                  name="participantOfEvent"
+                  value={currentAchievement.participantOfEvent}
                   onChange={handleInputChange}
                   className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                   required
@@ -328,6 +354,20 @@ const AchievementsPage = () => {
                   value={currentAchievement.roleOfParticipantFromCoEAI}
                   onChange={handleInputChange}
                   className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                  required
+                />
+              </div>
+              <div className="mb-4">
+                <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="detailsOfAchievement">
+                  Details of Achievement
+                </label>
+                <textarea
+                  id="detailsOfAchievement"
+                  name="detailsOfAchievement"
+                  value={currentAchievement.detailsOfAchievement}
+                  onChange={handleInputChange}
+                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                  rows="3"
                   required
                 />
               </div>

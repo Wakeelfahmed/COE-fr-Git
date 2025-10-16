@@ -12,7 +12,14 @@ const internshipSchema = new mongoose.Schema({
   centerName: String,
   supervisor: String,
   tasksCompleted: String,
-  fileLink: String  
+  fileLink: String,
+  createdBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
+  }
+}, {
+  timestamps: true
 });
 
 const Internship = mongoose.model('Internship', internshipSchema);

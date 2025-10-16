@@ -101,24 +101,25 @@ const ProjectsView = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [currentProject, setCurrentProject] = useState({
     projectTitle: '',
-    supervisor: '',
+    teamLead: '',
     rndTeam: '',
     clientCompany: '',
     dateOfContractSign: '',
     dateOfDeploymentAsPerContract: '',
     amountInPKRM: '',
     advPaymentPercentage: '',
-    advPaymentAmount: '',
     dateOfReceivingAdvancePayment: '',
     actualDateOfDeployment: '',
     dateOfReceivingCompletePayment: '',
+    taxPaidBy: 'BU',
+    targetSDG: [],
     remarks: '',
     fileLink: ''
   });
   const [isEditMode, setIsEditMode] = useState(false);
   const [filterCriteria, setFilterCriteria] = useState({
     projectTitle: '',
-    supervisor: '',
+    teamLead: '',
     clientCompany: '',
     dateFrom: '',
     dateTo: ''
@@ -181,17 +182,18 @@ const ProjectsView = () => {
     setIsEditMode(false);
     setCurrentProject({
       projectTitle: '',
-      supervisor: '',
+      teamLead: '',
       rndTeam: '',
       clientCompany: '',
       dateOfContractSign: '',
       dateOfDeploymentAsPerContract: '',
       amountInPKRM: '',
       advPaymentPercentage: '',
-      advPaymentAmount: '',
       dateOfReceivingAdvancePayment: '',
       actualDateOfDeployment: '',
       dateOfReceivingCompletePayment: '',
+      taxPaidBy: 'BU',
+      targetSDG: [],
       remarks: '',
       fileLink: ''
     });
@@ -209,7 +211,13 @@ const ProjectsView = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setCurrentProject(prev => ({ ...prev, [name]: value }));
+    if (name === 'targetSDG') {
+      // Handle multiple selections for SDGs
+      const selectedOptions = Array.from(e.target.selectedOptions, option => option.value);
+      setCurrentProject(prev => ({ ...prev, [name]: selectedOptions }));
+    } else {
+      setCurrentProject(prev => ({ ...prev, [name]: value }));
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -218,8 +226,7 @@ const ProjectsView = () => {
       ...currentProject,
       rndTeam: currentProject.rndTeam.split(',').map(member => member.trim()),
       amountInPKRM: parseFloat(currentProject.amountInPKRM),
-      advPaymentPercentage: parseFloat(currentProject.advPaymentPercentage),
-      advPaymentAmount: parseFloat(currentProject.advPaymentAmount)
+      advPaymentPercentage: parseFloat(currentProject.advPaymentPercentage)
     };
 
     try {
@@ -260,7 +267,7 @@ const ProjectsView = () => {
   const clearFilters = () => {
     setFilterCriteria({
       projectTitle: '',
-      supervisor: '',
+      teamLead: '',
       clientCompany: '',
       dateFrom: '',
       dateTo: ''
@@ -321,9 +328,9 @@ const ProjectsView = () => {
   };
 
   const filteredProjects = projects.filter(project => {
-    return project.projectTitle.toLowerCase().includes(filterCriteria.projectTitle.toLowerCase()) &&
-      project.supervisor.toLowerCase().includes(filterCriteria.supervisor.toLowerCase()) &&
-      project.clientCompany.toLowerCase().includes(filterCriteria.clientCompany.toLowerCase()) &&
+    return (project.projectTitle || '').toLowerCase().includes((filterCriteria.projectTitle || '').toLowerCase()) &&
+      (project.teamLead || '').toLowerCase().includes((filterCriteria.teamLead || '').toLowerCase()) &&
+      (project.clientCompany || '').toLowerCase().includes((filterCriteria.clientCompany || '').toLowerCase()) &&
       (filterCriteria.dateFrom === '' || project.dateOfContractSign >= filterCriteria.dateFrom) &&
       (filterCriteria.dateTo === '' || project.dateOfContractSign <= filterCriteria.dateTo);
   });
@@ -363,9 +370,9 @@ const ProjectsView = () => {
             />
             <input
               type="text"
-              placeholder="Filter by Supervisor"
-              name="supervisor"
-              value={filterCriteria.supervisor}
+              placeholder="Filter by Team Lead"
+              name="teamLead"
+              value={filterCriteria.teamLead}
               onChange={handleFilterChange}
               className="border rounded px-2 py-1"
             />
@@ -411,17 +418,18 @@ const ProjectsView = () => {
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">#</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Project Title</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Supervisor</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Team Lead</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">R&D Team</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Client Company</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contract Date</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Deployment Date (Contract)</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount (PKR M)</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Adv. Payment %</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Adv. Payment Amount</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Adv. Payment Date</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actual Deployment Date</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Complete Payment Date</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tax Paid By</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Target SDG</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Remarks</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">File</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
@@ -431,19 +439,20 @@ const ProjectsView = () => {
             {filteredProjects.map((project, index) => (
               <tr key={project._id}>
                 <td className="px-6 py-4 whitespace-nowrap">{index + 1}</td>
-                <td className="px-6 py-4 whitespace-nowrap">{project.projectTitle}</td>
-                <td className="px-6 py-4 whitespace-nowrap">{project.supervisor}</td>
-                <td className="px-6 py-4 whitespace-nowrap">{project.rndTeam.join(', ')}</td>
-                <td className="px-6 py-4 whitespace-nowrap">{project.clientCompany}</td>
-                <td className="px-6 py-4 whitespace-nowrap">{project.dateOfContractSign}</td>
-                <td className="px-6 py-4 whitespace-nowrap">{project.dateOfDeploymentAsPerContract}</td>
-                <td className="px-6 py-4 whitespace-nowrap">{project.amountInPKRM.toLocaleString()}</td>
-                <td className="px-6 py-4 whitespace-nowrap">{project.advPaymentPercentage}%</td>
-                <td className="px-6 py-4 whitespace-nowrap">{project.advPaymentAmount.toLocaleString()}</td>
-                <td className="px-6 py-4 whitespace-nowrap">{project.dateOfReceivingAdvancePayment}</td>
-                <td className="px-6 py-4 whitespace-nowrap">{project.actualDateOfDeployment}</td>
-                <td className="px-6 py-4 whitespace-nowrap">{project.dateOfReceivingCompletePayment}</td>
-                <td className="px-6 py-4 whitespace-nowrap">{project.remarks}</td>
+                <td className="px-6 py-4 whitespace-nowrap">{project.projectTitle || 'N/A'}</td>
+                <td className="px-6 py-4 whitespace-nowrap">{project.teamLead || 'N/A'}</td>
+                <td className="px-6 py-4 whitespace-nowrap">{project.rndTeam ? project.rndTeam.join(', ') : 'N/A'}</td>
+                <td className="px-6 py-4 whitespace-nowrap">{project.clientCompany || 'N/A'}</td>
+                <td className="px-6 py-4 whitespace-nowrap">{project.dateOfContractSign || 'N/A'}</td>
+                <td className="px-6 py-4 whitespace-nowrap">{project.dateOfDeploymentAsPerContract || 'N/A'}</td>
+                <td className="px-6 py-4 whitespace-nowrap">{project.amountInPKRM ? project.amountInPKRM.toLocaleString() : 'N/A'}</td>
+                <td className="px-6 py-4 whitespace-nowrap">{project.advPaymentPercentage ? project.advPaymentPercentage + '%' : 'N/A'}</td>
+                <td className="px-6 py-4 whitespace-nowrap">{project.dateOfReceivingAdvancePayment || 'N/A'}</td>
+                <td className="px-6 py-4 whitespace-nowrap">{project.actualDateOfDeployment || 'N/A'}</td>
+                <td className="px-6 py-4 whitespace-nowrap">{project.dateOfReceivingCompletePayment || 'N/A'}</td>
+                <td className="px-6 py-4 whitespace-nowrap">{project.taxPaidBy || 'N/A'}</td>
+                <td className="px-6 py-4 whitespace-nowrap">{project.targetSDG ? project.targetSDG.join(', ') : 'N/A'}</td>
+                <td className="px-6 py-4 whitespace-nowrap">{project.remarks || 'N/A'}</td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   {project.fileLink ? (
                     <div>
@@ -489,179 +498,217 @@ const ProjectsView = () => {
 
       {showModal && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full">
-          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+          <div className="relative top-20 mx-auto p-5 border w-11/12 max-w-4xl shadow-lg rounded-md bg-white">
             <h3 className="text-lg font-medium leading-6 text-gray-900 mb-4">
               {isEditMode ? 'Edit Project' : 'New Project'}
             </h3>
             <form onSubmit={handleSubmit}>
-              <div className="mb-4">
-                <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="projectTitle">
-                  Project Title
-                </label>
-                <input
-                  type="text"
-                  id="projectTitle"
-                  name="projectTitle"
-                  value={currentProject.projectTitle}
-                  onChange={handleInputChange}
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                  required
-                />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="mb-4">
+                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="projectTitle">
+                    Project Title
+                  </label>
+                  <input
+                    type="text"
+                    id="projectTitle"
+                    name="projectTitle"
+                    value={currentProject.projectTitle}
+                    onChange={handleInputChange}
+                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                    required
+                  />
+                </div>
+                <div className="mb-4">
+                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="teamLead">
+                    Team Lead
+                  </label>
+                  <input
+                    type="text"
+                    id="teamLead"
+                    name="teamLead"
+                    value={currentProject.teamLead}
+                    onChange={handleInputChange}
+                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                    required
+                  />
+                </div>
+                <div className="mb-4">
+                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="rndTeam">
+                    R&D Team (comma-separated)
+                  </label>
+                  <input
+                    type="text"
+                    id="rndTeam"
+                    name="rndTeam"
+                    value={currentProject.rndTeam}
+                    onChange={handleInputChange}
+                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                    required
+                  />
+                </div>
+                <div className="mb-4">
+                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="clientCompany">
+                    Client Company
+                  </label>
+                  <input
+                    type="text"
+                    id="clientCompany"
+                    name="clientCompany"
+                    value={currentProject.clientCompany}
+                    onChange={handleInputChange}
+                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                    required
+                  />
+                </div>
+                <div className="mb-4">
+                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="dateOfContractSign">
+                    Date of Contract Sign
+                  </label>
+                  <input
+                    type="date"
+                    id="dateOfContractSign"
+                    name="dateOfContractSign"
+                    value={currentProject.dateOfContractSign}
+                    onChange={handleInputChange}
+                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                    required
+                  />
+                </div>
+                <div className="mb-4">
+                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="dateOfDeploymentAsPerContract">
+                    Date of Deployment (As Per Contract)
+                  </label>
+                  <input
+                    type="date"
+                    id="dateOfDeploymentAsPerContract"
+                    name="dateOfDeploymentAsPerContract"
+                    value={currentProject.dateOfDeploymentAsPerContract}
+                    onChange={handleInputChange}
+                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                    required
+                  />
+                </div>
+                <div className="mb-4">
+                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="amountInPKRM">
+                    Amount in PKR M <span className="text-gray-500 font-normal">(Contract value in millions)</span>
+                  </label>
+                  <input
+                    type="number"
+                    id="amountInPKRM"
+                    name="amountInPKRM"
+                    value={currentProject.amountInPKRM}
+                    onChange={handleInputChange}
+                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                    required
+                  />
+                </div>
+                <div className="mb-4">
+                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="advPaymentPercentage">
+                    Advance Payment Percentage
+                  </label>
+                  <input
+                    type="number"
+                    id="advPaymentPercentage"
+                    name="advPaymentPercentage"
+                    value={currentProject.advPaymentPercentage}
+                    onChange={handleInputChange}
+                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                    required
+                  />
+                </div>
+                <div className="mb-4">
+                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="dateOfReceivingAdvancePayment">
+                    Date of Receiving Advance Payment
+                  </label>
+                  <input
+                    type="date"
+                    id="dateOfReceivingAdvancePayment"
+                    name="dateOfReceivingAdvancePayment"
+                    value={currentProject.dateOfReceivingAdvancePayment}
+                    onChange={handleInputChange}
+                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                    required
+                  />
+                </div>
+                <div className="mb-4">
+                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="actualDateOfDeployment">
+                    Actual Date of Deployment
+                  </label>
+                  <input
+                    type="date"
+                    id="actualDateOfDeployment"
+                    name="actualDateOfDeployment"
+                    value={currentProject.actualDateOfDeployment}
+                    onChange={handleInputChange}
+                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                    required
+                  />
+                </div>
+                <div className="mb-4">
+                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="dateOfReceivingCompletePayment">
+                    Date of Receiving Complete Payment
+                  </label>
+                  <input
+                    type="date"
+                    id="dateOfReceivingCompletePayment"
+                    name="dateOfReceivingCompletePayment"
+                    value={currentProject.dateOfReceivingCompletePayment}
+                    onChange={handleInputChange}
+                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                    required
+                  />
+                </div>
+                <div className="mb-4">
+                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="taxPaidBy">
+                    Tax Paid By
+                  </label>
+                  <select
+                    id="taxPaidBy"
+                    name="taxPaidBy"
+                    value={currentProject.taxPaidBy}
+                    onChange={handleInputChange}
+                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                    required
+                  >
+                    <option value="BU">BU</option>
+                    <option value="Client">Client</option>
+                  </select>
+                </div>
+                <div className="mb-4">
+                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="targetSDG">
+                    Target SDG
+                  </label>
+                  <select
+                    id="targetSDG"
+                    name="targetSDG"
+                    multiple
+                    value={currentProject.targetSDG}
+                    onChange={handleInputChange}
+                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                    style={{ height: '120px' }}
+                  >
+                    <option value="SDG 1: No Poverty">SDG 1: No Poverty</option>
+                    <option value="SDG 2: Zero Hunger">SDG 2: Zero Hunger</option>
+                    <option value="SDG 3: Good Health and Well-being">SDG 3: Good Health and Well-being</option>
+                    <option value="SDG 4: Quality Education">SDG 4: Quality Education</option>
+                    <option value="SDG 5: Gender Equality">SDG 5: Gender Equality</option>
+                    <option value="SDG 6: Clean Water and Sanitation">SDG 6: Clean Water and Sanitation</option>
+                    <option value="SDG 7: Affordable and Clean Energy">SDG 7: Affordable and Clean Energy</option>
+                    <option value="SDG 8: Decent Work and Economic Growth">SDG 8: Decent Work and Economic Growth</option>
+                    <option value="SDG 9: Industry, Innovation and Infrastructure">SDG 9: Industry, Innovation and Infrastructure</option>
+                    <option value="SDG 10: Reduced Inequalities">SDG 10: Reduced Inequalities</option>
+                    <option value="SDG 11: Sustainable Cities and Communities">SDG 11: Sustainable Cities and Communities</option>
+                    <option value="SDG 12: Responsible Consumption and Production">SDG 12: Responsible Consumption and Production</option>
+                    <option value="SDG 13: Climate Action">SDG 13: Climate Action</option>
+                    <option value="SDG 14: Life Below Water">SDG 14: Life Below Water</option>
+                    <option value="SDG 15: Life on Land">SDG 15: Life on Land</option>
+                    <option value="SDG 16: Peace, Justice and Strong Institutions">SDG 16: Peace, Justice and Strong Institutions</option>
+                    <option value="SDG 17: Partnerships for the Goals">SDG 17: Partnerships for the Goals</option>
+                  </select>
+                  <p className="text-sm text-gray-600 mt-1">Hold Ctrl/Cmd to select multiple SDGs</p>
+                </div>
               </div>
-              <div className="mb-4">
-                <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="supervisor">
-                  Supervisor
-                </label>
-                <input
-                  type="text"
-                  id="supervisor"
-                  name="supervisor"
-                  value={currentProject.supervisor}
-                  onChange={handleInputChange}
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                  required
-                />
-              </div>
-              <div className="mb-4">
-                <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="rndTeam">
-                  R&D Team (comma-separated)
-                </label>
-                <input
-                  type="text"
-                  id="rndTeam"
-                  name="rndTeam"
-                  value={currentProject.rndTeam}
-                  onChange={handleInputChange}
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                  required
-                />
-              </div>
-              <div className="mb-4">
-                <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="clientCompany">
-                  Client Company
-                </label>
-                <input
-                  type="text"
-                  id="clientCompany"
-                  name="clientCompany"
-                  value={currentProject.clientCompany}
-                  onChange={handleInputChange}
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                  required
-                />
-              </div>
-              <div className="mb-4">
-                <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="dateOfContractSign">
-                  Date of Contract Sign
-                </label>
-                <input
-                  type="date"
-                  id="dateOfContractSign"
-                  name="dateOfContractSign"
-                  value={currentProject.dateOfContractSign}
-                  onChange={handleInputChange}
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                  required
-                />
-              </div>
-              <div className="mb-4">
-                <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="dateOfDeploymentAsPerContract">
-                  Date of Deployment (As Per Contract)
-                </label>
-                <input
-                  type="date"
-                  id="dateOfDeploymentAsPerContract"
-                  name="dateOfDeploymentAsPerContract"
-                  value={currentProject.dateOfDeploymentAsPerContract}
-                  onChange={handleInputChange}
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                  required
-                />
-              </div>
-              <div className="mb-4">
-                <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="amountInPKRM">
-                  Amount in PKR M
-                </label>
-                <input
-                  type="number"
-                  id="amountInPKRM"
-                  name="amountInPKRM"
-                  value={currentProject.amountInPKRM}
-                  onChange={handleInputChange}
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                  required
-                />
-              </div>
-              <div className="mb-4">
-                <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="advPaymentPercentage">
-                  Advance Payment Percentage
-                </label>
-                <input
-                  type="number"
-                  id="advPaymentPercentage"
-                  name="advPaymentPercentage"
-                  value={currentProject.advPaymentPercentage}
-                  onChange={handleInputChange}
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                  required
-                />
-              </div>
-              <div className="mb-4">
-                <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="advPaymentAmount">
-                  Advance Payment Amount
-                </label>
-                <input
-                  type="number"
-                  id="advPaymentAmount"
-                  name="advPaymentAmount"
-                  value={currentProject.advPaymentAmount}
-                  onChange={handleInputChange}
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                  required
-                />
-              </div>
-              <div className="mb-4">
-                <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="dateOfReceivingAdvancePayment">
-                  Date of Receiving Advance Payment
-                </label>
-                <input
-                  type="date"
-                  id="dateOfReceivingAdvancePayment"
-                  name="dateOfReceivingAdvancePayment"
-                  value={currentProject.dateOfReceivingAdvancePayment}
-                  onChange={handleInputChange}
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                  required
-                />
-              </div>
-              <div className="mb-4">
-                <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="actualDateOfDeployment">
-                  Actual Date of Deployment
-                </label>
-                <input
-                  type="date"
-                  id="actualDateOfDeployment"
-                  name="actualDateOfDeployment"
-                  value={currentProject.actualDateOfDeployment}
-                  onChange={handleInputChange}
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                  required
-                />
-              </div>
-              <div className="mb-4">
-                <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="dateOfReceivingCompletePayment">
-                  Date of Receiving Complete Payment
-                </label>
-                <input
-                  type="date"
-                  id="dateOfReceivingCompletePayment"
-                  name="dateOfReceivingCompletePayment"
-                  value={currentProject.dateOfReceivingCompletePayment}
-                  onChange={handleInputChange}
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                  required
-                />
-              </div>
+
               <div className="mb-4">
                 <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="remarks">
                   Remarks

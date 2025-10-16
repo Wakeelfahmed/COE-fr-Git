@@ -2,184 +2,17 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useUser } from '../context/UserContext';
 import { FaInfoCircle } from 'react-icons/fa';
-import Select from 'react-select';
 
 axios.defaults.withCredentials = true;
 const API_BASE_URL = process.env.REACT_APP_BACKEND;
 
-const countries = [
-  { value: "Afghanistan", label: "Afghanistan" },
-  { value: "Albania", label: "Albania" },
-  { value: "Algeria", label: "Algeria" },
-  { value: "Andorra", label: "Andorra" },
-  { value: "Angola", label: "Angola" },
-  { value: "Argentina", label: "Argentina" },
-  { value: "Armenia", label: "Armenia" },
-  { value: "Australia", label: "Australia" },
-  { value: "Austria", label: "Austria" },
-  { value: "Azerbaijan", label: "Azerbaijan" },
-  { value: "Bahamas", label: "Bahamas" },
-  { value: "Bahrain", label: "Bahrain" },
-  { value: "Bangladesh", label: "Bangladesh" },
-  { value: "Barbados", label: "Barbados" },
-  { value: "Belarus", label: "Belarus" },
-  { value: "Belgium", label: "Belgium" },
-  { value: "Belize", label: "Belize" },
-  { value: "Benin", label: "Benin" },
-  { value: "Bhutan", label: "Bhutan" },
-  { value: "Bolivia", label: "Bolivia" },
-  { value: "Bosnia and Herzegovina", label: "Bosnia and Herzegovina" },
-  { value: "Botswana", label: "Botswana" },
-  { value: "Brazil", label: "Brazil" },
-  { value: "Brunei", label: "Brunei" },
-  { value: "Bulgaria", label: "Bulgaria" },
-  { value: "Burkina Faso", label: "Burkina Faso" },
-  { value: "Burundi", label: "Burundi" },
-  { value: "Cambodia", label: "Cambodia" },
-  { value: "Cameroon", label: "Cameroon" },
-  { value: "Canada", label: "Canada" },
-  { value: "Chad", label: "Chad" },
-  { value: "Chile", label: "Chile" },
-  { value: "China", label: "China" },
-  { value: "Colombia", label: "Colombia" },
-  { value: "Costa Rica", label: "Costa Rica" },
-  { value: "Croatia", label: "Croatia" },
-  { value: "Cuba", label: "Cuba" },
-  { value: "Cyprus", label: "Cyprus" },
-  { value: "Czech Republic", label: "Czech Republic" },
-  { value: "Denmark", label: "Denmark" },
-  { value: "Dominican Republic", label: "Dominican Republic" },
-  { value: "Ecuador", label: "Ecuador" },
-  { value: "Egypt", label: "Egypt" },
-  { value: "El Salvador", label: "El Salvador" },
-  { value: "Estonia", label: "Estonia" },
-  { value: "Ethiopia", label: "Ethiopia" },
-  { value: "Fiji", label: "Fiji" },
-  { value: "Finland", label: "Finland" },
-  { value: "France", label: "France" },
-  { value: "Gabon", label: "Gabon" },
-  { value: "Gambia", label: "Gambia" },
-  { value: "Georgia", label: "Georgia" },
-  { value: "Germany", label: "Germany" },
-  { value: "Ghana", label: "Ghana" },
-  { value: "Greece", label: "Greece" },
-  { value: "Guatemala", label: "Guatemala" },
-  { value: "Guinea", label: "Guinea" },
-  { value: "Haiti", label: "Haiti" },
-  { value: "Honduras", label: "Honduras" },
-  { value: "Hungary", label: "Hungary" },
-  { value: "Iceland", label: "Iceland" },
-  { value: "India", label: "India" },
-  { value: "Indonesia", label: "Indonesia" },
-  { value: "Iran", label: "Iran" },
-  { value: "Iraq", label: "Iraq" },
-  { value: "Ireland", label: "Ireland" },
-  { value: "Israel", label: "Israel" },
-  { value: "Italy", label: "Italy" },
-  { value: "Jamaica", label: "Jamaica" },
-  { value: "Japan", label: "Japan" },
-  { value: "Jordan", label: "Jordan" },
-  { value: "Kazakhstan", label: "Kazakhstan" },
-  { value: "Kenya", label: "Kenya" },
-  { value: "Kuwait", label: "Kuwait" },
-  { value: "Kyrgyzstan", label: "Kyrgyzstan" },
-  { value: "Laos", label: "Laos" },
-  { value: "Latvia", label: "Latvia" },
-  { value: "Lebanon", label: "Lebanon" },
-  { value: "Liberia", label: "Liberia" },
-  { value: "Libya", label: "Libya" },
-  { value: "Lithuania", label: "Lithuania" },
-  { value: "Luxembourg", label: "Luxembourg" },
-  { value: "Madagascar", label: "Madagascar" },
-  { value: "Malawi", label: "Malawi" },
-  { value: "Malaysia", label: "Malaysia" },
-  { value: "Maldives", label: "Maldives" },
-  { value: "Mali", label: "Mali" },
-  { value: "Malta", label: "Malta" },
-  { value: "Mauritania", label: "Mauritania" },
-  { value: "Mauritius", label: "Mauritius" },
-  { value: "Mexico", label: "Mexico" },
-  { value: "Moldova", label: "Moldova" },
-  { value: "Monaco", label: "Monaco" },
-  { value: "Mongolia", label: "Mongolia" },
-  { value: "Montenegro", label: "Montenegro" },
-  { value: "Morocco", label: "Morocco" },
-  { value: "Mozambique", label: "Mozambique" },
-  { value: "Myanmar", label: "Myanmar" },
-  { value: "Namibia", label: "Namibia" },
-  { value: "Nepal", label: "Nepal" },
-  { value: "Netherlands", label: "Netherlands" },
-  { value: "New Zealand", label: "New Zealand" },
-  { value: "Nicaragua", label: "Nicaragua" },
-  { value: "Niger", label: "Niger" },
-  { value: "Nigeria", label: "Nigeria" },
-  { value: "North Korea", label: "North Korea" },
-  { value: "North Macedonia", label: "North Macedonia" },
-  { value: "Norway", label: "Norway" },
-  { value: "Oman", label: "Oman" },
-  { value: "Pakistan", label: "Pakistan" },
-  { value: "Palestine", label: "Palestine" },
-  { value: "Panama", label: "Panama" },
-  { value: "Papua New Guinea", label: "Papua New Guinea" },
-  { value: "Paraguay", label: "Paraguay" },
-  { value: "Peru", label: "Peru" },
-  { value: "Philippines", label: "Philippines" },
-  { value: "Poland", label: "Poland" },
-  { value: "Portugal", label: "Portugal" },
-  { value: "Qatar", label: "Qatar" },
-  { value: "Romania", label: "Romania" },
-  { value: "Russia", label: "Russia" },
-  { value: "Rwanda", label: "Rwanda" },
-  { value: "Saudi Arabia", label: "Saudi Arabia" },
-  { value: "Senegal", label: "Senegal" },
-  { value: "Serbia", label: "Serbia" },
-  { value: "Seychelles", label: "Seychelles" },
-  { value: "Sierra Leone", label: "Sierra Leone" },
-  { value: "Singapore", label: "Singapore" },
-  { value: "Slovakia", label: "Slovakia" },
-  { value: "Slovenia", label: "Slovenia" },
-  { value: "Somalia", label: "Somalia" },
-  { value: "South Africa", label: "South Africa" },
-  { value: "South Korea", label: "South Korea" },
-  { value: "South Sudan", label: "South Sudan" },
-  { value: "Spain", label: "Spain" },
-  { value: "Sri Lanka", label: "Sri Lanka" },
-  { value: "Sudan", label: "Sudan" },
-  { value: "Suriname", label: "Suriname" },
-  { value: "Sweden", label: "Sweden" },
-  { value: "Switzerland", label: "Switzerland" },
-  { value: "Syria", label: "Syria" },
-  { value: "Taiwan", label: "Taiwan" },
-  { value: "Tajikistan", label: "Tajikistan" },
-  { value: "Tanzania", label: "Tanzania" },
-  { value: "Thailand", label: "Thailand" },
-  { value: "Togo", label: "Togo" },
-  { value: "Trinidad and Tobago", label: "Trinidad and Tobago" },
-  { value: "Tunisia", label: "Tunisia" },
-  { value: "Turkey", label: "Turkey" },
-  { value: "Turkmenistan", label: "Turkmenistan" },
-  { value: "Uganda", label: "Uganda" },
-  { value: "Ukraine", label: "Ukraine" },
-  { value: "United Arab Emirates", label: "United Arab Emirates" },
-  { value: "United Kingdom", label: "United Kingdom" },
-  { value: "United States", label: "United States" },
-  { value: "Uruguay", label: "Uruguay" },
-  { value: "Uzbekistan", label: "Uzbekistan" },
-  { value: "Venezuela", label: "Venezuela" },
-  { value: "Vietnam", label: "Vietnam" },
-  { value: "Yemen", label: "Yemen" },
-  { value: "Zambia", label: "Zambia" },
-  { value: "Zimbabwe", label: "Zimbabwe" }
-];
-
-const XYXPage = () => {
-  const [collaborations, setCollaborations] = useState([]);
+const LocalCollaborationPage = () => {
+  const [localCollaborations, setLocalCollaborations] = useState([]);
   const [showModal, setShowModal] = useState(false);
-  const [currentCollaboration, setCurrentCollaboration] = useState({
+  const [currentLocalCollaboration, setCurrentLocalCollaboration] = useState({
     memberOfCoE: '',
-    collaboratingForeignResearcher: '',
-    foreignCollaboratingInstitute: '',
-    collaboratingCountry: '',
+    collaboratingLocalResearcher: '',
+    localCollaboratingInstitute: '',
     typeOfCollaboration: '',
     durationStart: '',
     durationEnd: '',
@@ -196,34 +29,33 @@ const XYXPage = () => {
   const [reportTitle, setReportTitle] = useState('');
   const [filterCriteria, setFilterCriteria] = useState({
     memberOfCoE: '',
-    foreignResearcher: '',
-    country: '',
+    localResearcher: '',
+    institute: '',
     status: ''
   });
 
   useEffect(() => {
-    fetchCollaborations();
+    fetchLocalCollaborations();
   }, [showOnlyMine]);
 
-  const fetchCollaborations = async () => {
+  const fetchLocalCollaborations = async () => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/collaborations`, {
+      const response = await axios.get(`${API_BASE_URL}/local-collaborations`, {
         params: { onlyMine: showOnlyMine }
       });
-      setCollaborations(response.data);
+      setLocalCollaborations(response.data);
     } catch (error) {
-      console.error('Error fetching collaborations:', error);
-      alert('Error fetching collaborations. Please try again.');
+      console.error('Error fetching local collaborations:', error);
+      alert('Error fetching local collaborations. Please try again.');
     }
   };
 
-  const handleNewCollaboration = () => {
+  const handleNewLocalCollaboration = () => {
     setIsEditMode(false);
-    setCurrentCollaboration({
+    setCurrentLocalCollaboration({
       memberOfCoE: '',
-      collaboratingForeignResearcher: '',
-      foreignCollaboratingInstitute: '',
-      collaboratingCountry: '',
+      collaboratingLocalResearcher: '',
+      localCollaboratingInstitute: '',
       typeOfCollaboration: '',
       durationStart: '',
       durationEnd: '',
@@ -234,45 +66,45 @@ const XYXPage = () => {
     setShowModal(true);
   };
 
-  const handleEditCollaboration = (collaboration) => {
+  const handleEditLocalCollaboration = (localCollaboration) => {
     setIsEditMode(true);
-    setCurrentCollaboration({
-      ...collaboration,
-      durationStart: collaboration.durationStart ? new Date(collaboration.durationStart).toISOString().split('T')[0] : '',
-      durationEnd: collaboration.durationEnd ? new Date(collaboration.durationEnd).toISOString().split('T')[0] : ''
+    setCurrentLocalCollaboration({
+      ...localCollaboration,
+      durationStart: localCollaboration.durationStart ? new Date(localCollaboration.durationStart).toISOString().split('T')[0] : '',
+      durationEnd: localCollaboration.durationEnd ? new Date(localCollaboration.durationEnd).toISOString().split('T')[0] : ''
     });
     setShowModal(true);
   };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setCurrentCollaboration(prev => ({ ...prev, [name]: value }));
+    setCurrentLocalCollaboration(prev => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       if (isEditMode) {
-        await axios.put(`${API_BASE_URL}/collaborations/${currentCollaboration._id}`, currentCollaboration);
+        await axios.put(`${API_BASE_URL}/local-collaborations/${currentLocalCollaboration._id}`, currentLocalCollaboration);
       } else {
-        await axios.post(`${API_BASE_URL}/collaborations`, currentCollaboration);
+        await axios.post(`${API_BASE_URL}/local-collaborations`, currentLocalCollaboration);
       }
       setShowModal(false);
-      fetchCollaborations();
+      fetchLocalCollaborations();
     } catch (error) {
-      console.error('Error saving collaboration:', error);
-      alert('Error saving collaboration. Please try again.');
+      console.error('Error saving local collaboration:', error);
+      alert('Error saving local collaboration. Please try again.');
     }
   };
 
-  const handleDeleteCollaboration = async (collaborationId) => {
-    if (window.confirm('Are you sure you want to delete this collaboration?')) {
+  const handleDeleteLocalCollaboration = async (localCollaborationId) => {
+    if (window.confirm('Are you sure you want to delete this local collaboration?')) {
       try {
-        await axios.delete(`${API_BASE_URL}/collaborations/${collaborationId}`);
-        fetchCollaborations();
+        await axios.delete(`${API_BASE_URL}/local-collaborations/${localCollaborationId}`);
+        fetchLocalCollaborations();
       } catch (error) {
-        console.error('Error deleting collaboration:', error);
-        alert('Error deleting collaboration. Please try again.');
+        console.error('Error deleting local collaboration:', error);
+        alert('Error deleting local collaboration. Please try again.');
       }
     }
   };
@@ -289,8 +121,8 @@ const XYXPage = () => {
   const clearFilters = () => {
     setFilterCriteria({
       memberOfCoE: '',
-      foreignResearcher: '',
-      country: '',
+      localResearcher: '',
+      institute: '',
       status: ''
     });
   };
@@ -307,7 +139,7 @@ const XYXPage = () => {
     try {
       const response = await axios.post(`${API_BASE_URL}/reports`, {
         title: reportTitle,
-        sourceType: 'Collaborations',
+        sourceType: 'LocalCollaborations',
         filterCriteria
       });
       console.log('Report saved:', response.data);
@@ -320,27 +152,27 @@ const XYXPage = () => {
     }
   };
 
-  const filteredCollaborations = collaborations.filter(collab => {
+  const filteredLocalCollaborations = localCollaborations.filter(collab => {
     return collab.memberOfCoE.toLowerCase().includes(filterCriteria.memberOfCoE.toLowerCase()) &&
-           collab.collaboratingForeignResearcher.toLowerCase().includes(filterCriteria.foreignResearcher.toLowerCase()) &&
-           collab.collaboratingCountry.toLowerCase().includes(filterCriteria.country.toLowerCase()) &&
+           collab.collaboratingLocalResearcher.toLowerCase().includes(filterCriteria.localResearcher.toLowerCase()) &&
+           collab.localCollaboratingInstitute.toLowerCase().includes(filterCriteria.institute.toLowerCase()) &&
            collab.currentStatus.toLowerCase().includes(filterCriteria.status.toLowerCase());
   });
 
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-bold">International Collaborations</h2>
+        <h2 className="text-xl font-bold">Local Collaborations</h2>
         <div>
-          <button onClick={handleNewCollaboration} className="bg-blue-600 text-white px-4 py-2 rounded mr-2">
-            New Collaboration
+          <button onClick={handleNewLocalCollaboration} className="bg-blue-600 text-white px-4 py-2 rounded mr-2">
+            New Local Collaboration
           </button>
           {user?.role === 'director' && (
-            <button 
-              onClick={() => setShowOnlyMine(!showOnlyMine)} 
+            <button
+              onClick={() => setShowOnlyMine(!showOnlyMine)}
               className="bg-green-600 text-white px-4 py-2 rounded mr-2"
             >
-              {showOnlyMine ? 'All Collaborations' : 'My Collaborations'}
+              {showOnlyMine ? 'All Local Collaborations' : 'My Local Collaborations'}
             </button>
           )}
           <button onClick={toggleFilters} className="border border-blue-600 text-blue-600 px-4 py-2 rounded">
@@ -362,17 +194,17 @@ const XYXPage = () => {
             />
             <input
               type="text"
-              placeholder="Filter by Foreign Researcher"
-              name="foreignResearcher"
-              value={filterCriteria.foreignResearcher}
+              placeholder="Filter by Local Researcher"
+              name="localResearcher"
+              value={filterCriteria.localResearcher}
               onChange={handleFilterChange}
               className="border rounded px-2 py-1"
             />
             <input
               type="text"
-              placeholder="Filter by Country"
-              name="country"
-              value={filterCriteria.country}
+              placeholder="Filter by Institute"
+              name="institute"
+              value={filterCriteria.institute}
               onChange={handleFilterChange}
               className="border rounded px-2 py-1"
             />
@@ -400,9 +232,8 @@ const XYXPage = () => {
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">#</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Member of CoE-AI</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Foreign Researcher</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Foreign Institute</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Country</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Local Researcher</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Local Institute</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Duration</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
@@ -410,21 +241,20 @@ const XYXPage = () => {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {filteredCollaborations.map((collab, index) => (
+            {filteredLocalCollaborations.map((collab, index) => (
               <tr key={collab._id}>
                 <td className="px-6 py-4 whitespace-nowrap">{index + 1}</td>
                 <td className="px-6 py-4 whitespace-nowrap">{collab.memberOfCoE}</td>
-                <td className="px-6 py-4 whitespace-nowrap">{collab.collaboratingForeignResearcher}</td>
-                <td className="px-6 py-4 whitespace-nowrap">{collab.foreignCollaboratingInstitute}</td>
-                <td className="px-6 py-4 whitespace-nowrap">{collab.collaboratingCountry}</td>
+                <td className="px-6 py-4 whitespace-nowrap">{collab.collaboratingLocalResearcher}</td>
+                <td className="px-6 py-4 whitespace-nowrap">{collab.localCollaboratingInstitute}</td>
                 <td className="px-6 py-4 whitespace-nowrap">{collab.typeOfCollaboration}</td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   {new Date(collab.durationStart).toLocaleDateString()} - {collab.durationEnd ? new Date(collab.durationEnd).toLocaleDateString() : 'Ongoing'}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">{collab.currentStatus}</td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <button onClick={() => handleEditCollaboration(collab)} className="text-blue-600 hover:text-blue-900 mr-2">Edit</button>
-                  <button onClick={() => handleDeleteCollaboration(collab._id)} className="text-red-600 hover:text-red-900">Delete</button>
+                  <button onClick={() => handleEditLocalCollaboration(collab)} className="text-blue-600 hover:text-blue-900 mr-2">Edit</button>
+                  <button onClick={() => handleDeleteLocalCollaboration(collab._id)} className="text-red-600 hover:text-red-900">Delete</button>
                 </td>
               </tr>
             ))}
@@ -436,7 +266,7 @@ const XYXPage = () => {
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full">
           <div className="relative top-20 mx-auto p-5 border w-11/12 max-w-4xl shadow-lg rounded-md bg-white">
             <h3 className="text-lg font-medium leading-6 text-gray-900 mb-4">
-              {isEditMode ? 'Edit Collaboration' : 'New Collaboration'}
+              {isEditMode ? 'Edit Local Collaboration' : 'New Local Collaboration'}
             </h3>
             <form onSubmit={handleSubmit}>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -448,55 +278,37 @@ const XYXPage = () => {
                     type="text"
                     id="memberOfCoE"
                     name="memberOfCoE"
-                    value={currentCollaboration.memberOfCoE}
+                    value={currentLocalCollaboration.memberOfCoE}
                     onChange={handleInputChange}
                     className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                     required
                   />
                 </div>
                 <div className="mb-4">
-                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="collaboratingForeignResearcher">
-                    Collaborating Foreign Researcher
+                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="collaboratingLocalResearcher">
+                    Collaborating Local Researcher
                   </label>
                   <input
                     type="text"
-                    id="collaboratingForeignResearcher"
-                    name="collaboratingForeignResearcher"
-                    value={currentCollaboration.collaboratingForeignResearcher}
+                    id="collaboratingLocalResearcher"
+                    name="collaboratingLocalResearcher"
+                    value={currentLocalCollaboration.collaboratingLocalResearcher}
                     onChange={handleInputChange}
                     className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                     required
                   />
                 </div>
                 <div className="mb-4">
-                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="foreignCollaboratingInstitute">
-                    Foreign Collaborating Institute
+                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="localCollaboratingInstitute">
+                    Local Collaborating Institute
                   </label>
                   <input
                     type="text"
-                    id="foreignCollaboratingInstitute"
-                    name="foreignCollaboratingInstitute"
-                    value={currentCollaboration.foreignCollaboratingInstitute}
+                    id="localCollaboratingInstitute"
+                    name="localCollaboratingInstitute"
+                    value={currentLocalCollaboration.localCollaboratingInstitute}
                     onChange={handleInputChange}
                     className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    required
-                  />
-                </div>
-                <div className="mb-4">
-                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="collaboratingCountry">
-                    Collaborating Country
-                  </label>
-                  <Select
-                    id="collaboratingCountry"
-                    name="collaboratingCountry"
-                    value={countries.find(c => c.value === currentCollaboration.collaboratingCountry)}
-                    onChange={(selectedOption) => handleInputChange({ target: { name: 'collaboratingCountry', value: selectedOption ? selectedOption.value : '' } })}
-                    options={countries}
-                    isSearchable={true}
-                    placeholder="Select or search country..."
-                    className="react-select-container"
-                    classNamePrefix="react-select"
-                    isClearable
                     required
                   />
                 </div>
@@ -507,7 +319,7 @@ const XYXPage = () => {
                   <select
                     id="typeOfCollaboration"
                     name="typeOfCollaboration"
-                    value={currentCollaboration.typeOfCollaboration}
+                    value={currentLocalCollaboration.typeOfCollaboration}
                     onChange={handleInputChange}
                     className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                     required
@@ -518,7 +330,7 @@ const XYXPage = () => {
                     <option value="Research Grant Proposal">Research Grant Proposal</option>
                     <option value="Technology Development / Prototype">Technology Development / Prototype</option>
                     <option value="Exchange / Fellowship / Visiting Position">Exchange / Fellowship / Visiting Position</option>
-                    <option value="Joint Supervision (PhD/MS)">Joint Supervision (PhD/MS)</option>
+                    <option value="Joint Supervision (PhD/MS/BS)">Joint Supervision (PhD/MS/BS)</option>
                     <option value="Other">Other</option>
                   </select>
                 </div>
@@ -529,7 +341,7 @@ const XYXPage = () => {
                   <select
                     id="currentStatus"
                     name="currentStatus"
-                    value={currentCollaboration.currentStatus}
+                    value={currentLocalCollaboration.currentStatus}
                     onChange={handleInputChange}
                     className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                     required
@@ -549,7 +361,7 @@ const XYXPage = () => {
                     type="date"
                     id="durationStart"
                     name="durationStart"
-                    value={currentCollaboration.durationStart}
+                    value={currentLocalCollaboration.durationStart}
                     onChange={handleInputChange}
                     className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                     required
@@ -557,20 +369,20 @@ const XYXPage = () => {
                 </div>
                 <div className="mb-4">
                   <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="durationEnd">
-                    Duration End Date {currentCollaboration.currentStatus === 'Ongoing' && <span className="text-gray-500 font-normal">(Optional for Ongoing)</span>}
+                    Duration End Date {currentLocalCollaboration.currentStatus === 'Ongoing' && <span className="text-gray-500 font-normal">(Optional for Ongoing)</span>}
                   </label>
                   <input
                     type="date"
                     id="durationEnd"
                     name="durationEnd"
-                    value={currentCollaboration.durationEnd}
+                    value={currentLocalCollaboration.durationEnd}
                     onChange={handleInputChange}
                     className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    required={currentCollaboration.currentStatus !== 'Ongoing'}
+                    required={currentLocalCollaboration.currentStatus !== 'Ongoing'}
                   />
                 </div>
               </div>
-              
+
               <div className="mb-4">
                 <div className="flex items-center mb-2">
                   <label className="block text-gray-700 text-sm font-bold" htmlFor="keyOutcomes">
@@ -601,7 +413,7 @@ const XYXPage = () => {
                 <textarea
                   id="keyOutcomes"
                   name="keyOutcomes"
-                  value={currentCollaboration.keyOutcomes}
+                  value={currentLocalCollaboration.keyOutcomes}
                   onChange={handleInputChange}
                   rows="3"
                   className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
@@ -615,7 +427,7 @@ const XYXPage = () => {
                 <textarea
                   id="detailsOfOutcome"
                   name="detailsOfOutcome"
-                  value={currentCollaboration.detailsOfOutcome}
+                  value={currentLocalCollaboration.detailsOfOutcome}
                   onChange={handleInputChange}
                   rows="3"
                   className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
@@ -674,4 +486,4 @@ const XYXPage = () => {
   );
 };
 
-export default XYXPage;
+export default LocalCollaborationPage;

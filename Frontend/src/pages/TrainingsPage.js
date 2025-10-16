@@ -49,12 +49,13 @@ const EventsView = () => {
     type: '',
     title: '',
     participants: '',
+    mode: '',
     date: '',
     agenda: '',
     followUpActivity: '',
     resourcePerson: '',
     venue: '',
-    totalRevenue: '',
+    targetSDG: [],
     fileLink: ''
   });
   const [isEditMode, setIsEditMode] = useState(false);
@@ -62,6 +63,7 @@ const EventsView = () => {
     type: '',
     title: '',
     resourcePerson: '',
+    mode: '',
     venue: '',
     dateFrom: '',
     dateTo: ''
@@ -126,12 +128,13 @@ const EventsView = () => {
       type: '',
       title: '',
       participants: '',
+      mode: '',
       date: '',
       agenda: '',
       followUpActivity: '',
       resourcePerson: '',
       venue: '',
-      totalRevenue: '',
+      targetSDG: [],
       fileLink: ''
     });
     setShowModal(true);
@@ -145,14 +148,19 @@ const EventsView = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setCurrentEvent(prev => ({ ...prev, [name]: value }));
+    if (name === 'targetSDG') {
+      // Handle multiple selections for SDGs
+      const selectedOptions = Array.from(e.target.selectedOptions, option => option.value);
+      setCurrentEvent(prev => ({ ...prev, [name]: selectedOptions }));
+    } else {
+      setCurrentEvent(prev => ({ ...prev, [name]: value }));
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     const eventData = {
-      ...currentEvent,
-      totalRevenue: parseFloat(currentEvent.totalRevenue)
+      ...currentEvent
     };
 
     try {
@@ -195,6 +203,7 @@ const EventsView = () => {
       type: '',
       title: '',
       resourcePerson: '',
+      mode: '',
       venue: '',
       dateFrom: '',
       dateTo: ''
@@ -255,21 +264,45 @@ const EventsView = () => {
   };
 
   const filteredEvents = events.filter(event => {
-    return event.type.toLowerCase().includes(filterCriteria.type.toLowerCase()) &&
-           event.title.toLowerCase().includes(filterCriteria.title.toLowerCase()) &&
-           event.resourcePerson.toLowerCase().includes(filterCriteria.resourcePerson.toLowerCase()) &&
-           event.venue.toLowerCase().includes(filterCriteria.venue.toLowerCase()) &&
-           (filterCriteria.dateFrom === '' || event.date >= filterCriteria.dateFrom) &&
-           (filterCriteria.dateTo === '' || event.date <= filterCriteria.dateTo);
+    const evType = (event.type || '').toLowerCase();
+    const evTitle = (event.title || '').toLowerCase();
+    const evResource = (event.resourcePerson || '').toLowerCase();
+    const evMode = (event.mode || '').toLowerCase();
+    const evVenue = (event.venue || '').toLowerCase();
+
+    const fcType = (filterCriteria.type || '').toLowerCase();
+    const fcTitle = (filterCriteria.title || '').toLowerCase();
+    const fcResource = (filterCriteria.resourcePerson || '').toLowerCase();
+    const fcMode = (filterCriteria.mode || '').toLowerCase();
+    const fcVenue = (filterCriteria.venue || '').toLowerCase();
+
+    const passTextFilters =
+      evType.includes(fcType) &&
+      evTitle.includes(fcTitle) &&
+      evResource.includes(fcResource) &&
+      evMode.includes(fcMode) &&
+      evVenue.includes(fcVenue);
+
+    // Date filters (handle undefined dates safely)
+    const hasFrom = !!filterCriteria.dateFrom;
+    const hasTo = !!filterCriteria.dateTo;
+    const evDate = event.date ? new Date(event.date) : null;
+    const fromDate = hasFrom ? new Date(filterCriteria.dateFrom) : null;
+    const toDate = hasTo ? new Date(filterCriteria.dateTo) : null;
+
+    const passFrom = !hasFrom || (evDate && evDate >= fromDate);
+    const passTo = !hasTo || (evDate && evDate <= toDate);
+
+    return passTextFilters && passFrom && passTo;
   });
 
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-bold">Events/Trainings</h2>
+        <h2 className="text-xl font-bold">Talks/Trainings Attended</h2>
         <div>
           <button onClick={handleNewEvent} className="bg-blue-600 text-white px-4 py-2 rounded mr-2">
-            New Event
+            New Talk/Training/Conference
           </button>
           {user?.role === 'director' && (
             <button 
@@ -287,7 +320,7 @@ const EventsView = () => {
 
       {showFilters && (
         <div className="mb-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2 mb-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-2 mb-2">
             <select
               name="type"
               value={filterCriteria.type}
@@ -295,8 +328,9 @@ const EventsView = () => {
               className="border rounded px-2 py-1"
             >
               <option value="">All Types</option>
-              <option value="Activity">Activity</option>
+              <option value="Talk">Talk</option>
               <option value="Training">Training</option>
+              <option value="Conference">Conference</option>
             </select>
             <input
               type="text"
@@ -314,6 +348,16 @@ const EventsView = () => {
               onChange={handleFilterChange}
               className="border rounded px-2 py-1"
             />
+            <select
+              name="mode"
+              value={filterCriteria.mode}
+              onChange={handleFilterChange}
+              className="border rounded px-2 py-1"
+            >
+              <option value="">All Modes</option>
+              <option value="Onsite">Onsite</option>
+              <option value="Online">Online</option>
+            </select>
             <input
               type="text"
               placeholder="Filter by Venue"
@@ -359,9 +403,10 @@ const EventsView = () => {
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Resource Person</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Participants</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mode</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Venue</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Revenue</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Target SDG</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">File</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
             </tr>
@@ -374,9 +419,10 @@ const EventsView = () => {
                 <td className="px-6 py-4 whitespace-nowrap">{event.title}</td>
                 <td className="px-6 py-4 whitespace-nowrap">{event.resourcePerson}</td>
                 <td className="px-6 py-4 whitespace-nowrap">{event.participants}</td>
+                <td className="px-6 py-4 whitespace-nowrap">{event.mode}</td>
                 <td className="px-6 py-4 whitespace-nowrap">{event.venue}</td>
-                <td className="px-6 py-4 whitespace-nowrap">{new Date(event.date).toLocaleDateString()}</td>
-                <td className="px-6 py-4 whitespace-nowrap">{event.totalRevenue ? event.totalRevenue.toLocaleString() : 'N/A'}</td>
+                <td className="px-6 py-4 whitespace-nowrap">{event.date ? new Date(event.date).toLocaleDateString() : 'N/A'}</td>
+                <td className="px-6 py-4 whitespace-nowrap">{event.targetSDG ? event.targetSDG.join(', ') : 'N/A'}</td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   {event.fileLink ? (
                     <div>
@@ -440,8 +486,9 @@ const EventsView = () => {
                     required
                   >
                     <option value="">Select Type</option>
-                    <option value="Activity">Activity</option>
+                    <option value="Talk">Talk</option>
                     <option value="Training">Training</option>
+                    <option value="Conference">Conference</option>
                   </select>
                 </div>
                 <div className="mb-4">
@@ -460,7 +507,7 @@ const EventsView = () => {
                 </div>
                 <div className="mb-4">
                   <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="participants">
-                    Participants
+                    Participants <span className="text-gray-500 font-normal">(Student, Faculty, Industry etc)</span>
                   </label>
                   <input
                     type="text"
@@ -471,6 +518,23 @@ const EventsView = () => {
                     className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                     required
                   />
+                </div>
+                <div className="mb-4">
+                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="mode">
+                    Mode
+                  </label>
+                  <select
+                    id="mode"
+                    name="mode"
+                    value={currentEvent.mode}
+                    onChange={handleInputChange}
+                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                    required
+                  >
+                    <option value="">Select Mode</option>
+                    <option value="Onsite">Onsite</option>
+                    <option value="Online">Online</option>
+                  </select>
                 </div>
                 <div className="mb-4">
                   <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="date">
@@ -539,17 +603,37 @@ const EventsView = () => {
                   />
                 </div>
                 <div className="mb-4">
-                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="totalRevenue">
-                    Total Revenue
+                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="targetSDG">
+                    Target SDG
                   </label>
-                  <input
-                    type="number"
-                    id="totalRevenue"
-                    name="totalRevenue"
-                    value={currentEvent.totalRevenue}
+                  <select
+                    id="targetSDG"
+                    name="targetSDG"
+                    multiple
+                    value={currentEvent.targetSDG}
                     onChange={handleInputChange}
                     className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                  />
+                    style={{ height: '120px' }}
+                  >
+                    <option value="SDG 1: No Poverty">SDG 1: No Poverty</option>
+                    <option value="SDG 2: Zero Hunger">SDG 2: Zero Hunger</option>
+                    <option value="SDG 3: Good Health and Well-being">SDG 3: Good Health and Well-being</option>
+                    <option value="SDG 4: Quality Education">SDG 4: Quality Education</option>
+                    <option value="SDG 5: Gender Equality">SDG 5: Gender Equality</option>
+                    <option value="SDG 6: Clean Water and Sanitation">SDG 6: Clean Water and Sanitation</option>
+                    <option value="SDG 7: Affordable and Clean Energy">SDG 7: Affordable and Clean Energy</option>
+                    <option value="SDG 8: Decent Work and Economic Growth">SDG 8: Decent Work and Economic Growth</option>
+                    <option value="SDG 9: Industry, Innovation and Infrastructure">SDG 9: Industry, Innovation and Infrastructure</option>
+                    <option value="SDG 10: Reduced Inequalities">SDG 10: Reduced Inequalities</option>
+                    <option value="SDG 11: Sustainable Cities and Communities">SDG 11: Sustainable Cities and Communities</option>
+                    <option value="SDG 12: Responsible Consumption and Production">SDG 12: Responsible Consumption and Production</option>
+                    <option value="SDG 13: Climate Action">SDG 13: Climate Action</option>
+                    <option value="SDG 14: Life Below Water">SDG 14: Life Below Water</option>
+                    <option value="SDG 15: Life on Land">SDG 15: Life on Land</option>
+                    <option value="SDG 16: Peace, Justice and Strong Institutions">SDG 16: Peace, Justice and Strong Institutions</option>
+                    <option value="SDG 17: Partnerships for the Goals">SDG 17: Partnerships for the Goals</option>
+                  </select>
+                  <p className="text-sm text-gray-600 mt-1">Hold Ctrl/Cmd to select multiple SDGs</p>
                 </div>
                 <div className="flex items-center justify-between">
                   <button

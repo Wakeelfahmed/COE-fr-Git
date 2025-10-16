@@ -15,7 +15,7 @@ const achievementSchema = new mongoose.Schema({
     type: Date,
     required: true
   },
-  participant: {
+  participantOfEvent: {
     type: String,
     required: true,
     trim: true
@@ -26,6 +26,11 @@ const achievementSchema = new mongoose.Schema({
     trim: true
   },
   roleOfParticipantFromCoEAI: {
+    type: String,
+    required: true,
+    trim: true
+  },
+  detailsOfAchievement: {
     type: String,
     required: true,
     trim: true

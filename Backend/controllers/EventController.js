@@ -17,40 +17,52 @@ const hasAccessToEvent = (user, event) => {
   return user.role === 'director' || event.createdBy.toString() === user._id.toString();
 };
 
+exports.getAllEvents = async (req, res) => {
+  const user = getUserFromToken(req);
+  if (!user) return res.status(401).json({ message: 'Unauthorized' });
+
+  console.log('=== GET ALL EVENTS ===');
+  console.log('User ID:', user._id);
+  console.log('User Role:', user.role);
+  console.log('Only Mine:', req.query.onlyMine);
+
+  try {
+    let events;
+    if (user.role === 'director' && req.query.onlyMine !== 'true') {
+      console.log('Fetching all events (director mode)');
+      events = await Event.find();
+    } else {
+      console.log('Fetching only user events');
+      events = await Event.find({ createdBy: user._id });
+    }
+    console.log('Events found:', events.length);
+    console.log('Events:', events);
+    res.json(events);
+  } catch (error) {
+    console.error('Error fetching events:', error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
 exports.createEvent = async (req, res) => {
   const user = getUserFromToken(req);
   if (!user) return res.status(401).json({ message: 'Unauthorized' });
+
+  console.log('=== CREATING EVENT ===');
+  console.log('Event Data:', req.body);
+  console.log('User ID:', user._id);
 
   try {
     const event = new Event({
       ...req.body,
       createdBy: user._id
     });
-    await event.save();
-    res.status(201).json(event);
+    const newEvent = await event.save();
+    console.log('Event created successfully:', newEvent);
+    res.status(201).json(newEvent);
   } catch (error) {
+    console.error('Error creating event:', error);
     res.status(400).json({ message: error.message });
-  }
-};
-
-exports.getAllEvents = async (req, res) => {
-  const user = getUserFromToken(req);
-  if (!user) return res.status(401).json({ message: 'Unauthorized' });
-
-  try {
-    let events;
-    if (user.role === 'director' && req.query.onlyMine !== 'true') {
-      console.log("All events")
-      events = await Event.find();
-    } else {
-      console.log("Only mine")
-      events = await Event.find({ createdBy: user._id });
-    }
-
-    console.log(events)
-    res.json(events);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
   }
 };
 
@@ -68,6 +80,7 @@ exports.getEventById = async (req, res) => {
 
     res.json(event);
   } catch (error) {
+    console.error('Error fetching event:', error);
     res.status(500).json({ message: error.message });
   }
 };
@@ -87,6 +100,7 @@ exports.updateEvent = async (req, res) => {
     const updatedEvent = await Event.findByIdAndUpdate(req.params.id, req.body, { new: true });
     res.json(updatedEvent);
   } catch (error) {
+    console.error('Error updating event:', error);
     res.status(400).json({ message: error.message });
   }
 };
@@ -106,6 +120,7 @@ exports.deleteEvent = async (req, res) => {
     await Event.findByIdAndDelete(req.params.id);
     res.json({ message: 'Event deleted successfully' });
   } catch (error) {
+    console.error('Error deleting event:', error);
     res.status(500).json({ message: error.message });
   }
 };

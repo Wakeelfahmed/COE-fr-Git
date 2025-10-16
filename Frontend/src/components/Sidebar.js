@@ -6,17 +6,20 @@ import { auth } from '../firebaseConfig';
 
 
 const activityItems = [
-  { name: 'Trainings', path: '/trainings' },
+  { name: 'Talks/Training Attended', path: '/trainings' },
   { name: 'Internships', path: '/internships' },
-  // { name: 'Events', path: '/events' },
+  { name: 'Events', path: '/events' },
+  { name: 'Trainings Conducted', path: '/trainings-conducted' },
 ];
 
 const otherItems = [
   { name: 'Industry/Commercial Projects', path: '/' },
-  { name: 'Collaborations', path: '/Collaborations' },
+  { name: 'Foreign Collaboration', path: '/Collaborations' },
+  { name: 'Local Collaborations', path: '/local-collaborations' },
   { name: 'Achievements', path: '/achievements' },
   { name: 'Patents', path: '/patents' },
-  { name: 'Fundings', path: '/fundings' },
+  { name: 'Funded Projects', path: '/fundings' },
+  { name: 'Funding Proposals', path: '/funding-proposals' },
   { name: 'Publications', path: '/publications' },
   // { name: 'Forms', path: '/forms' },
   { name: 'Reports', path: '/reports' },

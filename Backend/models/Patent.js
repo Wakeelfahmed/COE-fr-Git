@@ -6,11 +6,11 @@ const patentSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  pi: {
+  inventor: {
     type: String,
     required: true
   },
-  team: {
+  coInventor: {
     type: [String],
     required: true
   },
@@ -19,12 +19,7 @@ const patentSchema = new mongoose.Schema({
     required: false,
     trim: true
   },
-  coPi: {
-    type: String,
-    required: false,
-    trim: true
-  },
-  affiliationOfCoPi: {
+  affiliationOfCoInventor: {
     type: String,
     required: false,
     trim: true
@@ -46,6 +41,11 @@ const patentSchema = new mongoose.Schema({
   },
   dateOfApproval: {
     type: Date
+  },
+  targetSDG: {
+    type: [String],
+    required: false,
+    trim: true
   },
   fileLink: String,
   createdBy: {

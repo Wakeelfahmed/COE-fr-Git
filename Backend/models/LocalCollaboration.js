@@ -1,22 +1,17 @@
 const mongoose = require('mongoose');
 
-const collaborationSchema = new mongoose.Schema({
+const localCollaborationSchema = new mongoose.Schema({
   memberOfCoE: {
     type: String,
     required: true,
     trim: true
   },
-  collaboratingForeignResearcher: {
+  collaboratingLocalResearcher: {
     type: String,
     required: true,
     trim: true
   },
-  foreignCollaboratingInstitute: {
-    type: String,
-    required: true,
-    trim: true
-  },
-  collaboratingCountry: {
+  localCollaboratingInstitute: {
     type: String,
     required: true,
     trim: true
@@ -31,7 +26,6 @@ const collaborationSchema = new mongoose.Schema({
       'Technology Development / Prototype',
       'Exchange / Fellowship / Visiting Position',
       'Joint Supervision (PhD/MS/BS)',
-      'Data Sharing',
       'Other'
     ]
   },
@@ -67,6 +61,6 @@ const collaborationSchema = new mongoose.Schema({
   timestamps: true
 });
 
-const Collaboration = mongoose.model('Collaboration', collaborationSchema);
+const LocalCollaboration = mongoose.model('LocalCollaboration', localCollaborationSchema);
 
-module.exports = Collaboration;
+module.exports = LocalCollaboration;

@@ -12,10 +12,13 @@ import InternshipsPage from './pages/InternshipsPage';
 import EventsPage from './pages/EventsPage';
 import PatentsPage from './pages/PatentsPage';
 import FundingsPage from './pages/FundingsPage';
+import FundingProposalsPage from './pages/FundingProposalsPage';
 import PublicationsPage from './pages/PublicationsPage';
 import ReportsPage from './pages/ReportsPage';
-import XYXPage from './pages/XYXPage';
+import ForeignCollaborationPage from './pages/ForeignCollaborationPage';
 import AchievementsPage from './pages/AchievementsPage';
+import TrainingsConductedPage from './pages/TrainingsConductedPage';
+import LocalCollaborationPage from './pages/LocalCollaborationPage';
 import AuthRedirect from './authRedirect';
 import { UserProvider, useUser } from './context/UserContext';
 import Loading from './components/Loading';
@@ -84,10 +87,13 @@ function App() {
                   <Route path="/trainings" element={<TrainingsPage />} />
                   <Route path="/internships" element={<InternshipsPage />} />
                   <Route path="/events" element={<EventsPage />} />
-                  <Route path="/Collaborations" element={<XYXPage />} />
+                  <Route path="/trainings-conducted" element={<TrainingsConductedPage />} />
+                  <Route path="/Collaborations" element={<ForeignCollaborationPage />} />
+                  <Route path="/local-collaborations" element={<LocalCollaborationPage />} />
                   <Route path="/achievements" element={<AchievementsPage />} />
                   <Route path="/patents" element={<PatentsPage />} />
                   <Route path="/fundings" element={<FundingsPage />} />
+                  <Route path="/funding-proposals" element={<FundingProposalsPage />} />
                   <Route path="/publications" element={<PublicationsPage />} />
                   <Route path="/reports" element={<ReportsPage />} />
                   <Route path="/" element={<Navigate to="/projects" replace />} />

@@ -47,22 +47,22 @@ const PatentsView = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [currentPatent, setCurrentPatent] = useState({
     title: '',
-    pi: '',
-    team: '',
+    inventor: '',
+    coInventor: '',
     patentOrg: '',
-    coPi: '',
-    affiliationOfCoPi: '',
+    affiliationOfCoInventor: '',
     dateOfSubmission: '',
     scope: '',
     directoryNumber: '',
     patentNumber: '',
     dateOfApproval: '',
+    targetSDG: [],
     fileLink: ''
   });
   const [isEditMode, setIsEditMode] = useState(false);
   const [filterCriteria, setFilterCriteria] = useState({
     title: '',
-    pi: '',
+    inventor: '',
     scope: '',
     dateFrom: '',
     dateTo: ''
@@ -125,16 +125,16 @@ const PatentsView = () => {
     setIsEditMode(false);
     setCurrentPatent({
       title: '',
-      pi: '',
-      team: '',
+      inventor: '',
+      coInventor: '',
       patentOrg: '',
-      coPi: '',
-      affiliationOfCoPi: '',
+      affiliationOfCoInventor: '',
       dateOfSubmission: '',
       scope: '',
       directoryNumber: '',
       patentNumber: '',
       dateOfApproval: '',
+      targetSDG: [],
       fileLink: ''
     });
     setShowModal(true);
@@ -144,21 +144,27 @@ const PatentsView = () => {
     setIsEditMode(true);
     setCurrentPatent({
       ...patent,
-      team: patent?.team?.join(', ')
+      coInventor: patent?.coInventor?.join(', ')
     });
     setShowModal(true);
   };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setCurrentPatent(prev => ({ ...prev, [name]: value }));
+    if (name === 'targetSDG') {
+      // Handle multiple selections for SDGs
+      const selectedOptions = Array.from(e.target.selectedOptions, option => option.value);
+      setCurrentPatent(prev => ({ ...prev, [name]: selectedOptions }));
+    } else {
+      setCurrentPatent(prev => ({ ...prev, [name]: value }));
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     const patentData = {
       ...currentPatent,
-      team: currentPatent?.team?.split(',').map(member => member.trim())
+      coInventor: currentPatent?.coInventor?.split(',').map(member => member.trim())
     };
 
     try {
@@ -199,7 +205,7 @@ const PatentsView = () => {
   const clearFilters = () => {
     setFilterCriteria({
       title: '',
-      pi: '',
+      inventor: '',
       scope: '',
       dateFrom: '',
       dateTo: ''
@@ -260,9 +266,9 @@ const PatentsView = () => {
   };
 
   const filteredPatents = patents.filter(patent => {
-    return patent.title.toLowerCase().includes(filterCriteria.title.toLowerCase()) &&
-           patent.pi.toLowerCase().includes(filterCriteria.pi.toLowerCase()) &&
-           patent.scope.toLowerCase().includes(filterCriteria.scope.toLowerCase()) &&
+    return (patent.title || '').toLowerCase().includes((filterCriteria.title || '').toLowerCase()) &&
+           (patent.inventor || '').toLowerCase().includes((filterCriteria.inventor || '').toLowerCase()) &&
+           (patent.scope || '').toLowerCase().includes((filterCriteria.scope || '').toLowerCase()) &&
            (filterCriteria.dateFrom === '' || patent.dateOfSubmission >= filterCriteria.dateFrom) &&
            (filterCriteria.dateTo === '' || patent.dateOfSubmission <= filterCriteria.dateTo);
   });
@@ -302,9 +308,9 @@ const PatentsView = () => {
             />
             <input
               type="text"
-              placeholder="Filter by PI"
-              name="pi"
-              value={filterCriteria.pi}
+              placeholder="Filter by Inventor"
+              name="inventor"
+              value={filterCriteria.inventor}
               onChange={handleFilterChange}
               className="border rounded px-2 py-1"
             />
@@ -352,16 +358,16 @@ const PatentsView = () => {
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">#</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">PI</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Team</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Inventor</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Co-Inventor</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Patent Org</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Co-PI</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Co-PI Affiliation</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Co-Inventor Affiliation</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Submission Date</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Scope</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Directory Number</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Patent Number</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Approval Date</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Target SDG</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">File</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
             </tr>
@@ -370,19 +376,19 @@ const PatentsView = () => {
             {filteredPatents.map((patent, index) => (
               <tr key={patent._id}>
                 <td className="px-6 py-4 whitespace-nowrap">{index + 1}</td>
-                <td className="px-6 py-4 whitespace-nowrap">{patent.title}</td>
-                <td className="px-6 py-4 whitespace-nowrap">{patent.pi}</td>
+                <td className="px-6 py-4 whitespace-nowrap">{patent.title || 'N/A'}</td>
+                <td className="px-6 py-4 whitespace-nowrap">{patent.inventor || 'N/A'}</td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  {Array.isArray(patent.team) ? patent.team.join(', ') : patent.team || 'N/A'}
+                  {Array.isArray(patent.coInventor) ? patent.coInventor.join(', ') : patent.coInventor || 'N/A'}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">{patent.patentOrg || '-'}</td>
-                <td className="px-6 py-4 whitespace-nowrap">{patent.coPi || '-'}</td>
-                <td className="px-6 py-4 whitespace-nowrap">{patent.affiliationOfCoPi || '-'}</td>
-                <td className="px-6 py-4 whitespace-nowrap">{patent.dateOfSubmission}</td>
-                <td className="px-6 py-4 whitespace-nowrap">{patent.scope}</td>
-                <td className="px-6 py-4 whitespace-nowrap">{patent.directoryNumber}</td>
-                <td className="px-6 py-4 whitespace-nowrap">{patent.patentNumber}</td>
-                <td className="px-6 py-4 whitespace-nowrap">{patent.dateOfApproval}</td>
+                <td className="px-6 py-4 whitespace-nowrap">{patent.affiliationOfCoInventor || '-'}</td>
+                <td className="px-6 py-4 whitespace-nowrap">{patent.dateOfSubmission || 'N/A'}</td>
+                <td className="px-6 py-4 whitespace-nowrap">{patent.scope || 'N/A'}</td>
+                <td className="px-6 py-4 whitespace-nowrap">{patent.directoryNumber || 'N/A'}</td>
+                <td className="px-6 py-4 whitespace-nowrap">{patent.patentNumber || 'N/A'}</td>
+                <td className="px-6 py-4 whitespace-nowrap">{patent.dateOfApproval || 'N/A'}</td>
+                <td className="px-6 py-4 whitespace-nowrap">{patent.targetSDG ? patent.targetSDG.join(', ') : 'N/A'}</td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   {patent.fileLink ? (
                     <div>
@@ -449,13 +455,13 @@ const PatentsView = () => {
                 </div>
                 <div className="mb-4">
                   <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="pi">
-                    PI
+                    Inventor
                   </label>
                   <input
                     type="text"
-                    id="pi"
-                    name="pi"
-                    value={currentPatent.pi}
+                    id="inventor"
+                    name="inventor"
+                    value={currentPatent.inventor}
                     onChange={handleInputChange}
                     className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                     required
@@ -463,13 +469,13 @@ const PatentsView = () => {
                 </div>
                 <div className="mb-4">
                   <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="team">
-                    Team (comma-separated)
+                    Co-Inventor (comma-separated)
                   </label>
                   <input
                     type="text"
-                    id="team"
-                    name="team"
-                    value={currentPatent.team}
+                    id="coInventor"
+                    name="coInventor"
+                    value={currentPatent.coInventor}
                     onChange={handleInputChange}
                     className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                     required
@@ -489,27 +495,14 @@ const PatentsView = () => {
                   />
                 </div>
                 <div className="mb-4">
-                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="coPi">
-                    Co-PI
-                  </label>
-                  <input
-                    type="text"
-                    id="coPi"
-                    name="coPi"
-                    value={currentPatent.coPi}
-                    onChange={handleInputChange}
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                  />
-                </div>
-                <div className="mb-4">
                   <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="affiliationOfCoPi">
-                    Affiliation of Co-PI
+                    Affiliation of Co-Inventor
                   </label>
                   <input
                     type="text"
-                    id="affiliationOfCoPi"
-                    name="affiliationOfCoPi"
-                    value={currentPatent.affiliationOfCoPi}
+                    id="affiliationOfCoInventor"
+                    name="affiliationOfCoInventor"
+                    value={currentPatent.affiliationOfCoInventor}
                     onChange={handleInputChange}
                     className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                   />
@@ -583,6 +576,39 @@ const PatentsView = () => {
                     onChange={handleInputChange}
                     className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                   />
+                </div>
+                <div className="mb-4">
+                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="targetSDG">
+                    Target SDG
+                  </label>
+                  <select
+                    id="targetSDG"
+                    name="targetSDG"
+                    multiple
+                    value={currentPatent.targetSDG}
+                    onChange={handleInputChange}
+                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                    style={{ height: '120px' }}
+                  >
+                    <option value="SDG 1: No Poverty">SDG 1: No Poverty</option>
+                    <option value="SDG 2: Zero Hunger">SDG 2: Zero Hunger</option>
+                    <option value="SDG 3: Good Health and Well-being">SDG 3: Good Health and Well-being</option>
+                    <option value="SDG 4: Quality Education">SDG 4: Quality Education</option>
+                    <option value="SDG 5: Gender Equality">SDG 5: Gender Equality</option>
+                    <option value="SDG 6: Clean Water and Sanitation">SDG 6: Clean Water and Sanitation</option>
+                    <option value="SDG 7: Affordable and Clean Energy">SDG 7: Affordable and Clean Energy</option>
+                    <option value="SDG 8: Decent Work and Economic Growth">SDG 8: Decent Work and Economic Growth</option>
+                    <option value="SDG 9: Industry, Innovation and Infrastructure">SDG 9: Industry, Innovation and Infrastructure</option>
+                    <option value="SDG 10: Reduced Inequalities">SDG 10: Reduced Inequalities</option>
+                    <option value="SDG 11: Sustainable Cities and Communities">SDG 11: Sustainable Cities and Communities</option>
+                    <option value="SDG 12: Responsible Consumption and Production">SDG 12: Responsible Consumption and Production</option>
+                    <option value="SDG 13: Climate Action">SDG 13: Climate Action</option>
+                    <option value="SDG 14: Life Below Water">SDG 14: Life Below Water</option>
+                    <option value="SDG 15: Life on Land">SDG 15: Life on Land</option>
+                    <option value="SDG 16: Peace, Justice and Strong Institutions">SDG 16: Peace, Justice and Strong Institutions</option>
+                    <option value="SDG 17: Partnerships for the Goals">SDG 17: Partnerships for the Goals</option>
+                  </select>
+                  <p className="text-sm text-gray-600 mt-1">Hold Ctrl/Cmd to select multiple SDGs</p>
                 </div>
                 <div className="flex items-center justify-between">
                   <button

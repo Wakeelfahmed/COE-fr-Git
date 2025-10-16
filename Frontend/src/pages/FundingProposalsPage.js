@@ -41,21 +41,19 @@ const deletePdf = async (userId, fileName) => {
   }
 };
 
-const FundingsView = () => {
-  const [fundedProjects, setFundedProjects] = useState([]);
+const FundingProposalsView = () => {
+  const [fundingProposals, setFundingProposals] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
-  const [currentFundedProject, setCurrentFundedProject] = useState({
+  const [currentFundingProposal, setCurrentFundingProposal] = useState({
     projectTitle: '',
     pi: '',
     researchTeam: '',
     dateOfSubmission: '',
-    dateOfApproval: '',
     fundingSource: '',
     pkr: '',
     team: '',
     status: '',
-    closingDate: '',
     targetSDG: [],
     fileLink: ''
   });
@@ -86,7 +84,7 @@ const FundingsView = () => {
     try {
       const response = await axios.post(`${API_BASE_URL}/reports`, {
         title: reportTitle,
-        sourceType: 'Fundings',
+        sourceType: 'FundingProposals',
         filterCriteria
       });
       console.log('Report saved:', response.data);
@@ -100,44 +98,43 @@ const FundingsView = () => {
   };
 
 
+
   useEffect(() => {
-    fetchFundedProjects();
+    fetchFundingProposals();
   }, [showOnlyMine]);
 
-  const fetchFundedProjects = async () => {
+  const fetchFundingProposals = async () => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/fundings`, {
+      const response = await axios.get(`${API_BASE_URL}/funding-proposals`, {
         params: { onlyMine: showOnlyMine }
       });
-      setFundedProjects(response.data);
+      setFundingProposals(response.data);
     } catch (error) {
-      console.error('Error fetching funded projects:', error);
-      alert('Error fetching funded projects. Please try again.');
+      console.error('Error fetching funding proposals:', error);
+      alert('Error fetching funding proposals. Please try again.');
     }
   };
 
-  const handleNewFundedProject = () => {
+  const handleNewFundingProposal = () => {
     setIsEditMode(false);
-    setCurrentFundedProject({
+    setCurrentFundingProposal({
       projectTitle: '',
       pi: '',
       researchTeam: '',
       dateOfSubmission: '',
-      dateOfApproval: '',
       fundingSource: '',
       pkr: '',
       team: '',
       status: '',
-      closingDate: '',
       targetSDG: [],
       fileLink: ''
     });
     setShowModal(true);
   };
 
-  const handleEditFundedProject = (fundedProject) => {
+  const handleEditFundingProposal = (fundingProposal) => {
     setIsEditMode(true);
-    setCurrentFundedProject(fundedProject);
+    setCurrentFundingProposal(fundingProposal);
     setShowModal(true);
   };
 
@@ -146,41 +143,41 @@ const FundingsView = () => {
     if (name === 'targetSDG') {
       // Handle multiple selections for SDGs
       const selectedOptions = Array.from(e.target.selectedOptions, option => option.value);
-      setCurrentFundedProject(prev => ({ ...prev, [name]: selectedOptions }));
+      setCurrentFundingProposal(prev => ({ ...prev, [name]: selectedOptions }));
     } else {
-      setCurrentFundedProject(prev => ({ ...prev, [name]: value }));
+      setCurrentFundingProposal(prev => ({ ...prev, [name]: value }));
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const fundedProjectData = {
-      ...currentFundedProject,
-      pkr: parseFloat(currentFundedProject.pkr)
+    const fundingProposalData = {
+      ...currentFundingProposal,
+      pkr: parseFloat(currentFundingProposal.pkr)
     };
 
     try {
       if (isEditMode) {
-        await axios.put(`${API_BASE_URL}/fundings/${currentFundedProject._id}`, fundedProjectData);
+        await axios.put(`${API_BASE_URL}/funding-proposals/${currentFundingProposal._id}`, fundingProposalData);
       } else {
-        await axios.post(`${API_BASE_URL}/fundings`, fundedProjectData);
+        await axios.post(`${API_BASE_URL}/funding-proposals`, fundingProposalData);
       }
       setShowModal(false);
-      fetchFundedProjects();
+      fetchFundingProposals();
     } catch (error) {
-      console.error('Error saving funded project:', error);
-      alert('Error saving funded project. Please try again.');
+      console.error('Error saving funding proposal:', error);
+      alert('Error saving funding proposal. Please try again.');
     }
   };
 
-  const handleDeleteFundedProject = async (fundingId) => {
-    if (window.confirm('Are you sure you want to delete this funded project?')) {
+  const handleDeleteFundingProposal = async (fundingProposalId) => {
+    if (window.confirm('Are you sure you want to delete this funding proposal?')) {
       try {
-        await axios.delete(`${API_BASE_URL}/fundings/${fundingId}`);
-        fetchFundedProjects();
+        await axios.delete(`${API_BASE_URL}/funding-proposals/${fundingProposalId}`);
+        fetchFundingProposals();
       } catch (error) {
-        console.error('Error deleting funded project:', error);
-        alert('Error deleting funded project. Please try again.');
+        console.error('Error deleting funding proposal:', error);
+        alert('Error deleting funding proposal. Please try again.');
       }
     }
   };
@@ -205,35 +202,35 @@ const FundingsView = () => {
     });
   };
 
-  const handleFileChange = (event, fundingId) => {
+  const handleFileChange = (event, fundingProposalId) => {
     const file = event.target.files[0];
     if (file && file.type === 'application/pdf') {
-      setSelectedFiles(prev => ({ ...prev, [fundingId]: file }));
+      setSelectedFiles(prev => ({ ...prev, [fundingProposalId]: file }));
     } else {
       alert('Please select a PDF file');
       event.target.value = null;
     }
   };
 
-  const handleFileUpload = async (fundedProjectId) => {
-    const file = selectedFiles[fundedProjectId];
+  const handleFileUpload = async (fundingProposalId) => {
+    const file = selectedFiles[fundingProposalId];
     if (!file) {
       alert('Please select a file first');
       return;
     }
     try {
       const fileUrl = await uploadPdf(file, user?.id);
-      await axios.put(`${API_BASE_URL}/fundings/${fundedProjectId}`, { fileLink: fileUrl });
-      
-      setFundedProjects(prevFundedProjects => 
-        prevFundedProjects.map(fundedProject => 
-          fundedProject._id === fundedProjectId ? { ...fundedProject, fileLink: fileUrl } : fundedProject
+      await axios.put(`${API_BASE_URL}/funding-proposals/${fundingProposalId}`, { fileLink: fileUrl });
+
+      setFundingProposals(prevFundingProposals =>
+        prevFundingProposals.map(fundingProposal =>
+          fundingProposal._id === fundingProposalId ? { ...fundingProposal, fileLink: fileUrl } : fundingProposal
         )
       );
-      
+
       setSelectedFiles(prev => {
         const newState = { ...prev };
-        delete newState[fundedProjectId];
+        delete newState[fundingProposalId];
         return newState;
       });
     } catch (error) {
@@ -242,14 +239,14 @@ const FundingsView = () => {
     }
   };
 
-  const handleFileDelete = async (fundedProjectId, fileName) => {
+  const handleFileDelete = async (fundingProposalId, fileName) => {
     try {
       await deletePdf(user?.id, fileName);
-      await axios.put(`${API_BASE_URL}/fundings/${fundedProjectId}`, { fileLink: null });
-      
-      setFundedProjects(prevFundedProjects => 
-        prevFundedProjects.map(fundedProject => 
-          fundedProject._id === fundedProjectId ? { ...fundedProject, fileLink: null } : fundedProject
+      await axios.put(`${API_BASE_URL}/funding-proposals/${fundingProposalId}`, { fileLink: null });
+
+      setFundingProposals(prevFundingProposals =>
+        prevFundingProposals.map(fundingProposal =>
+          fundingProposal._id === fundingProposalId ? { ...fundingProposal, fileLink: null } : fundingProposal
         )
       );
     } catch (error) {
@@ -258,18 +255,14 @@ const FundingsView = () => {
     }
   };
 
-  const filteredFundedProjects = fundedProjects.filter(fundedProject => {
-    return (fundedProject.projectTitle || '').toLowerCase().includes((filterCriteria.projectTitle || '').toLowerCase()) &&
-           (fundedProject.pi || '').toLowerCase().includes((filterCriteria.pi || '').toLowerCase()) &&
-           (fundedProject.fundingSource || '').toLowerCase().includes((filterCriteria.fundingSource || '').toLowerCase()) &&
-           (fundedProject.team || '').toLowerCase().includes((filterCriteria.team || '').toLowerCase()) &&
-           (filterCriteria.dateFrom === '' || fundedProject.dateOfSubmission >= filterCriteria.dateFrom) &&
-           (filterCriteria.dateTo === '' || fundedProject.dateOfSubmission <= filterCriteria.dateTo);
+  const filteredFundingProposals = fundingProposals.filter(fundingProposal => {
+    return (fundingProposal.projectTitle || '').toLowerCase().includes((filterCriteria.projectTitle || '').toLowerCase()) &&
+           (fundingProposal.pi || '').toLowerCase().includes((filterCriteria.pi || '').toLowerCase()) &&
+           (fundingProposal.fundingSource || '').toLowerCase().includes((filterCriteria.fundingSource || '').toLowerCase()) &&
+           (fundingProposal.team || '').toLowerCase().includes((filterCriteria.team || '').toLowerCase()) &&
+           (filterCriteria.dateFrom === '' || fundingProposal.dateOfSubmission >= filterCriteria.dateFrom) &&
+           (filterCriteria.dateTo === '' || fundingProposal.dateOfSubmission <= filterCriteria.dateTo);
   });
-
-
-  
-
 
 
 
@@ -277,17 +270,17 @@ const FundingsView = () => {
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-bold">Funded Projects</h2>
+        <h2 className="text-xl font-bold">Funding Proposals</h2>
         <div>
-          <button onClick={handleNewFundedProject} className="bg-blue-600 text-white px-4 py-2 rounded mr-2">
-            New Funded Project
+          <button onClick={handleNewFundingProposal} className="bg-blue-600 text-white px-4 py-2 rounded mr-2">
+            New Funding Proposal
           </button>
           {user?.role === 'director' && (
-            <button 
-              onClick={() => setShowOnlyMine(!showOnlyMine)} 
+            <button
+              onClick={() => setShowOnlyMine(!showOnlyMine)}
               className="bg-green-600 text-white px-4 py-2 rounded mr-2"
             >
-              {showOnlyMine ? 'All Funded Projects' : 'My Funded Projects'}
+              {showOnlyMine ? 'All Proposals' : 'My Proposals'}
             </button>
           )}
           <button onClick={toggleFilters} className="border border-blue-600 text-blue-600 px-4 py-2 rounded">
@@ -360,80 +353,76 @@ const FundingsView = () => {
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">PI</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Research Team</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Submission Date</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Approval Date</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Funding Source</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">PKR (M)</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Team</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Closing Date</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Target SDG</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">File</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {filteredFundedProjects.map((fundedProject, index) => (
-              <tr key={fundedProject._id}>
+            {filteredFundingProposals.map((fundingProposal, index) => (
+              <tr key={fundingProposal._id}>
                 <td className="px-6 py-4 whitespace-nowrap">{index + 1}</td>
-                <td className="px-6 py-4 whitespace-nowrap">{fundedProject.projectTitle}</td>
-                <td className="px-6 py-4 whitespace-nowrap">{fundedProject.pi}</td>
-                <td className="px-6 py-4 whitespace-nowrap">{fundedProject.researchTeam}</td>
-                <td className="px-6 py-4 whitespace-nowrap">{fundedProject.dateOfSubmission}</td>
-                <td className="px-6 py-4 whitespace-nowrap">{fundedProject.dateOfApproval}</td>
-                <td className="px-6 py-4 whitespace-nowrap">{fundedProject.fundingSource}</td>
-                <td className="px-6 py-4 whitespace-nowrap">{fundedProject.pkr.toLocaleString()}</td>
-                <td className="px-6 py-4 whitespace-nowrap">{fundedProject.team}</td>
-                <td className="px-6 py-4 whitespace-nowrap">{fundedProject.status}</td>
-                <td className="px-6 py-4 whitespace-nowrap">{fundedProject.closingDate}</td>
-                <td className="px-6 py-4 whitespace-nowrap">{fundedProject.targetSDG ? fundedProject.targetSDG.join(', ') : 'N/A'}</td>
+                <td className="px-6 py-4 whitespace-nowrap">{fundingProposal.projectTitle}</td>
+                <td className="px-6 py-4 whitespace-nowrap">{fundingProposal.pi}</td>
+                <td className="px-6 py-4 whitespace-nowrap">{fundingProposal.researchTeam}</td>
+                <td className="px-6 py-4 whitespace-nowrap">{fundingProposal.dateOfSubmission}</td>
+                <td className="px-6 py-4 whitespace-nowrap">{fundingProposal.fundingSource}</td>
+                <td className="px-6 py-4 whitespace-nowrap">{fundingProposal.pkr.toLocaleString()}</td>
+                <td className="px-6 py-4 whitespace-nowrap">{fundingProposal.team}</td>
+                <td className="px-6 py-4 whitespace-nowrap">{fundingProposal.status}</td>
+                <td className="px-6 py-4 whitespace-nowrap">{fundingProposal.targetSDG ? fundingProposal.targetSDG.join(', ') : 'N/A'}</td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  {fundedProject.fileLink ? (
+                  {fundingProposal.fileLink ? (
                     <div>
-                      <a href={fundedProject.fileLink} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-900 mr-2">View File</a>
-                      <button onClick={() => handleFileDelete(fundedProject._id, fundedProject.fileLink.split('/').pop())} className="text-red-600 hover:text-red-900 mr-2">Delete</button>
-                      <input 
-                        type="file" 
-                        onChange={(e) => handleFileChange(e, fundedProject._id)} 
-                        accept=".pdf" 
-                        className="hidden" 
-                        id={`fileUpdate-${fundedProject._id}`} 
+                      <a href={fundingProposal.fileLink} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-900 mr-2">View File</a>
+                      <button onClick={() => handleFileDelete(fundingProposal._id, fundingProposal.fileLink.split('/').pop())} className="text-red-600 hover:text-red-900 mr-2">Delete</button>
+                      <input
+                        type="file"
+                        onChange={(e) => handleFileChange(e, fundingProposal._id)}
+                        accept=".pdf"
+                        className="hidden"
+                        id={`fileUpdate-${fundingProposal._id}`}
                       />
-                      <label htmlFor={`fileUpdate-${fundedProject._id}`} className="text-green-600 hover:text-green-900 cursor-pointer">Update</label>
-                      {selectedFiles[fundedProject._id] && (
-                        <button onClick={() => handleFileUpload(fundedProject._id)} className="text-blue-600 hover:text-blue-900 ml-2">Confirm Update</button>
+                      <label htmlFor={`fileUpdate-${fundingProposal._id}`} className="text-green-600 hover:text-green-900 cursor-pointer">Update</label>
+                      {selectedFiles[fundingProposal._id] && (
+                        <button onClick={() => handleFileUpload(fundingProposal._id)} className="text-blue-600 hover:text-blue-900 ml-2">Confirm Update</button>
                         )}
                       </div>
                     ) : (
                       <div>
-                        <input 
-                          type="file" 
-                          onChange={(e) => handleFileChange(e, fundedProject._id)} 
-                          accept=".pdf" 
-                          className="hidden" 
-                          id={`fileUpload-${fundedProject._id}`} 
+                        <input
+                          type="file"
+                          onChange={(e) => handleFileChange(e, fundingProposal._id)}
+                          accept=".pdf"
+                          className="hidden"
+                          id={`fileUpload-${fundingProposal._id}`}
                         />
-                        <label htmlFor={`fileUpload-${fundedProject._id}`} className="text-blue-600 hover:text-blue-900 cursor-pointer mr-2">Select File</label>
-                        {selectedFiles[fundedProject._id] && (
-                          <button onClick={() => handleFileUpload(fundedProject._id)} className="text-green-600 hover:text-green-900">Upload</button>
+                        <label htmlFor={`fileUpload-${fundingProposal._id}`} className="text-blue-600 hover:text-blue-900 cursor-pointer mr-2">Select File</label>
+                        {selectedFiles[fundingProposal._id] && (
+                          <button onClick={() => handleFileUpload(fundingProposal._id)} className="text-green-600 hover:text-green-900">Upload</button>
                         )}
                       </div>
                     )}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <button onClick={() => handleEditFundedProject(fundedProject)} className="text-blue-600 hover:text-blue-900 mr-2">Edit</button>
-                    <button onClick={() => handleDeleteFundedProject(fundedProject._id)} className="text-red-600 hover:text-red-900">Delete</button>
+                    <button onClick={() => handleEditFundingProposal(fundingProposal)} className="text-blue-600 hover:text-blue-900 mr-2">Edit</button>
+                    <button onClick={() => handleDeleteFundingProposal(fundingProposal._id)} className="text-red-600 hover:text-red-900">Delete</button>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
-  
+
         {showModal && (
           <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full">
             <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
               <h3 className="text-lg font-medium leading-6 text-gray-900 mb-4">
-                {isEditMode ? 'Edit Funded Project' : 'New Funded Project'}
+                {isEditMode ? 'Edit Funding Proposal' : 'New Funding Proposal'}
               </h3>
               <form onSubmit={handleSubmit}>
                 <div className="mb-4">
@@ -444,7 +433,7 @@ const FundingsView = () => {
                     type="text"
                     id="projectTitle"
                     name="projectTitle"
-                    value={currentFundedProject.projectTitle}
+                    value={currentFundingProposal.projectTitle}
                     onChange={handleInputChange}
                     className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                     required
@@ -458,7 +447,7 @@ const FundingsView = () => {
                     type="text"
                     id="pi"
                     name="pi"
-                    value={currentFundedProject.pi}
+                    value={currentFundingProposal.pi}
                     onChange={handleInputChange}
                     className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                     required
@@ -472,7 +461,7 @@ const FundingsView = () => {
                     type="text"
                     id="researchTeam"
                     name="researchTeam"
-                    value={currentFundedProject.researchTeam}
+                    value={currentFundingProposal.researchTeam}
                     onChange={handleInputChange}
                     className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                     required
@@ -486,21 +475,7 @@ const FundingsView = () => {
                     type="date"
                     id="dateOfSubmission"
                     name="dateOfSubmission"
-                    value={currentFundedProject.dateOfSubmission}
-                    onChange={handleInputChange}
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    required
-                  />
-                </div>
-                <div className="mb-4">
-                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="dateOfApproval">
-                    Date of Approval
-                  </label>
-                  <input
-                    type="date"
-                    id="dateOfApproval"
-                    name="dateOfApproval"
-                    value={currentFundedProject.dateOfApproval}
+                    value={currentFundingProposal.dateOfSubmission}
                     onChange={handleInputChange}
                     className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                     required
@@ -514,7 +489,7 @@ const FundingsView = () => {
                     type="text"
                     id="fundingSource"
                     name="fundingSource"
-                    value={currentFundedProject.fundingSource}
+                    value={currentFundingProposal.fundingSource}
                     onChange={handleInputChange}
                     className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                     required
@@ -528,7 +503,7 @@ const FundingsView = () => {
                     type="number"
                     id="pkr"
                     name="pkr"
-                    value={currentFundedProject.pkr}
+                    value={currentFundingProposal.pkr}
                     onChange={handleInputChange}
                     className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                     required
@@ -542,7 +517,7 @@ const FundingsView = () => {
                     type="text"
                     id="team"
                     name="team"
-                    value={currentFundedProject.team}
+                    value={currentFundingProposal.team}
                     onChange={handleInputChange}
                     className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                     required
@@ -556,21 +531,7 @@ const FundingsView = () => {
                     type="text"
                     id="status"
                     name="status"
-                    value={currentFundedProject.status}
-                    onChange={handleInputChange}
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    required
-                  />
-                </div>
-                <div className="mb-4">
-                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="closingDate">
-                    Closing Date
-                  </label>
-                  <input
-                    type="date"
-                    id="closingDate"
-                    name="closingDate"
-                    value={currentFundedProject.closingDate}
+                    value={currentFundingProposal.status}
                     onChange={handleInputChange}
                     className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                     required
@@ -584,7 +545,7 @@ const FundingsView = () => {
                     id="targetSDG"
                     name="targetSDG"
                     multiple
-                    value={currentFundedProject.targetSDG}
+                    value={currentFundingProposal.targetSDG}
                     onChange={handleInputChange}
                     className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                     style={{ height: '120px' }}
@@ -662,8 +623,9 @@ const FundingsView = () => {
 
 
 
-      </div>
-    );
-  };
-  
-  export default FundingsView;
+
+    </div>
+  );
+};
+
+export default FundingProposalsView;
