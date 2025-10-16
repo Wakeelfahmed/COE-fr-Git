@@ -97,6 +97,16 @@ const FundingProposalsView = () => {
     }
   };
 
+  // Helper function to format dates for display (dd-mm-year format)
+  const formatDateForDisplay = (dateString) => {
+    if (!dateString) return 'N/A';
+    const date = new Date(dateString);
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}-${month}-${year}`;
+  };
+
 
 
   useEffect(() => {
@@ -134,7 +144,18 @@ const FundingProposalsView = () => {
 
   const handleEditFundingProposal = (fundingProposal) => {
     setIsEditMode(true);
-    setCurrentFundingProposal(fundingProposal);
+
+    // Format dates for HTML date inputs (YYYY-MM-DD format)
+    const formatDateForInput = (dateString) => {
+      if (!dateString) return '';
+      const date = new Date(dateString);
+      return date.toISOString().split('T')[0]; // Convert to YYYY-MM-DD format
+    };
+
+    setCurrentFundingProposal({
+      ...fundingProposal,
+      dateOfSubmission: formatDateForInput(fundingProposal.dateOfSubmission)
+    });
     setShowModal(true);
   };
 
@@ -369,7 +390,7 @@ const FundingProposalsView = () => {
                 <td className="px-6 py-4 whitespace-nowrap">{fundingProposal.projectTitle}</td>
                 <td className="px-6 py-4 whitespace-nowrap">{fundingProposal.pi}</td>
                 <td className="px-6 py-4 whitespace-nowrap">{fundingProposal.researchTeam}</td>
-                <td className="px-6 py-4 whitespace-nowrap">{fundingProposal.dateOfSubmission}</td>
+                <td className="px-6 py-4 whitespace-nowrap">{formatDateForDisplay(fundingProposal.dateOfSubmission)}</td>
                 <td className="px-6 py-4 whitespace-nowrap">{fundingProposal.fundingSource}</td>
                 <td className="px-6 py-4 whitespace-nowrap">{fundingProposal.pkr.toLocaleString()}</td>
                 <td className="px-6 py-4 whitespace-nowrap">{fundingProposal.team}</td>

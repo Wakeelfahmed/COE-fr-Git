@@ -116,7 +116,18 @@ const PublicationsView = () => {
 
   const handleEditPublication = (publication) => {
     setIsEditMode(true);
-    setCurrentPublication(publication);
+
+    // Format dates for HTML date inputs (YYYY-MM-DD format)
+    const formatDateForInput = (dateString) => {
+      if (!dateString) return '';
+      const date = new Date(dateString);
+      return date.toISOString().split('T')[0]; // Convert to YYYY-MM-DD format
+    };
+
+    setCurrentPublication({
+      ...publication,
+      dateOfPublication: formatDateForInput(publication.dateOfPublication)
+    });
     setShowModal(true);
   };
 
@@ -276,6 +287,16 @@ const PublicationsView = () => {
     }
   };
 
+  // Helper function to format dates for display (dd-mm-year format)
+  const formatDateForDisplay = (dateString) => {
+    if (!dateString) return 'N/A';
+    const date = new Date(dateString);
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}-${month}-${year}`;
+  };
+
 
 
 
@@ -371,7 +392,7 @@ const PublicationsView = () => {
                 <td className="px-6 py-4 whitespace-nowrap">{publication.publicationDetails}</td>
                 <td className="px-6 py-4 whitespace-nowrap">{publication.typeOfPublication}</td>
                 <td className="px-6 py-4 whitespace-nowrap">{publication.lastKnownImpactFactor}</td>
-                <td className="px-6 py-4 whitespace-nowrap">{publication.dateOfPublication}</td>
+                <td className="px-6 py-4 whitespace-nowrap">{formatDateForDisplay(publication.dateOfPublication)}</td>
                 <td className="px-6 py-4 whitespace-nowrap">{publication.hecCategory}</td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   {fileOperations[publication._id]?.loading ? (

@@ -73,8 +73,6 @@ const FundingsView = () => {
   const { user } = useUser();
   const [showOnlyMine, setShowOnlyMine] = useState(false);
 
-
-
   const [showReportModal, setShowReportModal] = useState(false);
   const [reportTitle, setReportTitle] = useState('');
 
@@ -99,6 +97,15 @@ const FundingsView = () => {
     }
   };
 
+  // Helper function to format dates for display (dd-mm-year format)
+  const formatDateForDisplay = (dateString) => {
+    if (!dateString) return 'N/A';
+    const date = new Date(dateString);
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}-${month}-${year}`;
+  };
 
   useEffect(() => {
     fetchFundedProjects();
@@ -137,7 +144,20 @@ const FundingsView = () => {
 
   const handleEditFundedProject = (fundedProject) => {
     setIsEditMode(true);
-    setCurrentFundedProject(fundedProject);
+
+    // Format dates for HTML date inputs (YYYY-MM-DD format)
+    const formatDateForInput = (dateString) => {
+      if (!dateString) return '';
+      const date = new Date(dateString);
+      return date.toISOString().split('T')[0]; // Convert to YYYY-MM-DD format
+    };
+
+    setCurrentFundedProject({
+      ...fundedProject,
+      dateOfSubmission: formatDateForInput(fundedProject.dateOfSubmission),
+      dateOfApproval: formatDateForInput(fundedProject.dateOfApproval),
+      closingDate: formatDateForInput(fundedProject.closingDate)
+    });
     setShowModal(true);
   };
 
@@ -378,13 +398,13 @@ const FundingsView = () => {
                 <td className="px-6 py-4 whitespace-nowrap">{fundedProject.projectTitle}</td>
                 <td className="px-6 py-4 whitespace-nowrap">{fundedProject.pi}</td>
                 <td className="px-6 py-4 whitespace-nowrap">{fundedProject.researchTeam}</td>
-                <td className="px-6 py-4 whitespace-nowrap">{fundedProject.dateOfSubmission}</td>
-                <td className="px-6 py-4 whitespace-nowrap">{fundedProject.dateOfApproval}</td>
+                <td className="px-6 py-4 whitespace-nowrap">{formatDateForDisplay(fundedProject.dateOfSubmission)}</td>
+                <td className="px-6 py-4 whitespace-nowrap">{formatDateForDisplay(fundedProject.dateOfApproval)}</td>
                 <td className="px-6 py-4 whitespace-nowrap">{fundedProject.fundingSource}</td>
                 <td className="px-6 py-4 whitespace-nowrap">{fundedProject.pkr.toLocaleString()}</td>
                 <td className="px-6 py-4 whitespace-nowrap">{fundedProject.team}</td>
                 <td className="px-6 py-4 whitespace-nowrap">{fundedProject.status}</td>
-                <td className="px-6 py-4 whitespace-nowrap">{fundedProject.closingDate}</td>
+                <td className="px-6 py-4 whitespace-nowrap">{formatDateForDisplay(fundedProject.closingDate)}</td>
                 <td className="px-6 py-4 whitespace-nowrap">{fundedProject.targetSDG ? fundedProject.targetSDG.join(', ') : 'N/A'}</td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   {fundedProject.fileLink ? (

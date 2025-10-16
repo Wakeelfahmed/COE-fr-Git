@@ -100,6 +100,16 @@ const EventsView = () => {
     }
   };
 
+  // Helper function to format dates for display (dd-mm-year format)
+  const formatDateForDisplay = (dateString) => {
+    if (!dateString) return 'N/A';
+    const date = new Date(dateString);
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}-${month}-${year}`;
+  };
+
 
 
 
@@ -142,7 +152,18 @@ const EventsView = () => {
 
   const handleEditEvent = (event) => {
     setIsEditMode(true);
-    setCurrentEvent(event);
+
+    // Format dates for HTML date inputs (YYYY-MM-DD format)
+    const formatDateForInput = (dateString) => {
+      if (!dateString) return '';
+      const date = new Date(dateString);
+      return date.toISOString().split('T')[0]; // Convert to YYYY-MM-DD format
+    };
+
+    setCurrentEvent({
+      ...event,
+      date: formatDateForInput(event.date)
+    });
     setShowModal(true);
   };
 
@@ -421,7 +442,7 @@ const EventsView = () => {
                 <td className="px-6 py-4 whitespace-nowrap">{event.participants}</td>
                 <td className="px-6 py-4 whitespace-nowrap">{event.mode}</td>
                 <td className="px-6 py-4 whitespace-nowrap">{event.venue}</td>
-                <td className="px-6 py-4 whitespace-nowrap">{event.date ? new Date(event.date).toLocaleDateString() : 'N/A'}</td>
+                <td className="px-6 py-4 whitespace-nowrap">{formatDateForDisplay(event.date)}</td>
                 <td className="px-6 py-4 whitespace-nowrap">{event.targetSDG ? event.targetSDG.join(', ') : 'N/A'}</td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   {event.fileLink ? (

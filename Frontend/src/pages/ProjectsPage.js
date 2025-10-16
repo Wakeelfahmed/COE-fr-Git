@@ -158,6 +158,16 @@ const ProjectsView = () => {
     }
   };
 
+  // Helper function to format dates for display (dd-mm-year format)
+  const formatDateForDisplay = (dateString) => {
+    if (!dateString) return 'N/A';
+    const date = new Date(dateString);
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}-${month}-${year}`;
+  };
+
 
 
 
@@ -202,9 +212,22 @@ const ProjectsView = () => {
 
   const handleEditProject = (project) => {
     setIsEditMode(true);
+
+    // Format dates for HTML date inputs (YYYY-MM-DD format)
+    const formatDateForInput = (dateString) => {
+      if (!dateString) return '';
+      const date = new Date(dateString);
+      return date.toISOString().split('T')[0]; // Convert to YYYY-MM-DD format
+    };
+
     setCurrentProject({
       ...project,
-      rndTeam: project.rndTeam.join(', ')
+      rndTeam: project.rndTeam.join(', '),
+      dateOfContractSign: formatDateForInput(project.dateOfContractSign),
+      dateOfDeploymentAsPerContract: formatDateForInput(project.dateOfDeploymentAsPerContract),
+      dateOfReceivingAdvancePayment: formatDateForInput(project.dateOfReceivingAdvancePayment),
+      actualDateOfDeployment: formatDateForInput(project.actualDateOfDeployment),
+      dateOfReceivingCompletePayment: formatDateForInput(project.dateOfReceivingCompletePayment)
     });
     setShowModal(true);
   };
@@ -443,13 +466,13 @@ const ProjectsView = () => {
                 <td className="px-6 py-4 whitespace-nowrap">{project.teamLead || 'N/A'}</td>
                 <td className="px-6 py-4 whitespace-nowrap">{project.rndTeam ? project.rndTeam.join(', ') : 'N/A'}</td>
                 <td className="px-6 py-4 whitespace-nowrap">{project.clientCompany || 'N/A'}</td>
-                <td className="px-6 py-4 whitespace-nowrap">{project.dateOfContractSign || 'N/A'}</td>
-                <td className="px-6 py-4 whitespace-nowrap">{project.dateOfDeploymentAsPerContract || 'N/A'}</td>
+                <td className="px-6 py-4 whitespace-nowrap">{formatDateForDisplay(project.dateOfContractSign)}</td>
+                <td className="px-6 py-4 whitespace-nowrap">{formatDateForDisplay(project.dateOfDeploymentAsPerContract)}</td>
                 <td className="px-6 py-4 whitespace-nowrap">{project.amountInPKRM ? project.amountInPKRM.toLocaleString() : 'N/A'}</td>
                 <td className="px-6 py-4 whitespace-nowrap">{project.advPaymentPercentage ? project.advPaymentPercentage + '%' : 'N/A'}</td>
-                <td className="px-6 py-4 whitespace-nowrap">{project.dateOfReceivingAdvancePayment || 'N/A'}</td>
-                <td className="px-6 py-4 whitespace-nowrap">{project.actualDateOfDeployment || 'N/A'}</td>
-                <td className="px-6 py-4 whitespace-nowrap">{project.dateOfReceivingCompletePayment || 'N/A'}</td>
+                <td className="px-6 py-4 whitespace-nowrap">{formatDateForDisplay(project.dateOfReceivingAdvancePayment)}</td>
+                <td className="px-6 py-4 whitespace-nowrap">{formatDateForDisplay(project.actualDateOfDeployment)}</td>
+                <td className="px-6 py-4 whitespace-nowrap">{formatDateForDisplay(project.dateOfReceivingCompletePayment)}</td>
                 <td className="px-6 py-4 whitespace-nowrap">{project.taxPaidBy || 'N/A'}</td>
                 <td className="px-6 py-4 whitespace-nowrap">{project.targetSDG ? project.targetSDG.join(', ') : 'N/A'}</td>
                 <td className="px-6 py-4 whitespace-nowrap">{project.remarks || 'N/A'}</td>

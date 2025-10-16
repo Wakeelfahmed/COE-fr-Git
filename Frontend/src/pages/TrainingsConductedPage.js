@@ -73,7 +73,18 @@ const TrainingsConductedPage = () => {
 
   const handleEditTraining = (training) => {
     setIsEditMode(true);
-    setCurrentTraining(training);
+
+    // Format dates for HTML date inputs (YYYY-MM-DD format)
+    const formatDateForInput = (dateString) => {
+      if (!dateString) return '';
+      const date = new Date(dateString);
+      return date.toISOString().split('T')[0]; // Convert to YYYY-MM-DD format
+    };
+
+    setCurrentTraining({
+      ...training,
+      date: formatDateForInput(training.date)
+    });
     setShowModal(true);
   };
 
@@ -174,6 +185,16 @@ const TrainingsConductedPage = () => {
       console.error('Error saving report:', error);
       alert('Error saving report. Please try again.');
     }
+  };
+
+  // Helper function to format dates for display (dd-mm-year format)
+  const formatDateForDisplay = (dateString) => {
+    if (!dateString) return 'N/A';
+    const date = new Date(dateString);
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}-${month}-${year}`;
   };
 
   const filteredTrainings = trainings.filter(training => {
@@ -334,7 +355,7 @@ const TrainingsConductedPage = () => {
                 <td className="px-6 py-4 whitespace-nowrap">{training.numberOfAttendees || 'N/A'}</td>
                 <td className="px-6 py-4 whitespace-nowrap">{training.organizer}</td>
                 <td className="px-6 py-4 whitespace-nowrap">{training.resourcePersons}</td>
-                <td className="px-6 py-4 whitespace-nowrap">{training.date ? new Date(training.date).toLocaleDateString() : 'N/A'}</td>
+                <td className="px-6 py-4 whitespace-nowrap">{formatDateForDisplay(training.date)}</td>
                 <td className="px-6 py-4 whitespace-nowrap">{training.targetSDG ? training.targetSDG.join(', ') : 'N/A'}</td>
                 <td className="px-6 py-4 whitespace-nowrap">Rs. {training.totalRevenueGenerated?.toLocaleString()}</td>
                 <td className="px-6 py-4 whitespace-nowrap">

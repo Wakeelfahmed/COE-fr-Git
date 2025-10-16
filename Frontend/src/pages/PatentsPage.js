@@ -99,6 +99,16 @@ const PatentsView = () => {
     }
   };
 
+  // Helper function to format dates for display (dd-mm-year format)
+  const formatDateForDisplay = (dateString) => {
+    if (!dateString) return 'N/A';
+    const date = new Date(dateString);
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}-${month}-${year}`;
+  };
+
 
 
 
@@ -142,9 +152,19 @@ const PatentsView = () => {
 
   const handleEditPatent = (patent) => {
     setIsEditMode(true);
+
+    // Format dates for HTML date inputs (YYYY-MM-DD format)
+    const formatDateForInput = (dateString) => {
+      if (!dateString) return '';
+      const date = new Date(dateString);
+      return date.toISOString().split('T')[0]; // Convert to YYYY-MM-DD format
+    };
+
     setCurrentPatent({
       ...patent,
-      coInventor: patent?.coInventor?.join(', ')
+      coInventor: patent?.coInventor?.join(', '),
+      dateOfSubmission: formatDateForInput(patent.dateOfSubmission),
+      dateOfApproval: formatDateForInput(patent.dateOfApproval)
     });
     setShowModal(true);
   };
@@ -383,11 +403,11 @@ const PatentsView = () => {
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">{patent.patentOrg || '-'}</td>
                 <td className="px-6 py-4 whitespace-nowrap">{patent.affiliationOfCoInventor || '-'}</td>
-                <td className="px-6 py-4 whitespace-nowrap">{patent.dateOfSubmission || 'N/A'}</td>
+                <td className="px-6 py-4 whitespace-nowrap">{formatDateForDisplay(patent.dateOfSubmission)}</td>
                 <td className="px-6 py-4 whitespace-nowrap">{patent.scope || 'N/A'}</td>
                 <td className="px-6 py-4 whitespace-nowrap">{patent.directoryNumber || 'N/A'}</td>
                 <td className="px-6 py-4 whitespace-nowrap">{patent.patentNumber || 'N/A'}</td>
-                <td className="px-6 py-4 whitespace-nowrap">{patent.dateOfApproval || 'N/A'}</td>
+                <td className="px-6 py-4 whitespace-nowrap">{formatDateForDisplay(patent.dateOfApproval)}</td>
                 <td className="px-6 py-4 whitespace-nowrap">{patent.targetSDG ? patent.targetSDG.join(', ') : 'N/A'}</td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   {patent.fileLink ? (
