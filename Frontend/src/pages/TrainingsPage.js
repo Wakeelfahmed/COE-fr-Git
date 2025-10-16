@@ -54,7 +54,6 @@ const EventsView = () => {
     agenda: '',
     followUpActivity: '',
     resourcePerson: '',
-    venue: '',
     targetSDG: [],
     fileLink: ''
   });
@@ -64,7 +63,6 @@ const EventsView = () => {
     title: '',
     resourcePerson: '',
     mode: '',
-    venue: '',
     dateFrom: '',
     dateTo: ''
   });
@@ -143,7 +141,6 @@ const EventsView = () => {
       agenda: '',
       followUpActivity: '',
       resourcePerson: '',
-      venue: '',
       targetSDG: [],
       fileLink: ''
     });
@@ -225,7 +222,6 @@ const EventsView = () => {
       title: '',
       resourcePerson: '',
       mode: '',
-      venue: '',
       dateFrom: '',
       dateTo: ''
     });
@@ -289,20 +285,17 @@ const EventsView = () => {
     const evTitle = (event.title || '').toLowerCase();
     const evResource = (event.resourcePerson || '').toLowerCase();
     const evMode = (event.mode || '').toLowerCase();
-    const evVenue = (event.venue || '').toLowerCase();
 
     const fcType = (filterCriteria.type || '').toLowerCase();
     const fcTitle = (filterCriteria.title || '').toLowerCase();
     const fcResource = (filterCriteria.resourcePerson || '').toLowerCase();
     const fcMode = (filterCriteria.mode || '').toLowerCase();
-    const fcVenue = (filterCriteria.venue || '').toLowerCase();
 
     const passTextFilters =
       evType.includes(fcType) &&
       evTitle.includes(fcTitle) &&
       evResource.includes(fcResource) &&
-      evMode.includes(fcMode) &&
-      evVenue.includes(fcVenue);
+      evMode.includes(fcMode);
 
     // Date filters (handle undefined dates safely)
     const hasFrom = !!filterCriteria.dateFrom;
@@ -341,7 +334,7 @@ const EventsView = () => {
 
       {showFilters && (
         <div className="mb-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-2 mb-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2 mb-2">
             <select
               name="type"
               value={filterCriteria.type}
@@ -379,14 +372,6 @@ const EventsView = () => {
               <option value="Onsite">Onsite</option>
               <option value="Online">Online</option>
             </select>
-            <input
-              type="text"
-              placeholder="Filter by Venue"
-              name="venue"
-              value={filterCriteria.venue}
-              onChange={handleFilterChange}
-              className="border rounded px-2 py-1"
-            />
             <label for="dateFrom">From Event Date:</label>
             <input
               type="date"
@@ -425,7 +410,6 @@ const EventsView = () => {
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Resource Person</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Participants</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mode</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Venue</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Target SDG</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">File</th>
@@ -441,7 +425,6 @@ const EventsView = () => {
                 <td className="px-6 py-4 whitespace-nowrap">{event.resourcePerson}</td>
                 <td className="px-6 py-4 whitespace-nowrap">{event.participants}</td>
                 <td className="px-6 py-4 whitespace-nowrap">{event.mode}</td>
-                <td className="px-6 py-4 whitespace-nowrap">{event.venue}</td>
                 <td className="px-6 py-4 whitespace-nowrap">{formatDateForDisplay(event.date)}</td>
                 <td className="px-6 py-4 whitespace-nowrap">{event.targetSDG ? event.targetSDG.join(', ') : 'N/A'}</td>
                 <td className="px-6 py-4 whitespace-nowrap">
@@ -606,19 +589,6 @@ const EventsView = () => {
                     id="resourcePerson"
                     name="resourcePerson"
                     value={currentEvent.resourcePerson}
-                    onChange={handleInputChange}
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                  />
-                </div>
-                <div className="mb-4">
-                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="venue">
-                    Venue
-                  </label>
-                  <input
-                    type="text"
-                    id="venue"
-                    name="venue"
-                    value={currentEvent.venue}
                     onChange={handleInputChange}
                     className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                   />

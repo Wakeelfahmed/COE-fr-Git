@@ -394,7 +394,7 @@ const EventsPage = () => {
               </div>
               <div className="mb-4">
                 <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="participantsOfEvent">
-                  Participants of Event <span className="text-gray-500 font-normal">(Student/Faculty)</span>
+                  Participants of Event <span className="text-gray-500 font-normal">(Student, Faculty, Industry etc)</span>
                 </label>
                 <input
                   type="text"

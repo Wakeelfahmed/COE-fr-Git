@@ -1,38 +1,14 @@
 const mongoose = require('mongoose');
 
 const eventSchema = new mongoose.Schema({
-  type: {
+  activity: {
     type: String,
     required: true,
     trim: true
   },
-  title: {
+  organizer: {
     type: String,
     required: true,
-    trim: true
-  },
-  participants: {
-    type: String,
-    required: true,
-    trim: true
-  },
-  mode: {
-    type: String,
-    required: true,
-    trim: true
-  },
-  date: {
-    type: Date,
-    required: true
-  },
-  agenda: {
-    type: String,
-    required: false,
-    trim: true
-  },
-  followUpActivity: {
-    type: String,
-    required: false,
     trim: true
   },
   resourcePerson: {
@@ -40,19 +16,30 @@ const eventSchema = new mongoose.Schema({
     required: true,
     trim: true
   },
-  venue: {
+  role: {
     type: String,
     required: true,
     trim: true
   },
-  targetSDG: {
-    type: [String],
+  otherRole: {
+    type: String,
     required: false,
     trim: true
   },
-  fileLink: {
+  type: {
     type: String,
-    required: false
+    required: true,
+    trim: true
+  },
+  participantsOfEvent: {
+    type: String,
+    required: true,
+    trim: true
+  },
+  nameOfAttendee: {
+    type: String,
+    required: true,
+    trim: true
   },
   createdBy: {
     type: mongoose.Schema.Types.ObjectId,
