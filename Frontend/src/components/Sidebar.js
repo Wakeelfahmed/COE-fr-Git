@@ -6,7 +6,7 @@ import { auth } from '../firebaseConfig';
 
 
 const activityItems = [
-  { name: 'Talks/Training Attended', path: '/trainings' },
+  { name: 'Talks/Training Attended', path: '/TalkTrainingConference' },
   { name: 'Internships', path: '/internships' },
   { name: 'Events', path: '/events' },
   { name: 'Trainings Conducted', path: '/trainings-conducted' },
@@ -14,7 +14,7 @@ const activityItems = [
 
 const otherItems = [
   { name: 'Industry/Commercial Projects', path: '/' },
-  { name: 'Foreign Collaboration', path: '/Collaborations' },
+  { name: 'Collaboration', path: '/collaborations' },
   { name: 'Local Collaborations', path: '/local-collaborations' },
   { name: 'Achievements', path: '/achievements' },
   { name: 'Patents', path: '/patents' },

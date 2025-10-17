@@ -8,6 +8,7 @@ const Patent = require('../models/Patent');
 const Training = require('../models/Training');
 const Collaboration = require('../models/Collaboration');
 const Achievement = require('../models/Achievement');
+const TalkTrainingConference = require('../models/TalkTrainingConference');
 const jwt = require('jsonwebtoken');
 
 
@@ -78,6 +79,9 @@ exports.createReport = async (req, res) => {
         break;
       case 'Trainings':
         reportData = await Training.find(filter);
+        break;
+      case 'TalksTrainingsAttended':
+        reportData = await TalkTrainingConference.find(filter);
         break;
       case 'Collaborations':
         reportData = await Collaboration.find(filter);

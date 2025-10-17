@@ -7,7 +7,7 @@ import Login from './components/Login';
 import Signup from './components/Signup';
 import Profile from './components/Profile';
 import ProjectsPage from './pages/ProjectsPage';
-import TrainingsPage from './pages/TrainingsPage';
+import TrainingsPage from './pages/TalkTrainingConferencePage';
 import InternshipsPage from './pages/InternshipsPage';
 import EventsPage from './pages/EventsPage';
 import PatentsPage from './pages/PatentsPage';
@@ -15,7 +15,7 @@ import FundingsPage from './pages/FundingsPage';
 import FundingProposalsPage from './pages/FundingProposalsPage';
 import PublicationsPage from './pages/PublicationsPage';
 import ReportsPage from './pages/ReportsPage';
-import ForeignCollaborationPage from './pages/ForeignCollaborationPage';
+import CollaborationPage from './pages/ForeignCollaborationPage';
 import AchievementsPage from './pages/AchievementsPage';
 import TrainingsConductedPage from './pages/TrainingsConductedPage';
 import LocalCollaborationPage from './pages/LocalCollaborationPage';
@@ -84,11 +84,11 @@ function App() {
                 <Routes>
                   <Route path="/profile" element={<Profile />} />
                   <Route path="/projects" element={<ProjectsPage />} />
-                  <Route path="/trainings" element={<TrainingsPage />} />
+                  <Route path="/TalkTrainingConference" element={<TrainingsPage />} />
                   <Route path="/internships" element={<InternshipsPage />} />
                   <Route path="/events" element={<EventsPage />} />
                   <Route path="/trainings-conducted" element={<TrainingsConductedPage />} />
-                  <Route path="/Collaborations" element={<ForeignCollaborationPage />} />
+                  <Route path="/collaborations" element={<CollaborationPage />} />
                   <Route path="/local-collaborations" element={<LocalCollaborationPage />} />
                   <Route path="/achievements" element={<AchievementsPage />} />
                   <Route path="/patents" element={<PatentsPage />} />

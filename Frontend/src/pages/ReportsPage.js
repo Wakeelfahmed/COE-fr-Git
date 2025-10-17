@@ -17,6 +17,38 @@ const ReportsView = () => {
     fetchReports();
   }, [showOnlyMine]);
 
+  // Helper function to check if a field is likely a date field (but not created/updated timestamps)
+  const isDateField = (fieldName) => {
+    // Exclude createdAt and updatedAt - these should show time
+    if (fieldName.toLowerCase() === 'createdat' || fieldName.toLowerCase() === 'updatedat') {
+      return false;
+    }
+
+    const dateFields = [
+      'date', 'start', 'end', 'duration', 'published',
+      'startDate', 'endDate', 'publishDate', 'durationStart', 'durationEnd'
+    ];
+    return dateFields.some(dateField => fieldName.toLowerCase().includes(dateField.toLowerCase()));
+  };
+
+  // Helper function to format date as DD-MM-YYYY
+  const formatDate = (dateString) => {
+    if (!dateString || typeof dateString !== 'string') return dateString;
+
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return dateString; // Return original if not a valid date
+
+      const day = String(date.getDate()).padStart(2, '0');
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const year = date.getFullYear();
+
+      return `${day}-${month}-${year}`;
+    } catch (error) {
+      return dateString; // Return original if formatting fails
+    }
+  };
+
   const fetchReports = async () => {
     try {
       const response = await axios.get(`${API_BASE_URL}/reports`, {
@@ -54,7 +86,13 @@ const ReportsView = () => {
       return <p>No report data available</p>;
     }
 
-    const headers = Object.keys(data[0]).filter(key => key !== '_id');
+    // Check if first item exists and has valid data
+    const firstItem = data[0];
+    if (!firstItem || typeof firstItem !== 'object') {
+      return <p>No report data available</p>;
+    }
+
+    const headers = Object.keys(firstItem).filter(key => key !== '_id');
 
     return (
       <div className="overflow-x-auto">
@@ -69,9 +107,19 @@ const ReportsView = () => {
           <tbody>
             {data.map((row, index) => (
               <tr key={index} className={index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}>
-                {headers.map((header) => (
-                  <td key={header} className="py-2 px-4 border-b">{row[header]}</td>
-                ))}
+                {headers.map((header) => {
+                  const cellValue = row[header];
+                  const displayValue = cellValue !== null && cellValue !== undefined ? cellValue.toString() : '';
+
+                  // Format date fields
+                  const formattedValue = isDateField(header) ? formatDate(displayValue) : displayValue;
+
+                  return (
+                    <td key={header} className="py-2 px-4 border-b">
+                      {formattedValue}
+                    </td>
+                  );
+                })}
               </tr>
             ))}
           </tbody>
@@ -115,30 +163,39 @@ const ReportsView = () => {
     yPos = addWrappedText('Report Data:', yPos + 15);
 
     if (Array.isArray(selectedReport.reportData) && selectedReport.reportData.length > 0) {
-      const headers = Object.keys(selectedReport.reportData[0]).filter(key => key !== '_id');
-      const data = selectedReport.reportData.map(row => 
-        headers.map(header => {
-          const cellData = row[header];
-          return cellData !== null && cellData !== undefined ? cellData.toString() : '';
-        })
-      );
+      // Check if first item exists and has valid data
+      const firstItem = selectedReport.reportData[0];
+      if (firstItem && typeof firstItem === 'object') {
+        const headers = Object.keys(firstItem).filter(key => key !== '_id');
+        const data = selectedReport.reportData.map(row =>
+          headers.map(header => {
+            const cellData = row[header];
+            const displayValue = cellData !== null && cellData !== undefined ? cellData.toString() : '';
 
-      doc.autoTable({
-        head: [headers],
-        body: data,
-        startY: yPos + 10,
-        margin: { left: marginX, right: marginX },
-        styles: { fontSize: 8, cellPadding: 2 },
-        columnStyles: headers.reduce((acc, header, index) => {
-          acc[index] = { cellWidth: 'auto' };
-          return acc;
-        }, {}),
-        didDrawPage: (data) => {
-          // Footer with page number
-          doc.setFontSize(8);
-          doc.text(`Page ${data.pageNumber}`, marginX, pageHeight - 20);
-        },
-      });
+            // Format date fields for PDF
+            return isDateField(header) ? formatDate(displayValue) : displayValue;
+          })
+        );
+
+        doc.autoTable({
+          head: [headers],
+          body: data,
+          startY: yPos + 10,
+          margin: { left: marginX, right: marginX },
+          styles: { fontSize: 8, cellPadding: 2 },
+          columnStyles: headers.reduce((acc, header, index) => {
+            acc[index] = { cellWidth: 'auto' };
+            return acc;
+          }, {}),
+          didDrawPage: (data) => {
+            // Footer with page number
+            doc.setFontSize(8);
+            doc.text(`Page ${data.pageNumber}`, marginX, pageHeight - 20);
+          },
+        });
+      } else {
+        yPos = addWrappedText('No valid report data available', yPos + 10);
+      }
     } else {
       yPos = addWrappedText('No report data available', yPos + 10);
     }
@@ -148,11 +205,27 @@ const ReportsView = () => {
   };
 
   const prepareCSVData = () => {
-    if (!selectedReport || !Array.isArray(selectedReport.reportData)) return [];
-    
-    const headers = Object.keys(selectedReport.reportData[0]).filter(key => key !== '_id');
-    const csvData = [headers, ...selectedReport.reportData.map(row => headers.map(header => row[header]))];
-    
+    if (!selectedReport || !Array.isArray(selectedReport.reportData) || selectedReport.reportData.length === 0) {
+      return [];
+    }
+
+    // Check if first item exists and has valid data
+    const firstItem = selectedReport.reportData[0];
+    if (!firstItem || typeof firstItem !== 'object') {
+      return [];
+    }
+
+    const headers = Object.keys(firstItem).filter(key => key !== '_id');
+    const csvData = [headers, ...selectedReport.reportData.map(row =>
+      headers.map(header => {
+        const cellData = row[header];
+        const displayValue = cellData !== null && cellData !== undefined ? cellData.toString() : '';
+
+        // Format date fields for CSV
+        return isDateField(header) ? formatDate(displayValue) : displayValue;
+      })
+    )];
+
     return csvData;
   };
 

@@ -172,7 +172,7 @@ const countries = [
   { value: "Zimbabwe", label: "Zimbabwe" }
 ];
 
-const ForeignCollaborationPage = () => {
+const CollaborationPage = () => {
   const [collaborations, setCollaborations] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [currentCollaboration, setCurrentCollaboration] = useState({
@@ -180,6 +180,7 @@ const ForeignCollaborationPage = () => {
     collaboratingForeignResearcher: '',
     foreignCollaboratingInstitute: '',
     collaboratingCountry: '',
+    collaborationScope: 'foreign', // Default to foreign since this is Foreign Collaboration page
     typeOfCollaboration: '',
     otherTypeDescription: '',
     durationStart: '',
@@ -197,9 +198,10 @@ const ForeignCollaborationPage = () => {
   const [reportTitle, setReportTitle] = useState('');
   const [filterCriteria, setFilterCriteria] = useState({
     memberOfCoE: '',
-    foreignResearcher: '',
-    country: '',
-    status: ''
+    collaboratingForeignResearcher: '', // Changed from 'foreignResearcher'
+    collaboratingCountry: '', // Changed from 'country'
+    currentStatus: '', // Changed from 'status'
+    collaborationScope: ''
   });
 
   useEffect(() => {
@@ -225,6 +227,7 @@ const ForeignCollaborationPage = () => {
       collaboratingForeignResearcher: '',
       foreignCollaboratingInstitute: '',
       collaboratingCountry: '',
+      collaborationScope: 'foreign', // Default to foreign
       typeOfCollaboration: '',
       otherTypeDescription: '',
       durationStart: '',
@@ -240,6 +243,8 @@ const ForeignCollaborationPage = () => {
     setIsEditMode(true);
     setCurrentCollaboration({
       ...collaboration,
+      // Set default collaborationScope if not present (for backward compatibility)
+      collaborationScope: collaboration.collaborationScope || 'foreign',
       durationStart: collaboration.durationStart ? new Date(collaboration.durationStart).toISOString().split('T')[0] : '',
       durationEnd: collaboration.durationEnd ? new Date(collaboration.durationEnd).toISOString().split('T')[0] : ''
     });
@@ -248,16 +253,37 @@ const ForeignCollaborationPage = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setCurrentCollaboration(prev => ({ ...prev, [name]: value }));
+
+    if (name === 'collaborationScope' && value === 'local') {
+      // Clear country when switching to local
+      setCurrentCollaboration(prev => ({
+        ...prev,
+        [name]: value,
+        collaboratingCountry: '' // Clear country field
+      }));
+    } else {
+      setCurrentCollaboration(prev => ({ ...prev, [name]: value }));
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Prepare the data based on collaboration scope
+    const submissionData = {
+      ...currentCollaboration
+    };
+
+    // Remove country field if it's a local collaboration
+    if (currentCollaboration.collaborationScope === 'local') {
+      delete submissionData.collaboratingCountry;
+    }
+
     try {
       if (isEditMode) {
-        await axios.put(`${API_BASE_URL}/collaborations/${currentCollaboration._id}`, currentCollaboration);
+        await axios.put(`${API_BASE_URL}/collaborations/${currentCollaboration._id}`, submissionData);
       } else {
-        await axios.post(`${API_BASE_URL}/collaborations`, currentCollaboration);
+        await axios.post(`${API_BASE_URL}/collaborations`, submissionData);
       }
       setShowModal(false);
       fetchCollaborations();
@@ -291,9 +317,10 @@ const ForeignCollaborationPage = () => {
   const clearFilters = () => {
     setFilterCriteria({
       memberOfCoE: '',
-      foreignResearcher: '',
-      country: '',
-      status: ''
+      collaboratingForeignResearcher: '',
+      collaboratingCountry: '',
+      currentStatus: '',
+      collaborationScope: ''
     });
   };
 
@@ -323,16 +350,31 @@ const ForeignCollaborationPage = () => {
   };
 
   const filteredCollaborations = collaborations.filter(collab => {
-    return collab.memberOfCoE.toLowerCase().includes(filterCriteria.memberOfCoE.toLowerCase()) &&
-           collab.collaboratingForeignResearcher.toLowerCase().includes(filterCriteria.foreignResearcher.toLowerCase()) &&
-           collab.collaboratingCountry.toLowerCase().includes(filterCriteria.country.toLowerCase()) &&
-           collab.currentStatus.toLowerCase().includes(filterCriteria.status.toLowerCase());
+    // Text filters
+    const passTextFilters =
+      (collab.memberOfCoE || '').toLowerCase().includes((filterCriteria.memberOfCoE || '').toLowerCase()) &&
+      (collab.collaboratingForeignResearcher || '').toLowerCase().includes((filterCriteria.foreignResearcher || '').toLowerCase()) &&
+      (collab.collaboratingCountry || '').toLowerCase().includes((filterCriteria.country || '').toLowerCase()) &&
+      (collab.currentStatus || '').toLowerCase().includes((filterCriteria.status || '').toLowerCase()) &&
+      (filterCriteria.collaborationScope === '' || (collab.collaborationScope || 'foreign') === filterCriteria.collaborationScope);
+
+    // Date filters (handle undefined dates safely)
+    const hasFrom = !!filterCriteria.dateFrom;
+    const hasTo = !!filterCriteria.dateTo;
+    const collabDate = collab.durationStart ? new Date(collab.durationStart) : null;
+    const fromDate = hasFrom ? new Date(filterCriteria.dateFrom) : null;
+    const toDate = hasTo ? new Date(filterCriteria.dateTo) : null;
+
+    const passFrom = !hasFrom || (collabDate && collabDate >= fromDate);
+    const passTo = !hasTo || (collabDate && collabDate <= toDate);
+
+    return passTextFilters && passFrom && passTo;
   });
 
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-bold">Foreign Collaboration</h2>
+        <h2 className="text-xl font-bold">Collaboration</h2>
         <div>
           <button onClick={handleNewCollaboration} className="bg-blue-600 text-white px-4 py-2 rounded mr-2">
             New Collaboration
@@ -353,7 +395,7 @@ const ForeignCollaborationPage = () => {
 
       {showFilters && (
         <div className="mb-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 mb-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2 mb-2">
             <input
               type="text"
               placeholder="Filter by Member of CoE"
@@ -365,27 +407,59 @@ const ForeignCollaborationPage = () => {
             <input
               type="text"
               placeholder="Filter by Foreign Researcher"
-              name="foreignResearcher"
-              value={filterCriteria.foreignResearcher}
-              onChange={handleFilterChange}
-              className="border rounded px-2 py-1"
-            />
-            <input
-              type="text"
-              placeholder="Filter by Country"
-              name="country"
-              value={filterCriteria.country}
+              name="collaboratingForeignResearcher"
+              value={filterCriteria.collaboratingForeignResearcher}
               onChange={handleFilterChange}
               className="border rounded px-2 py-1"
             />
             <input
               type="text"
               placeholder="Filter by Status"
-              name="status"
-              value={filterCriteria.status}
+              name="currentStatus"
+              value={filterCriteria.currentStatus}
               onChange={handleFilterChange}
               className="border rounded px-2 py-1"
             />
+            <label for="dateFrom">From Start Date:</label>
+            <input
+              type="date"
+              placeholder="From Date"
+              name="dateFrom"
+              value={filterCriteria.dateFrom}
+              onChange={handleFilterChange}
+              className="border rounded px-2 py-1"
+            />
+            <label for="dateTo">To Start Date:</label>
+            <input
+              id="dateTo"
+              type="date"
+              name="dateTo"
+              value={filterCriteria.dateTo}
+              onChange={handleFilterChange}
+              className="border rounded px-2 py-1"
+            />
+            <div className="flex gap-2">
+              <select
+                name="collaborationScope"
+                value={filterCriteria.collaborationScope}
+                onChange={handleFilterChange}
+                className="border rounded px-2 py-1 flex-1"
+              >
+                <option value="">All Scopes</option>
+                <option value="local">Local</option>
+                <option value="foreign">Foreign</option>
+              </select>
+              {filterCriteria.collaborationScope === 'foreign' && (
+                <input
+                  type="text"
+                  placeholder="Filter by Country"
+                  name="collaboratingCountry"
+                  value={filterCriteria.collaboratingCountry}
+                  onChange={handleFilterChange}
+                  className="border rounded px-2 py-1 flex-1"
+                />
+              )}
+            </div>
           </div>
           <button onClick={clearFilters} className="bg-gray-300 text-gray-700 px-4 py-2 rounded">
             Clear Filters
@@ -404,6 +478,7 @@ const ForeignCollaborationPage = () => {
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Member of CoE-AI</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Foreign Researcher</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Foreign Institute</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Scope</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Country</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Duration</th>
@@ -418,7 +493,16 @@ const ForeignCollaborationPage = () => {
                 <td className="px-6 py-4 whitespace-nowrap">{collab.memberOfCoE}</td>
                 <td className="px-6 py-4 whitespace-nowrap">{collab.collaboratingForeignResearcher}</td>
                 <td className="px-6 py-4 whitespace-nowrap">{collab.foreignCollaboratingInstitute}</td>
-                <td className="px-6 py-4 whitespace-nowrap">{collab.collaboratingCountry}</td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
+                    (collab.collaborationScope || 'foreign') === 'foreign'
+                      ? 'bg-blue-100 text-blue-800'
+                      : 'bg-green-100 text-green-800'
+                  }`}>
+                    {(collab.collaborationScope || 'foreign') === 'foreign' ? 'Foreign' : 'Local'}
+                  </span>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">{collab.collaboratingCountry || 'N/A'}</td>
                 <td className="px-6 py-4 whitespace-nowrap">{collab.typeOfCollaboration}</td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   {new Date(collab.durationStart).toLocaleDateString()} - {collab.durationEnd ? new Date(collab.durationEnd).toLocaleDateString() : 'Ongoing'}
@@ -485,23 +569,41 @@ const ForeignCollaborationPage = () => {
                   />
                 </div>
                 <div className="mb-4">
-                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="collaboratingCountry">
-                    Collaborating Country
+                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="collaborationScope">
+                    Collaboration Scope
                   </label>
-                  <Select
-                    id="collaboratingCountry"
-                    name="collaboratingCountry"
-                    value={countries.find(c => c.value === currentCollaboration.collaboratingCountry)}
-                    onChange={(selectedOption) => handleInputChange({ target: { name: 'collaboratingCountry', value: selectedOption ? selectedOption.value : '' } })}
-                    options={countries}
-                    isSearchable={true}
-                    placeholder="Select or search country..."
-                    className="react-select-container"
-                    classNamePrefix="react-select"
-                    isClearable
+                  <select
+                    id="collaborationScope"
+                    name="collaborationScope"
+                    value={currentCollaboration.collaborationScope}
+                    onChange={handleInputChange}
+                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                     required
-                  />
+                  >
+                    <option value="local">Local</option>
+                    <option value="foreign">Foreign</option>
+                  </select>
                 </div>
+                {currentCollaboration.collaborationScope === 'foreign' && (
+                  <div className="mb-4">
+                    <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="collaboratingCountry">
+                      Collaborating Country
+                    </label>
+                    <Select
+                      id="collaboratingCountry"
+                      name="collaboratingCountry"
+                      value={countries.find(c => c.value === currentCollaboration.collaboratingCountry)}
+                      onChange={(selectedOption) => handleInputChange({ target: { name: 'collaboratingCountry', value: selectedOption ? selectedOption.value : '' } })}
+                      options={countries}
+                      isSearchable={true}
+                      placeholder="Select or search country..."
+                      className="react-select-container"
+                      classNamePrefix="react-select"
+                      isClearable
+                      required={currentCollaboration.collaborationScope === 'foreign'}
+                    />
+                  </div>
+                )}
                 <div className="mb-4">
                   <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="typeOfCollaboration">
                     Type of Collaboration
@@ -694,4 +796,4 @@ const ForeignCollaborationPage = () => {
   );
 };
 
-export default ForeignCollaborationPage;
+export default CollaborationPage;

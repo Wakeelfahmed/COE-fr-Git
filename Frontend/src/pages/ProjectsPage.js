@@ -10,20 +10,36 @@ const API_BASE_URL = process.env.REACT_APP_BACKEND;
 const uploadPdf = async (file, userId) => {
   if (!file) return;
 
+  console.log('=== UPLOAD PDF DEBUG ===');
+  console.log('File:', file);
+  console.log('File name:', file.name);
+  console.log('File size:', file.size);
+  console.log('File type:', file.type);
+  console.log('User ID:', userId);
+  console.log('Storage bucket:', storage.app.options.storageBucket);
+
   try {
     // Create a reference to the file location in storage
     const fileRef = ref(storage, `pdfs/${userId}/${file.name}`);
+    console.log('File reference path:', fileRef.fullPath);
 
     // Upload the file
+    console.log('Starting upload...');
     await uploadBytes(fileRef, file);
 
     // Get the file's download URL
+    console.log('Getting download URL...');
     const downloadURL = await getDownloadURL(fileRef);
-
+    console.log('Upload successful!');
     console.log("File uploaded successfully. Download URL:", downloadURL);
     return downloadURL; // Return the URL for use (e.g., saving in the database)
   } catch (error) {
-    console.error("Error uploading file:", error);
+    console.error("=== UPLOAD ERROR DETAILS ===");
+    console.error("Error name:", error.name);
+    console.error("Error code:", error.code);
+    console.error("Error message:", error.message);
+    console.error("Error stack:", error.stack);
+    console.error("Full error object:", error);
     throw error; // Handle error appropriately in your app
   }
 };
@@ -128,6 +144,13 @@ const ProjectsView = () => {
 
   const { user } = useUser();
   const [showOnlyMine, setShowOnlyMine] = useState(false);
+
+  console.log('=== FIREBASE DEBUG ===');
+  console.log('Firebase storage initialized:', !!storage);
+  console.log('Storage bucket:', storage?.app?.options?.storageBucket);
+  console.log('User object:', user);
+  console.log('User ID:', user?.id);
+  console.log('User email:', user?.email);
 
 
 
@@ -299,9 +322,19 @@ const ProjectsView = () => {
 
   const handleFileChange = (event, projectId) => {
     const file = event.target.files[0];
+    console.log('=== FILE CHANGE DEBUG ===');
+    console.log('Project ID:', projectId);
+    console.log('Selected files:', event.target.files);
+    console.log('Selected file:', file);
+
     if (file && file.type === 'application/pdf') {
+      console.log('Valid PDF file selected:', file.name);
       setSelectedFiles(prev => ({ ...prev, [projectId]: file }));
+      console.log('File added to selectedFiles state');
     } else {
+      console.error('Invalid file selected or no file selected');
+      console.error('File:', file);
+      console.error('File type:', file?.type);
       alert('Please select a PDF file');
       event.target.value = null;
     }
@@ -310,33 +343,56 @@ const ProjectsView = () => {
   const handleFileUpload = async (projectId) => {
     const file = selectedFiles[projectId];
     if (!file) {
+      console.error('No file selected for project ID:', projectId);
       alert('Please select a file first');
       return;
     }
+
+    console.log('=== FILE UPLOAD DEBUG ===');
+    console.log('Project ID:', projectId);
+    console.log('Selected file:', file);
+    console.log('File name:', file.name);
+    console.log('File size:', file.size);
+    console.log('User ID:', user?.uid);
+    console.log('User object:', user);
+
     try {
-      const fileUrl = await uploadPdf(file, user?.id);
+      console.log('Calling uploadPdf...');
+      const fileUrl = await uploadPdf(file, user?.uid);
+      console.log('File URL received:', fileUrl);
+
+      console.log('Updating project with file URL...');
       await axios.put(`${API_BASE_URL}/projects/${projectId}`, { fileLink: fileUrl });
-      
-      setProjects(prevProjects => 
-        prevProjects.map(project => 
+      console.log('Project updated successfully');
+
+      setProjects(prevProjects =>
+        prevProjects.map(project =>
           project._id === projectId ? { ...project, fileLink: fileUrl } : project
         )
       );
-      
+
       setSelectedFiles(prev => {
         const newState = { ...prev };
         delete newState[projectId];
         return newState;
       });
+
+      console.log('File upload completed successfully');
     } catch (error) {
-      console.error('Error uploading file:', error);
+      console.error('=== FILE UPLOAD ERROR ===');
+      console.error('Error in handleFileUpload:', error);
+      console.error('Error name:', error.name);
+      console.error('Error message:', error.message);
+      console.error('Error status:', error.response?.status);
+      console.error('Error response data:', error.response?.data);
+      console.error('Error stack:', error.stack);
       alert('Error uploading file. Please try again.');
     }
   };
 
   const handleFileDelete = async (projectId, fileName) => {
     try {
-      await deletePdf(user?.id, fileName);
+      await deletePdf(user?.uid, fileName);
       await axios.put(`${API_BASE_URL}/projects/${projectId}`, { fileLink: null });
       
       setProjects(prevProjects => 

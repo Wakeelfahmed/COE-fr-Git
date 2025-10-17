@@ -85,7 +85,7 @@ const EventsView = () => {
     try {
       const response = await axios.post(`${API_BASE_URL}/reports`, {
         title: reportTitle,
-        sourceType: 'Trainings',
+        sourceType: 'TalksTrainingsAttended',
         filterCriteria
       });
       console.log('Report saved:', response.data);
@@ -120,13 +120,13 @@ const EventsView = () => {
 
   const fetchEvents = async () => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/events`, {
+      const response = await axios.get(`${API_BASE_URL}/TalkTrainingConference`, {
         params: { onlyMine: showOnlyMine }
       });
       setEvents(response.data);
     } catch (error) {
-      console.error('Error fetching events:', error);
-      alert('Error fetching events. Please try again.');
+      console.error('Error fetching trainings:', error);
+      alert('Error fetching Talks/Trainings Attended. Please try again.');
     }
   };
 
@@ -183,26 +183,26 @@ const EventsView = () => {
 
     try {
       if (isEditMode) {
-        await axios.put(`${API_BASE_URL}/events/${currentEvent._id}`, eventData);
+        await axios.put(`${API_BASE_URL}/TalkTrainingConference/${currentEvent._id}`, eventData);
       } else {
-        await axios.post(`${API_BASE_URL}/events`, eventData);
+        await axios.post(`${API_BASE_URL}/TalkTrainingConference`, eventData);
       }
       setShowModal(false);
       fetchEvents();
     } catch (error) {
-      console.error('Error saving event:', error);
-      alert('Error saving event. Please try again.');
+      console.error('Error saving training:', error);
+      alert('Error saving training. Please try again.');
     }
   };
 
   const handleDeleteEvent = async (eventId) => {
     if (window.confirm('Are you sure you want to delete this event?')) {
       try {
-        await axios.delete(`${API_BASE_URL}/events/${eventId}`);
+        await axios.delete(`${API_BASE_URL}/TalkTrainingConference/${eventId}`);
         fetchEvents();
       } catch (error) {
-        console.error('Error deleting event:', error);
-        alert('Error deleting event. Please try again.');
+        console.error('Error deleting training:', error);
+        alert('Error deleting training. Please try again.');
       }
     }
   };
@@ -244,8 +244,8 @@ const EventsView = () => {
       return;
     }
     try {
-      const fileUrl = await uploadPdf(file, user?.id);
-      await axios.put(`${API_BASE_URL}/events/${eventId}`, { fileLink: fileUrl });
+      const fileUrl = await uploadPdf(file, user?.uid);
+      await axios.put(`${API_BASE_URL}/TalkTrainingConference/${eventId}`, { fileLink: fileUrl });
       
       setEvents(prevEvents => 
         prevEvents.map(event => 
@@ -266,8 +266,8 @@ const EventsView = () => {
 
   const handleFileDelete = async (eventId, fileName) => {
     try {
-      await deletePdf(user?.id, fileName);
-      await axios.put(`${API_BASE_URL}/events/${eventId}`, { fileLink: null });
+      await deletePdf(user?.uid, fileName);
+      await axios.put(`${API_BASE_URL}/TalkTrainingConference/${eventId}`, { fileLink: null });
       
       setEvents(prevEvents => 
         prevEvents.map(event => 

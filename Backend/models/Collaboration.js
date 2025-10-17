@@ -18,8 +18,16 @@ const collaborationSchema = new mongoose.Schema({
   },
   collaboratingCountry: {
     type: String,
-    required: true,
+    required: function() {
+      return this.collaborationScope === 'foreign';
+    },
     trim: true
+  },
+  collaborationScope: {
+    type: String,
+    required: true,
+    enum: ['local', 'foreign'],
+    default: 'foreign'
   },
   typeOfCollaboration: {
     type: String,

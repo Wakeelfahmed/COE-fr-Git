@@ -1,14 +1,40 @@
 const mongoose = require('mongoose');
 
-const eventSchema = new mongoose.Schema({
-  activity: {
+const talkTrainingConferenceSchema = new mongoose.Schema({
+  type: {
+    type: String,
+    required: true,
+    enum: ['Talk', 'Training', 'Conference'],
+    trim: true
+  },
+  title: {
     type: String,
     required: true,
     trim: true
   },
-  organizer: {
+  participants: {
     type: String,
     required: true,
+    trim: true
+  },
+  mode: {
+    type: String,
+    required: true,
+    enum: ['Onsite', 'Online'],
+    trim: true
+  },
+  date: {
+    type: Date,
+    required: true
+  },
+  agenda: {
+    type: String,
+    required: false,
+    trim: true
+  },
+  followUpActivity: {
+    type: String,
+    required: false,
     trim: true
   },
   resourcePerson: {
@@ -16,35 +42,14 @@ const eventSchema = new mongoose.Schema({
     required: true,
     trim: true
   },
-  role: {
+  targetSDG: [{
     type: String,
-    required: true,
-    trim: true
-  },
-  otherRole: {
+    required: false
+  }],
+  fileLink: {
     type: String,
     required: false,
     trim: true
-  },
-  type: {
-    type: String,
-    required: true,
-    trim: true
-  },
-  participantsOfEvent: {
-    type: String,
-    required: true,
-    trim: true
-  },
-  nameOfAttendee: {
-    type: String,
-    required: true,
-    trim: true
-  },
-  date: {
-    type: Date,
-    required: true,
-    default: Date.now
   },
   createdBy: {
     type: mongoose.Schema.Types.ObjectId,
@@ -55,4 +60,4 @@ const eventSchema = new mongoose.Schema({
   timestamps: true
 });
 
-module.exports = mongoose.model('Event', eventSchema);
+module.exports = mongoose.model('TalkTrainingConference', talkTrainingConferenceSchema);
