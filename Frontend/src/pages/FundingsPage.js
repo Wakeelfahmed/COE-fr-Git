@@ -111,6 +111,27 @@ const FundingsView = () => {
     fetchFundedProjects();
   }, [showOnlyMine]);
 
+  // Add Escape key listener to close modals
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        if (showModal) {
+          setShowModal(false);
+        }
+        if (showReportModal) {
+          setShowReportModal(false);
+        }
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+
+    // Cleanup event listener on component unmount
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [showModal, showReportModal]);
+
   const fetchFundedProjects = async () => {
     try {
       const response = await axios.get(`${API_BASE_URL}/fundings`, {
@@ -451,151 +472,154 @@ const FundingsView = () => {
   
         {showModal && (
           <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full">
-            <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <div className="relative top-20 mx-auto p-5 border w-11/12 max-w-4xl shadow-lg rounded-md bg-white">
               <h3 className="text-lg font-medium leading-6 text-gray-900 mb-4">
                 {isEditMode ? 'Edit Funded Project' : 'New Funded Project'}
               </h3>
               <form onSubmit={handleSubmit}>
-                <div className="mb-4">
-                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="projectTitle">
-                    Project Title
-                  </label>
-                  <input
-                    type="text"
-                    id="projectTitle"
-                    name="projectTitle"
-                    value={currentFundedProject.projectTitle}
-                    onChange={handleInputChange}
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    required
-                  />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="mb-4">
+                    <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="projectTitle">
+                      Project Title
+                    </label>
+                    <input
+                      type="text"
+                      id="projectTitle"
+                      name="projectTitle"
+                      value={currentFundedProject.projectTitle}
+                      onChange={handleInputChange}
+                      className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                      required
+                    />
+                  </div>
+                  <div className="mb-4">
+                    <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="pi">
+                      PI
+                    </label>
+                    <input
+                      type="text"
+                      id="pi"
+                      name="pi"
+                      value={currentFundedProject.pi}
+                      onChange={handleInputChange}
+                      className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                      required
+                    />
+                  </div>
+                  <div className="mb-4">
+                    <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="researchTeam">
+                      Research Team
+                    </label>
+                    <input
+                      type="text"
+                      id="researchTeam"
+                      name="researchTeam"
+                      value={currentFundedProject.researchTeam}
+                      onChange={handleInputChange}
+                      className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                      required
+                    />
+                  </div>
+                  <div className="mb-4">
+                    <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="fundingSource">
+                      Funding Source
+                    </label>
+                    <input
+                      type="text"
+                      id="fundingSource"
+                      name="fundingSource"
+                      value={currentFundedProject.fundingSource}
+                      onChange={handleInputChange}
+                      className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                      required
+                    />
+                  </div>
+                  <div className="mb-4">
+                    <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="pkr">
+                      PKR (M)
+                    </label>
+                    <input
+                      type="number"
+                      id="pkr"
+                      name="pkr"
+                      value={currentFundedProject.pkr}
+                      onChange={handleInputChange}
+                      className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                      required
+                    />
+                  </div>
+                  <div className="mb-4">
+                    <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="team">
+                      Team <span className="text-gray-500 font-normal">(Comma separated names)</span>
+                    </label>
+                    <input
+                      type="text"
+                      id="team"
+                      name="team"
+                      value={currentFundedProject.team}
+                      onChange={handleInputChange}
+                      className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                      required
+                    />
+                  </div>
+                  <div className="mb-4">
+                    <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="status">
+                      Status
+                    </label>
+                    <input
+                      type="text"
+                      id="status"
+                      name="status"
+                      value={currentFundedProject.status}
+                      onChange={handleInputChange}
+                      className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                      required
+                    />
+                  </div>
+                  <div className="mb-4">
+                    <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="dateOfSubmission">
+                      Date of Submission
+                    </label>
+                    <input
+                      type="date"
+                      id="dateOfSubmission"
+                      name="dateOfSubmission"
+                      value={currentFundedProject.dateOfSubmission}
+                      onChange={handleInputChange}
+                      className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                      required
+                    />
+                  </div>
+                  <div className="mb-4">
+                    <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="dateOfApproval">
+                      Date of Approval
+                    </label>
+                    <input
+                      type="date"
+                      id="dateOfApproval"
+                      name="dateOfApproval"
+                      value={currentFundedProject.dateOfApproval}
+                      onChange={handleInputChange}
+                      className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                      required
+                    />
+                  </div>
+                  <div className="mb-4">
+                    <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="closingDate">
+                      Closing Date
+                    </label>
+                    <input
+                      type="date"
+                      id="closingDate"
+                      name="closingDate"
+                      value={currentFundedProject.closingDate}
+                      onChange={handleInputChange}
+                      className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                      required
+                    />
+                  </div>
                 </div>
-                <div className="mb-4">
-                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="pi">
-                    PI
-                  </label>
-                  <input
-                    type="text"
-                    id="pi"
-                    name="pi"
-                    value={currentFundedProject.pi}
-                    onChange={handleInputChange}
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    required
-                  />
-                </div>
-                <div className="mb-4">
-                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="researchTeam">
-                    Research Team
-                  </label>
-                  <input
-                    type="text"
-                    id="researchTeam"
-                    name="researchTeam"
-                    value={currentFundedProject.researchTeam}
-                    onChange={handleInputChange}
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    required
-                  />
-                </div>
-                <div className="mb-4">
-                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="dateOfSubmission">
-                    Date of Submission
-                  </label>
-                  <input
-                    type="date"
-                    id="dateOfSubmission"
-                    name="dateOfSubmission"
-                    value={currentFundedProject.dateOfSubmission}
-                    onChange={handleInputChange}
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    required
-                  />
-                </div>
-                <div className="mb-4">
-                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="dateOfApproval">
-                    Date of Approval
-                  </label>
-                  <input
-                    type="date"
-                    id="dateOfApproval"
-                    name="dateOfApproval"
-                    value={currentFundedProject.dateOfApproval}
-                    onChange={handleInputChange}
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    required
-                  />
-                </div>
-                <div className="mb-4">
-                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="fundingSource">
-                    Funding Source
-                  </label>
-                  <input
-                    type="text"
-                    id="fundingSource"
-                    name="fundingSource"
-                    value={currentFundedProject.fundingSource}
-                    onChange={handleInputChange}
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    required
-                  />
-                </div>
-                <div className="mb-4">
-                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="pkr">
-                    PKR (M)
-                  </label>
-                  <input
-                    type="number"
-                    id="pkr"
-                    name="pkr"
-                    value={currentFundedProject.pkr}
-                    onChange={handleInputChange}
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    required
-                  />
-                </div>
-                <div className="mb-4">
-                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="team">
-                    Team <span className="text-gray-500 font-normal">(Comma separated names)</span>
-                  </label>
-                  <input
-                    type="text"
-                    id="team"
-                    name="team"
-                    value={currentFundedProject.team}
-                    onChange={handleInputChange}
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    required
-                  />
-                </div>
-                <div className="mb-4">
-                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="status">
-                    Status
-                  </label>
-                  <input
-                    type="text"
-                    id="status"
-                    name="status"
-                    value={currentFundedProject.status}
-                    onChange={handleInputChange}
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    required
-                  />
-                </div>
-                <div className="mb-4">
-                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="closingDate">
-                    Closing Date
-                  </label>
-                  <input
-                    type="date"
-                    id="closingDate"
-                    name="closingDate"
-                    value={currentFundedProject.closingDate}
-                    onChange={handleInputChange}
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    required
-                  />
-                </div>
+
                 <div className="mb-4">
                   <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="targetSDG">
                     Target SDG

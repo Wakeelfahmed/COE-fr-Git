@@ -35,6 +35,27 @@ const AchievementsPage = () => {
     fetchAchievements();
   }, [showOnlyMine]);
 
+  // Add Escape key listener to close modals
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        if (showModal) {
+          setShowModal(false);
+        }
+        if (showReportModal) {
+          setShowReportModal(false);
+        }
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+
+    // Cleanup event listener on component unmount
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [showModal, showReportModal]);
+
   const fetchAchievements = async () => {
     try {
       const response = await axios.get(`${API_BASE_URL}/achievements`, {
@@ -268,95 +289,98 @@ const AchievementsPage = () => {
 
       {showModal && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full">
-          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+          <div className="relative top-20 mx-auto p-5 border w-11/12 max-w-4xl shadow-lg rounded-md bg-white">
             <h3 className="text-lg font-medium leading-6 text-gray-900 mb-4">
               {isEditMode ? 'Edit Achievement' : 'New Achievement'}
             </h3>
             <form onSubmit={handleSubmit}>
-              <div className="mb-4">
-                <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="event">
-                  Event
-                </label>
-                <input
-                  type="text"
-                  id="event"
-                  name="event"
-                  value={currentAchievement.event}
-                  onChange={handleInputChange}
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                  required
-                />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="mb-4">
+                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="event">
+                    Event
+                  </label>
+                  <input
+                    type="text"
+                    id="event"
+                    name="event"
+                    value={currentAchievement.event}
+                    onChange={handleInputChange}
+                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                    required
+                  />
+                </div>
+                <div className="mb-4">
+                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="organizer">
+                    Organizer
+                  </label>
+                  <input
+                    type="text"
+                    id="organizer"
+                    name="organizer"
+                    value={currentAchievement.organizer}
+                    onChange={handleInputChange}
+                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                    required
+                  />
+                </div>
+                <div className="mb-4">
+                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="date">
+                    Date
+                  </label>
+                  <input
+                    type="date"
+                    id="date"
+                    name="date"
+                    value={currentAchievement.date}
+                    onChange={handleInputChange}
+                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                    required
+                  />
+                </div>
+                <div className="mb-4">
+                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="participantOfEvent">
+                    Participant of Event <span className="text-gray-500 font-normal">(Student, Faculty, Industry etc)</span>
+                  </label>
+                  <input
+                    type="text"
+                    id="participantOfEvent"
+                    name="participantOfEvent"
+                    value={currentAchievement.participantOfEvent}
+                    onChange={handleInputChange}
+                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                    required
+                  />
+                </div>
+                <div className="mb-4">
+                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="participantFromCoEAI">
+                    Participant from CoE-AI
+                  </label>
+                  <input
+                    type="text"
+                    id="participantFromCoEAI"
+                    name="participantFromCoEAI"
+                    value={currentAchievement.participantFromCoEAI}
+                    onChange={handleInputChange}
+                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                    required
+                  />
+                </div>
+                <div className="mb-4">
+                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="roleOfParticipantFromCoEAI">
+                    Role of Participant from CoE-AI <span className="text-gray-500 font-normal">(e.g., Competitor, Organizer)</span>
+                  </label>
+                  <input
+                    type="text"
+                    id="roleOfParticipantFromCoEAI"
+                    name="roleOfParticipantFromCoEAI"
+                    value={currentAchievement.roleOfParticipantFromCoEAI}
+                    onChange={handleInputChange}
+                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                    required
+                  />
+                </div>
               </div>
-              <div className="mb-4">
-                <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="organizer">
-                  Organizer
-                </label>
-                <input
-                  type="text"
-                  id="organizer"
-                  name="organizer"
-                  value={currentAchievement.organizer}
-                  onChange={handleInputChange}
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                  required
-                />
-              </div>
-              <div className="mb-4">
-                <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="date">
-                  Date
-                </label>
-                <input
-                  type="date"
-                  id="date"
-                  name="date"
-                  value={currentAchievement.date}
-                  onChange={handleInputChange}
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                  required
-                />
-              </div>
-              <div className="mb-4">
-                <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="participantOfEvent">
-                  Participant of Event <span className="text-gray-500 font-normal">(Student, Faculty, Industry etc)</span>
-                </label>
-                <input
-                  type="text"
-                  id="participantOfEvent"
-                  name="participantOfEvent"
-                  value={currentAchievement.participantOfEvent}
-                  onChange={handleInputChange}
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                  required
-                />
-              </div>
-              <div className="mb-4">
-                <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="participantFromCoEAI">
-                  Participant from CoE-AI
-                </label>
-                <input
-                  type="text"
-                  id="participantFromCoEAI"
-                  name="participantFromCoEAI"
-                  value={currentAchievement.participantFromCoEAI}
-                  onChange={handleInputChange}
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                  required
-                />
-              </div>
-              <div className="mb-4">
-                <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="roleOfParticipantFromCoEAI">
-                  Role of Participant from CoE-AI <span className="text-gray-500 font-normal">(e.g., Competitor, Organizer)</span>
-                </label>
-                <input
-                  type="text"
-                  id="roleOfParticipantFromCoEAI"
-                  name="roleOfParticipantFromCoEAI"
-                  value={currentAchievement.roleOfParticipantFromCoEAI}
-                  onChange={handleInputChange}
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                  required
-                />
-              </div>
+
               <div className="mb-4">
                 <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="detailsOfAchievement">
                   Details of Achievement

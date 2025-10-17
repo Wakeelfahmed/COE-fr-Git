@@ -39,6 +39,27 @@ const CompetitionsPage = () => {
     fetchCompetitions();
   }, [showOnlyMine]);
 
+  // Add Escape key listener to close modals
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        if (showModal) {
+          setShowModal(false);
+        }
+        if (showReportModal) {
+          setShowReportModal(false);
+        }
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+
+    // Cleanup event listener on component unmount
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [showModal, showReportModal]);
+
   const fetchCompetitions = async () => {
     try {
       const response = await axios.get(`${API_BASE_URL}/competitions`, {

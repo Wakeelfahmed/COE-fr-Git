@@ -119,6 +119,27 @@ const PatentsView = () => {
     fetchPatents();
   }, [showOnlyMine]);
 
+  // Add Escape key listener to close modals
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        if (showModal) {
+          setShowModal(false);
+        }
+        if (showReportModal) {
+          setShowReportModal(false);
+        }
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+
+    // Cleanup event listener on component unmount
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [showModal, showReportModal]);
+
   const fetchPatents = async () => {
     try {
       const response = await axios.get(`${API_BASE_URL}/patents`, {
@@ -456,149 +477,152 @@ const PatentsView = () => {
   
         {showModal && (
           <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full">
-            <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <div className="relative top-20 mx-auto p-5 border w-11/12 max-w-4xl shadow-lg rounded-md bg-white">
               <h3 className="text-lg font-medium leading-6 text-gray-900 mb-4">
                 {isEditMode ? 'Edit Patent' : 'New Patent'}
               </h3>
               <form onSubmit={handleSubmit}>
-                <div className="mb-4">
-                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="title">
-                    Title
-                  </label>
-                  <input
-                    type="text"
-                    id="title"
-                    name="title"
-                    value={currentPatent.title}
-                    onChange={handleInputChange}
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    required
-                  />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="mb-4">
+                    <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="title">
+                      Title
+                    </label>
+                    <input
+                      type="text"
+                      id="title"
+                      name="title"
+                      value={currentPatent.title}
+                      onChange={handleInputChange}
+                      className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                      required
+                    />
+                  </div>
+                  <div className="mb-4">
+                    <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="pi">
+                      Inventor
+                    </label>
+                    <input
+                      type="text"
+                      id="inventor"
+                      name="inventor"
+                      value={currentPatent.inventor}
+                      onChange={handleInputChange}
+                      className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                      required
+                    />
+                  </div>
+                  <div className="mb-4">
+                    <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="team">
+                      Co-Inventor (comma-separated)
+                    </label>
+                    <input
+                      type="text"
+                      id="coInventor"
+                      name="coInventor"
+                      value={currentPatent.coInventor}
+                      onChange={handleInputChange}
+                      className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                      required
+                    />
+                  </div>
+                  <div className="mb-4">
+                    <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="patentOrg">
+                      Patent Organization
+                    </label>
+                    <input
+                      type="text"
+                      id="patentOrg"
+                      name="patentOrg"
+                      value={currentPatent.patentOrg}
+                      onChange={handleInputChange}
+                      className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                    />
+                  </div>
+                  <div className="mb-4">
+                    <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="affiliationOfCoPi">
+                      Affiliation of Co-Inventor
+                    </label>
+                    <input
+                      type="text"
+                      id="affiliationOfCoInventor"
+                      name="affiliationOfCoInventor"
+                      value={currentPatent.affiliationOfCoInventor}
+                      onChange={handleInputChange}
+                      className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                    />
+                  </div>
+                  <div className="mb-4">
+                    <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="scope">
+                      Scope
+                    </label>
+                    <select
+                      id="scope"
+                      name="scope"
+                      value={currentPatent.scope}
+                      onChange={handleInputChange}
+                      className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                      required
+                    >
+                      <option value="">Select Scope</option>
+                      <option value="National">National</option>
+                      <option value="International">International</option>
+                    </select>
+                  </div>
+                  <div className="mb-4">
+                    <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="directoryNumber">
+                      Directory Number
+                    </label>
+                    <input
+                      type="text"
+                      id="directoryNumber"
+                      name="directoryNumber"
+                      value={currentPatent.directoryNumber}
+                      onChange={handleInputChange}
+                      className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                    />
+                  </div>
+                  <div className="mb-4">
+                    <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="patentNumber">
+                      Patent Number
+                    </label>
+                    <input
+                      type="text"
+                      id="patentNumber"
+                      name="patentNumber"
+                      value={currentPatent.patentNumber}
+                      onChange={handleInputChange}
+                      className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                    />
+                  </div>
+                  <div className="mb-4">
+                    <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="dateOfSubmission">
+                      Date of Submission
+                    </label>
+                    <input
+                      type="date"
+                      id="dateOfSubmission"
+                      name="dateOfSubmission"
+                      value={currentPatent.dateOfSubmission}
+                      onChange={handleInputChange}
+                      className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                      required
+                    />
+                  </div>
+                  <div className="mb-4">
+                    <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="dateOfApproval">
+                      Date of Approval
+                    </label>
+                    <input
+                      type="date"
+                      id="dateOfApproval"
+                      name="dateOfApproval"
+                      value={currentPatent.dateOfApproval}
+                      onChange={handleInputChange}
+                      className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                    />
+                  </div>
                 </div>
-                <div className="mb-4">
-                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="pi">
-                    Inventor
-                  </label>
-                  <input
-                    type="text"
-                    id="inventor"
-                    name="inventor"
-                    value={currentPatent.inventor}
-                    onChange={handleInputChange}
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    required
-                  />
-                </div>
-                <div className="mb-4">
-                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="team">
-                    Co-Inventor (comma-separated)
-                  </label>
-                  <input
-                    type="text"
-                    id="coInventor"
-                    name="coInventor"
-                    value={currentPatent.coInventor}
-                    onChange={handleInputChange}
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    required
-                  />
-                </div>
-                <div className="mb-4">
-                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="patentOrg">
-                    Patent Organization
-                  </label>
-                  <input
-                    type="text"
-                    id="patentOrg"
-                    name="patentOrg"
-                    value={currentPatent.patentOrg}
-                    onChange={handleInputChange}
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                  />
-                </div>
-                <div className="mb-4">
-                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="affiliationOfCoPi">
-                    Affiliation of Co-Inventor
-                  </label>
-                  <input
-                    type="text"
-                    id="affiliationOfCoInventor"
-                    name="affiliationOfCoInventor"
-                    value={currentPatent.affiliationOfCoInventor}
-                    onChange={handleInputChange}
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                  />
-                </div>
-                <div className="mb-4">
-                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="dateOfSubmission">
-                    Date of Submission
-                  </label>
-                  <input
-                    type="date"
-                    id="dateOfSubmission"
-                    name="dateOfSubmission"
-                    value={currentPatent.dateOfSubmission}
-                    onChange={handleInputChange}
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    required
-                  />
-                </div>
-                <div className="mb-4">
-                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="scope">
-                    Scope
-                  </label>
-                  <select
-                    id="scope"
-                    name="scope"
-                    value={currentPatent.scope}
-                    onChange={handleInputChange}
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    required
-                  >
-                    <option value="">Select Scope</option>
-                    <option value="National">National</option>
-                    <option value="International">International</option>
-                  </select>
-                </div>
-                <div className="mb-4">
-                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="directoryNumber">
-                    Directory Number
-                  </label>
-                  <input
-                    type="text"
-                    id="directoryNumber"
-                    name="directoryNumber"
-                    value={currentPatent.directoryNumber}
-                    onChange={handleInputChange}
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                  />
-                </div>
-                <div className="mb-4">
-                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="patentNumber">
-                    Patent Number
-                  </label>
-                  <input
-                    type="text"
-                    id="patentNumber"
-                    name="patentNumber"
-                    value={currentPatent.patentNumber}
-                    onChange={handleInputChange}
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                  />
-                </div>
-                <div className="mb-4">
-                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="dateOfApproval">
-                    Date of Approval
-                  </label>
-                  <input
-                    type="date"
-                    id="dateOfApproval"
-                    name="dateOfApproval"
-                    value={currentPatent.dateOfApproval}
-                    onChange={handleInputChange}
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                  />
-                </div>
+
                 <div className="mb-4">
                   <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="targetSDG">
                     Target SDG

@@ -17,7 +17,6 @@ const fundingProposalRoutes = require('./routes/fundingProposalRoutes');
 const reportRoutes = require('./routes/reportRoutes');
 const collaborationRoutes = require('./routes/collaborationRoutes');
 const achievementRoutes = require('./routes/achievementRoutes');
-const localCollaborationRoutes = require('./routes/localCollaborationRoutes');
 const competitionRoutes = require('./routes/competitionRoutes');
 
 // Load environment variables
@@ -60,7 +59,6 @@ app.use('/api/funding-proposals', fundingProposalRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api/collaborations', collaborationRoutes);
 app.use('/api/achievements', achievementRoutes);
-app.use('/api/local-collaborations', localCollaborationRoutes);
 app.use('/api/competitions', competitionRoutes);
 
 // Start the server

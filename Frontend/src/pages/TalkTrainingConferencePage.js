@@ -118,6 +118,27 @@ const EventsView = () => {
     fetchEvents();
   }, [showOnlyMine]);
 
+  // Add Escape key listener to close modals
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        if (showModal) {
+          setShowModal(false);
+        }
+        if (showReportModal) {
+          setShowReportModal(false);
+        }
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+
+    // Cleanup event listener on component unmount
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [showModal, showReportModal]);
+
   const fetchEvents = async () => {
     try {
       const response = await axios.get(`${API_BASE_URL}/TalkTrainingConference`, {
@@ -472,127 +493,130 @@ const EventsView = () => {
   
         {showModal && (
           <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full">
-            <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <div className="relative top-20 mx-auto p-5 border w-11/12 max-w-4xl shadow-lg rounded-md bg-white">
               <h3 className="text-lg font-medium leading-6 text-gray-900 mb-4">
                 {isEditMode ? 'Edit Event' : 'New Event'}
               </h3>
               <form onSubmit={handleSubmit}>
-                <div className="mb-4">
-                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="type">
-                    Type
-                  </label>
-                  <select
-                    id="type"
-                    name="type"
-                    value={currentEvent.type}
-                    onChange={handleInputChange}
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    required
-                  >
-                    <option value="">Select Type</option>
-                    <option value="Talk">Talk</option>
-                    <option value="Training">Training</option>
-                    <option value="Conference">Conference</option>
-                  </select>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="mb-4">
+                    <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="type">
+                      Type
+                    </label>
+                    <select
+                      id="type"
+                      name="type"
+                      value={currentEvent.type}
+                      onChange={handleInputChange}
+                      className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                      required
+                    >
+                      <option value="">Select Type</option>
+                      <option value="Talk">Talk</option>
+                      <option value="Training">Training</option>
+                      <option value="Conference">Conference</option>
+                    </select>
+                  </div>
+                  <div className="mb-4">
+                    <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="title">
+                      Title
+                    </label>
+                    <input
+                      type="text"
+                      id="title"
+                      name="title"
+                      value={currentEvent.title}
+                      onChange={handleInputChange}
+                      className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                      required
+                    />
+                  </div>
+                  <div className="mb-4">
+                    <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="participants">
+                      Participants <span className="text-gray-500 font-normal">(Student, Faculty, Industry etc)</span>
+                    </label>
+                    <input
+                      type="text"
+                      id="participants"
+                      name="participants"
+                      value={currentEvent.participants}
+                      onChange={handleInputChange}
+                      className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                      required
+                    />
+                  </div>
+                  <div className="mb-4">
+                    <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="mode">
+                      Mode
+                    </label>
+                    <select
+                      id="mode"
+                      name="mode"
+                      value={currentEvent.mode}
+                      onChange={handleInputChange}
+                      className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                      required
+                    >
+                      <option value="">Select Mode</option>
+                      <option value="Onsite">Onsite</option>
+                      <option value="Online">Online</option>
+                    </select>
+                  </div>
+                  <div className="mb-4">
+                    <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="date">
+                      Date
+                    </label>
+                    <input
+                      type="date"
+                      id="date"
+                      name="date"
+                      value={currentEvent.date}
+                      onChange={handleInputChange}
+                      className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                      required
+                    />
+                  </div>
+                  <div className="mb-4">
+                    <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="resourcePerson">
+                      Resource Person
+                    </label>
+                    <input
+                      type="text"
+                      id="resourcePerson"
+                      name="resourcePerson"
+                      value={currentEvent.resourcePerson}
+                      onChange={handleInputChange}
+                      className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                    />
+                  </div>
+                  <div className="mb-4">
+                    <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="agenda">
+                      Agenda/Details
+                    </label>
+                    <textarea
+                      id="agenda"
+                      name="agenda"
+                      value={currentEvent.agenda}
+                      onChange={handleInputChange}
+                      className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                      rows="3"
+                    ></textarea>
+                  </div>
+                  <div className="mb-4">
+                    <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="followUpActivity">
+                      Follow Up Activity
+                    </label>
+                    <input
+                      type="text"
+                      id="followUpActivity"
+                      name="followUpActivity"
+                      value={currentEvent.followUpActivity}
+                      onChange={handleInputChange}
+                      className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                    />
+                  </div>
                 </div>
-                <div className="mb-4">
-                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="title">
-                    Title
-                  </label>
-                  <input
-                    type="text"
-                    id="title"
-                    name="title"
-                    value={currentEvent.title}
-                    onChange={handleInputChange}
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    required
-                  />
-                </div>
-                <div className="mb-4">
-                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="participants">
-                    Participants <span className="text-gray-500 font-normal">(Student, Faculty, Industry etc)</span>
-                  </label>
-                  <input
-                    type="text"
-                    id="participants"
-                    name="participants"
-                    value={currentEvent.participants}
-                    onChange={handleInputChange}
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    required
-                  />
-                </div>
-                <div className="mb-4">
-                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="mode">
-                    Mode
-                  </label>
-                  <select
-                    id="mode"
-                    name="mode"
-                    value={currentEvent.mode}
-                    onChange={handleInputChange}
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    required
-                  >
-                    <option value="">Select Mode</option>
-                    <option value="Onsite">Onsite</option>
-                    <option value="Online">Online</option>
-                  </select>
-                </div>
-                <div className="mb-4">
-                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="date">
-                    Date
-                  </label>
-                  <input
-                    type="date"
-                    id="date"
-                    name="date"
-                    value={currentEvent.date}
-                    onChange={handleInputChange}
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    required
-                  />
-                </div>
-                <div className="mb-4">
-                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="agenda">
-                    Agenda/Details
-                  </label>
-                  <textarea
-                    id="agenda"
-                    name="agenda"
-                    value={currentEvent.agenda}
-                    onChange={handleInputChange}
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    rows="3"
-                  ></textarea>
-                </div>
-                <div className="mb-4">
-                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="followUpActivity">
-                    Follow Up Activity
-                  </label>
-                  <input
-                    type="text"
-                    id="followUpActivity"
-                    name="followUpActivity"
-                    value={currentEvent.followUpActivity}
-                    onChange={handleInputChange}
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                  />
-                </div>
-                <div className="mb-4">
-                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="resourcePerson">
-                    Resource Person
-                  </label>
-                  <input
-                    type="text"
-                    id="resourcePerson"
-                    name="resourcePerson"
-                    value={currentEvent.resourcePerson}
-                    onChange={handleInputChange}
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                  />
-                </div>
+
                 <div className="mb-4">
                   <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="targetSDG">
                     Target SDG

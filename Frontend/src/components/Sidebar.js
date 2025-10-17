@@ -16,7 +16,6 @@ const activityItems = [
 const otherItems = [
   { name: 'Industry/Commercial Projects', path: '/' },
   { name: 'Collaboration', path: '/collaborations' },
-  { name: 'Local Collaborations', path: '/local-collaborations' },
   { name: 'Achievements', path: '/achievements' },
   { name: 'Patents', path: '/patents' },
   { name: 'Funded Projects', path: '/fundings' },

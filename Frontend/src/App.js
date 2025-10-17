@@ -18,7 +18,6 @@ import ReportsPage from './pages/ReportsPage';
 import CollaborationPage from './pages/ForeignCollaborationPage';
 import AchievementsPage from './pages/AchievementsPage';
 import TrainingsConductedPage from './pages/TrainingsConductedPage';
-import LocalCollaborationPage from './pages/LocalCollaborationPage';
 import CompetitionsPage from './pages/CompetitionsPage';
 import AuthRedirect from './authRedirect';
 import { UserProvider, useUser } from './context/UserContext';
@@ -90,7 +89,6 @@ function App() {
                   <Route path="/events" element={<EventsPage />} />
                   <Route path="/trainings-conducted" element={<TrainingsConductedPage />} />
                   <Route path="/collaborations" element={<CollaborationPage />} />
-                  <Route path="/local-collaborations" element={<LocalCollaborationPage />} />
                   <Route path="/achievements" element={<AchievementsPage />} />
                   <Route path="/patents" element={<PatentsPage />} />
                   <Route path="/fundings" element={<FundingsPage />} />
