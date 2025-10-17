@@ -1,10 +1,9 @@
 const mongoose = require('mongoose');
 
-const talkTrainingConferenceSchema = new mongoose.Schema({
-  type: {
+const competitionSchema = new mongoose.Schema({
+  organizer: {
     type: String,
     required: true,
-    enum: ['Talk', 'Training', 'Conference'],
     trim: true
   },
   title: {
@@ -12,44 +11,41 @@ const talkTrainingConferenceSchema = new mongoose.Schema({
     required: true,
     trim: true
   },
+  date: {
+    type: Date,
+    required: true
+  },
   participants: {
     type: String,
     required: true,
     trim: true
   },
-  mode: {
+  scope: {
     type: String,
     required: true,
-    enum: ['Onsite', 'Online'],
-    trim: true
+    enum: ['National', 'Regional', 'International', 'Other']
   },
-  date: {
-    type: Date,
-    required: true
-  },
-  agenda: {
+  scopeOther: {
     type: String,
-    required: false,
     trim: true
   },
-  followUpActivity: {
-    type: String,
-    required: false,
-    trim: true
-  },
-  resourcePerson: {
+  participantsFromBU: {
     type: String,
     required: true,
     trim: true
   },
-  targetSDG: [{
+  prizeMoney: {
+    type: Number,
+    min: 0
+  },
+  details: {
     type: String,
-    required: false
-  }],
+    required: true,
+    trim: true
+  },
   fileLink: {
     type: String,
-    required: false,
-    trim: true
+    required: false
   },
   createdBy: {
     id: {
@@ -70,4 +66,4 @@ const talkTrainingConferenceSchema = new mongoose.Schema({
   timestamps: true
 });
 
-module.exports = mongoose.model('TalkTrainingConference', talkTrainingConferenceSchema);
+module.exports = mongoose.model('Competition', competitionSchema);

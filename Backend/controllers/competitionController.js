@@ -1,4 +1,4 @@
-const Collaboration = require('../models/Collaboration');
+const Competition = require('../models/Competition');
 const jwt = require('jsonwebtoken');
 
 // Helper function to get user info from token
@@ -12,14 +12,14 @@ const getUserFromToken = (req) => {
   }
 };
 
-// Helper function to check if user has access to the collaboration
-const hasAccessToCollaboration = (user, collaboration) => {
+// Helper function to check if user has access to the competition
+const hasAccessToCompetition = (user, competition) => {
   // Handle both old (simple ID) and new (object with id) createdBy structures
-  const creatorId = collaboration.createdBy?.id || collaboration.createdBy;
+  const creatorId = competition.createdBy?.id || competition.createdBy;
   return user.role === 'director' || creatorId?.toString() === user._id.toString();
 };
 
-exports.createCollaboration = async (req, res) => {
+exports.createCompetition = async (req, res) => {
   const user = getUserFromToken(req);
   if (!user) return res.status(401).json({ message: 'Unauthorized' });
 
@@ -32,95 +32,109 @@ exports.createCollaboration = async (req, res) => {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    const collaboration = new Collaboration({
-      ...req.body,
+    // Handle scope field - if scope is 'Other', use the scopeOther field
+    const competitionData = { ...req.body };
+    if (competitionData.scope === 'Other' && competitionData.scopeOther) {
+      competitionData.scope = competitionData.scopeOther;
+    }
+    delete competitionData.scopeOther; // Remove scopeOther from the data
+
+    const competition = new Competition({
+      ...competitionData,
       createdBy: {
         id: user._id,
         name: `${fullUser.firstName} ${fullUser.lastName}`,
         email: fullUser.email
       }
     });
-    await collaboration.save();
-    res.status(201).json(collaboration);
+    await competition.save();
+    res.status(201).json(competition);
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
 };
 
-exports.getAllCollaborations = async (req, res) => {
+exports.getAllCompetitions = async (req, res) => {
   const user = getUserFromToken(req);
   if (!user) return res.status(401).json({ message: 'Unauthorized' });
 
   try {
-    let collaborations;
+    let competitions;
     if (user.role === 'director' && req.query.onlyMine !== 'true') {
-      collaborations = await Collaboration.find();
+      competitions = await Competition.find();
     } else {
       // Handle both old (simple ID) and new (object with id) createdBy structures
-      collaborations = await Collaboration.find({
+      competitions = await Competition.find({
         $or: [
           { 'createdBy.id': user._id },
           { createdBy: user._id }
         ]
       });
     }
-    res.json(collaborations);
+    res.json(competitions);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
 
-exports.getCollaborationById = async (req, res) => {
+exports.getCompetitionById = async (req, res) => {
   const user = getUserFromToken(req);
   if (!user) return res.status(401).json({ message: 'Unauthorized' });
 
   try {
-    const collaboration = await Collaboration.findById(req.params.id);
-    if (!collaboration) return res.status(404).json({ message: 'Collaboration not found' });
+    const competition = await Competition.findById(req.params.id);
+    if (!competition) return res.status(404).json({ message: 'Competition not found' });
 
-    if (!hasAccessToCollaboration(user, collaboration)) {
+    if (!hasAccessToCompetition(user, competition)) {
       return res.status(403).json({ message: 'Access denied' });
     }
 
-    res.json(collaboration);
+    res.json(competition);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
 
-exports.updateCollaboration = async (req, res) => {
+exports.updateCompetition = async (req, res) => {
   const user = getUserFromToken(req);
   if (!user) return res.status(401).json({ message: 'Unauthorized' });
 
   try {
-    const collaboration = await Collaboration.findById(req.params.id);
-    if (!collaboration) return res.status(404).json({ message: 'Collaboration not found' });
+    const competition = await Competition.findById(req.params.id);
+    if (!competition) return res.status(404).json({ message: 'Competition not found' });
 
-    if (!hasAccessToCollaboration(user, collaboration)) {
+    if (!hasAccessToCompetition(user, competition)) {
       return res.status(403).json({ message: 'Access denied' });
     }
 
-    const updatedCollaboration = await Collaboration.findByIdAndUpdate(req.params.id, req.body, { new: true });
-    res.json(updatedCollaboration);
+    // Handle scope field - if scope is 'Other', use the scopeOther field
+    const updateData = { ...req.body };
+    if (updateData.scope === 'Other' && updateData.scopeOther) {
+      updateData.scope = updateData.scopeOther;
+    }
+    delete updateData.scopeOther; // Remove scopeOther from the data
+
+    const updatedCompetition = await Competition.findByIdAndUpdate(req.params.id, updateData, { new: true });
+    res.json(updatedCompetition);
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
 };
 
-exports.deleteCollaboration = async (req, res) => {
+exports.deleteCompetition = async (req, res) => {
   const user = getUserFromToken(req);
   if (!user) return res.status(401).json({ message: 'Unauthorized' });
 
   try {
-    const collaboration = await Collaboration.findById(req.params.id);
-    if (!collaboration) return res.status(404).json({ message: 'Collaboration not found' });
+    const competition = await Competition.findById(req.params.id);
+    if (!competition) return res.status(404).json({ message: 'Competition not found' });
 
-    if (!hasAccessToCollaboration(user, collaboration)) {
+    if (!hasAccessToCompetition(user, competition)) {
       return res.status(403).json({ message: 'Access denied' });
     }
 
-    await Collaboration.findByIdAndDelete(req.params.id);
-    res.json({ message: 'Collaboration deleted successfully' });
+    await Competition.findByIdAndDelete(req.params.id);
+    res.json({ message: 'Competition deleted successfully' });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

@@ -14,7 +14,9 @@ const getUserFromToken = (req) => {
 
 // Helper function to check if user has access to the project
 const hasAccessToProject = (user, project) => {
-  return user.role === 'director' || project.createdBy.toString() === user._id.toString();
+  // Handle both old (simple ID) and new (object with id) createdBy structures
+  const creatorId = project.createdBy?.id || project.createdBy;
+  return user.role === 'director' || creatorId?.toString() === user._id.toString();
 };
 
 exports.createProject = async (req, res) => {
@@ -22,9 +24,21 @@ exports.createProject = async (req, res) => {
   if (!user) return res.status(401).json({ message: 'Unauthorized' });
 
   try {
+    // Get full user information including name
+    const User = require('../models/User');
+    const fullUser = await User.findById(user._id);
+
+    if (!fullUser) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
     const project = new CommercializationProject({
       ...req.body,
-      createdBy: user._id
+      createdBy: {
+        id: user._id,
+        name: `${fullUser.firstName} ${fullUser.lastName}`,
+        email: fullUser.email
+      }
     });
     await project.save();
     res.status(201).json(project);
@@ -43,7 +57,14 @@ exports.getAllProjects = async (req, res) => {
       projects = await CommercializationProject.find();
       console.log("\n\n All projects: \n", projects, "\n\n")
     } else {
-      projects = await CommercializationProject.find({ createdBy: user._id });
+      console.log('Fetching only user projects');
+      // Handle both old (simple ID) and new (object with id) createdBy structures
+      projects = await CommercializationProject.find({
+        $or: [
+          { 'createdBy.id': user._id },
+          { createdBy: user._id }
+        ]
+      });
       console.log("\n\n My projects: \n", projects, "\n\n")
     }
     res.json(projects);

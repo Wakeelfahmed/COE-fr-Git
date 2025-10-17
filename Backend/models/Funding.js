@@ -20,9 +20,19 @@ const fundingSchema = new mongoose.Schema({
   },
   fileLink: String,
   createdBy: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: true
+    id: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: true
+    },
+    name: {
+      type: String,
+      required: true
+    },
+    email: {
+      type: String,
+      required: true
+    }
   }
 }, {
   timestamps: true

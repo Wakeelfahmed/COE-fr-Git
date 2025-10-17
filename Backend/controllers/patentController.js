@@ -14,7 +14,9 @@ const getUserFromToken = (req) => {
 
 // Helper function to check if user has access to the patent
 const hasAccessToPatent = (user, patent) => {
-  return user.role === 'director' || patent.createdBy.toString() === user._id.toString();
+  // Handle both old (simple ID) and new (object with id) createdBy structures
+  const creatorId = patent.createdBy?.id || patent.createdBy;
+  return user.role === 'director' || creatorId?.toString() === user._id.toString();
 };
 
 exports.createPatent = async (req, res) => {
@@ -22,9 +24,21 @@ exports.createPatent = async (req, res) => {
   if (!user) return res.status(401).json({ message: 'Unauthorized' });
 
   try {
+    // Get full user information including name
+    const User = require('../models/User');
+    const fullUser = await User.findById(user._id);
+
+    if (!fullUser) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
     const patent = new Patent({
       ...req.body,
-      createdBy: user._id
+      createdBy: {
+        id: user._id,
+        name: `${fullUser.firstName} ${fullUser.lastName}`,
+        email: fullUser.email
+      }
     });
     await patent.save();
     res.status(201).json(patent);
@@ -42,7 +56,13 @@ exports.getAllPatents = async (req, res) => {
     if (user.role === 'director' && req.query.onlyMine !== 'true') {
       patents = await Patent.find();
     } else {
-      patents = await Patent.find({ createdBy: user._id });
+      // Handle both old (simple ID) and new (object with id) createdBy structures
+      patents = await Patent.find({
+        $or: [
+          { 'createdBy.id': user._id },
+          { createdBy: user._id }
+        ]
+      });
     }
     res.json(patents);
   } catch (error) {

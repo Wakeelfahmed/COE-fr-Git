@@ -14,7 +14,9 @@ const getUserFromToken = (req) => {
 
 // Helper function to check if user has access to the achievement
 const hasAccessToAchievement = (user, achievement) => {
-  return user.role === 'director' || achievement.createdBy.toString() === user._id.toString();
+  // Handle both old (simple ID) and new (object with id) createdBy structures
+  const creatorId = achievement.createdBy?.id || achievement.createdBy;
+  return user.role === 'director' || creatorId?.toString() === user._id.toString();
 };
 
 exports.createAchievement = async (req, res) => {
@@ -22,9 +24,21 @@ exports.createAchievement = async (req, res) => {
   if (!user) return res.status(401).json({ message: 'Unauthorized' });
 
   try {
+    // Get full user information including name
+    const User = require('../models/User');
+    const fullUser = await User.findById(user._id);
+
+    if (!fullUser) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
     const achievement = new Achievement({
       ...req.body,
-      createdBy: user._id
+      createdBy: {
+        id: user._id,
+        name: `${fullUser.firstName} ${fullUser.lastName}`,
+        email: fullUser.email
+      }
     });
     await achievement.save();
     res.status(201).json(achievement);
@@ -42,7 +56,13 @@ exports.getAllAchievements = async (req, res) => {
     if (user.role === 'director' && req.query.onlyMine !== 'true') {
       achievements = await Achievement.find();
     } else {
-      achievements = await Achievement.find({ createdBy: user._id });
+      // Handle both old (simple ID) and new (object with id) createdBy structures
+      achievements = await Achievement.find({
+        $or: [
+          { 'createdBy.id': user._id },
+          { createdBy: user._id }
+        ]
+      });
     }
     res.json(achievements);
   } catch (error) {

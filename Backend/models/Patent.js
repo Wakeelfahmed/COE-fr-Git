@@ -12,7 +12,8 @@ const patentSchema = new mongoose.Schema({
   },
   coInventor: {
     type: [String],
-    required: true
+    required: false,
+    default: []
   },
   patentOrg: {
     type: String,
@@ -49,10 +50,20 @@ const patentSchema = new mongoose.Schema({
   },
   fileLink: String,
   createdBy: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: true
-  }
+    id: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: true
+    },
+    name: {
+      type: String,
+      required: true
+    },
+    email: {
+      type: String,
+      required: true
+    }
+  },
 }, {
   timestamps: true
 });

@@ -23,7 +23,21 @@ const commercializationProjectSchema = new mongoose.Schema({
     trim: true
   },
   remarks: String,
-  createdBy: String,
+  createdBy: {
+    id: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: true
+    },
+    name: {
+      type: String,
+      required: true
+    },
+    email: {
+      type: String,
+      required: true
+    }
+  },
   fileLink: String  // New field for storing the PDF file link
 });
 

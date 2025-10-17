@@ -14,7 +14,9 @@ const getUserFromToken = (req) => {
 
 // Helper function to check if user has access to the funding
 const hasAccessToFunding = (user, funding) => {
-  return user.role === 'director' || funding.createdBy.toString() === user._id.toString();
+  // Handle both old (simple ID) and new (object with id) createdBy structures
+  const creatorId = funding.createdBy?.id || funding.createdBy;
+  return user.role === 'director' || creatorId?.toString() === user._id.toString();
 };
 
 exports.createFunding = async (req, res) => {
@@ -22,9 +24,21 @@ exports.createFunding = async (req, res) => {
   if (!user) return res.status(401).json({ message: 'Unauthorized' });
 
   try {
+    // Get full user information including name
+    const User = require('../models/User');
+    const fullUser = await User.findById(user._id);
+
+    if (!fullUser) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
     const funding = new Funding({
       ...req.body,
-      createdBy: user._id
+      createdBy: {
+        id: user._id,
+        name: `${fullUser.firstName} ${fullUser.lastName}`,
+        email: fullUser.email
+      }
     });
     await funding.save();
     res.status(201).json(funding);
@@ -42,7 +56,13 @@ exports.getAllFundings = async (req, res) => {
     if (user.role === 'director' && req.query.onlyMine !== 'true') {
       fundings = await Funding.find();
     } else {
-      fundings = await Funding.find({ createdBy: user._id });
+      // Handle both old (simple ID) and new (object with id) createdBy structures
+      fundings = await Funding.find({
+        $or: [
+          { 'createdBy.id': user._id },
+          { createdBy: user._id }
+        ]
+      });
     }
     res.json(fundings);
   } catch (error) {

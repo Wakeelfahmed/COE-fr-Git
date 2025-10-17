@@ -174,7 +174,7 @@ const TrainingsConductedPage = () => {
     try {
       const response = await axios.post(`${API_BASE_URL}/reports`, {
         title: reportTitle,
-        sourceType: 'TrainingsConducted',
+        sourceType: 'Trainings',
         filterCriteria
       });
       console.log('Report saved:', response.data);
@@ -279,7 +279,7 @@ const TrainingsConductedPage = () => {
               onChange={handleFilterChange}
               className="border rounded px-2 py-1"
             />
-            <label for="dateFrom">From Date:</label>
+            <label htmlFor="dateFrom">From Date:</label>
             <input
               type="date"
               placeholder="From Date"
@@ -288,7 +288,7 @@ const TrainingsConductedPage = () => {
               onChange={handleFilterChange}
               className="border rounded px-2 py-1"
             />
-            <label for="dateTo">To Date:</label>
+            <label htmlFor="dateTo">To Date:</label>
             <input
               type="date"
               placeholder="To Date"

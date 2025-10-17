@@ -14,7 +14,9 @@ const getUserFromToken = (req) => {
 
 // Helper function to check if user has access to the training
 const hasAccessToTraining = (user, training) => {
-  return user.role === 'director' || training.createdBy.toString() === user._id.toString();
+  // Handle both old (simple ID) and new (object with id) createdBy structures
+  const creatorId = training.createdBy?.id || training.createdBy;
+  return user.role === 'director' || creatorId?.toString() === user._id.toString();
 };
 
 exports.getAllTrainingsConducted = async (req, res) => {
@@ -33,7 +35,13 @@ exports.getAllTrainingsConducted = async (req, res) => {
       trainings = await TrainingsConducted.find();
     } else {
       console.log('Fetching only user trainings conducted');
-      trainings = await TrainingsConducted.find({ createdBy: user._id });
+      // Handle both old (simple ID) and new (object with id) createdBy structures
+      trainings = await TrainingsConducted.find({
+        $or: [
+          { 'createdBy.id': user._id },
+          { createdBy: user._id }
+        ]
+      });
     }
     console.log('Trainings conducted found:', trainings.length);
     console.log('Trainings conducted:', trainings);
@@ -53,9 +61,21 @@ exports.createTrainingsConducted = async (req, res) => {
   console.log('User ID:', user._id);
 
   try {
+    // Get full user information including name
+    const User = require('../models/User');
+    const fullUser = await User.findById(user._id);
+
+    if (!fullUser) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
     const training = new TrainingsConducted({
       ...req.body,
-      createdBy: user._id
+      createdBy: {
+        id: user._id,
+        name: `${fullUser.firstName} ${fullUser.lastName}`,
+        email: fullUser.email
+      }
     });
     const newTraining = await training.save();
     console.log('Training conducted created successfully:', newTraining);

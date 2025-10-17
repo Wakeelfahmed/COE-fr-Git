@@ -14,7 +14,9 @@ const getUserFromToken = (req) => {
 
 // Helper function to check if user has access to the publication
 const hasAccessToPublication = (user, publication) => {
-  return user.role === 'director' || publication.createdBy.toString() === user._id.toString();
+  // Handle both old (simple ID) and new (object with id) createdBy structures
+  const creatorId = publication.createdBy?.id || publication.createdBy;
+  return user.role === 'director' || creatorId?.toString() === user._id.toString();
 };
 
 exports.getAllPublications = async (req, res) => {
@@ -33,7 +35,13 @@ exports.getAllPublications = async (req, res) => {
       publications = await Publication.find();
     } else {
       console.log('Fetching only user publications');
-      publications = await Publication.find({ createdBy: user._id });
+      // Handle both old (simple ID) and new (object with id) createdBy structures
+      publications = await Publication.find({
+        $or: [
+          { 'createdBy.id': user._id },
+          { createdBy: user._id }
+        ]
+      });
     }
     console.log('Publications found:', publications.length);
     console.log('Publications:', publications);
@@ -49,9 +57,21 @@ exports.createPublication = async (req, res) => {
   if (!user) return res.status(401).json({ message: 'Unauthorized' });
 
   try {
+    // Get full user information including name
+    const User = require('../models/User');
+    const fullUser = await User.findById(user._id);
+
+    if (!fullUser) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
     const publication = new Publication({
       ...req.body,
-      createdBy: user._id
+      createdBy: {
+        id: user._id,
+        name: `${fullUser.firstName} ${fullUser.lastName}`,
+        email: fullUser.email
+      }
     });
     const newPublication = await publication.save();
     res.status(201).json(newPublication);

@@ -14,7 +14,9 @@ const getUserFromToken = (req) => {
 
 // Helper function to check if user has access to the event
 const hasAccessToEvent = (user, event) => {
-  return user.role === 'director' || event.createdBy.toString() === user._id.toString();
+  // Handle both old (simple ID) and new (object with id) createdBy structures
+  const creatorId = event.createdBy?.id || event.createdBy;
+  return user.role === 'director' || creatorId?.toString() === user._id.toString();
 };
 
 exports.getAllEvents = async (req, res) => {
@@ -33,7 +35,13 @@ exports.getAllEvents = async (req, res) => {
       events = await TalkTrainingConference.find();
     } else {
       console.log('Fetching only user events');
-      events = await TalkTrainingConference.find({ createdBy: user._id });
+      // Handle both old (simple ID) and new (object with id) createdBy structures
+      events = await TalkTrainingConference.find({
+        $or: [
+          { 'createdBy.id': user._id },
+          { createdBy: user._id }
+        ]
+      });
     }
     console.log('Events found:', events.length);
     console.log('Events:', events);
@@ -53,9 +61,21 @@ exports.createEvent = async (req, res) => {
   console.log('User ID:', user._id);
 
   try {
+    // Get full user information including name
+    const User = require('../models/User');
+    const fullUser = await User.findById(user._id);
+
+    if (!fullUser) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
     const event = new TalkTrainingConference({
       ...req.body,
-      createdBy: user._id
+      createdBy: {
+        id: user._id,
+        name: `${fullUser.firstName} ${fullUser.lastName}`,
+        email: fullUser.email
+      }
     });
     const newEvent = await event.save();
     console.log('Event created successfully:', newEvent);

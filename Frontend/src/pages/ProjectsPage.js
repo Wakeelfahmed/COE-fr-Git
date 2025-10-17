@@ -463,7 +463,7 @@ const ProjectsView = () => {
               onChange={handleFilterChange}
               className="border rounded px-2 py-1"
             />
-            <label for="dateFrom">From Contract Sign Date:</label>
+            <label htmlFor="dateFrom">From Contract Sign Date:</label>
             <input
               type="date"
               placeholder="From Date"
@@ -472,7 +472,7 @@ const ProjectsView = () => {
               onChange={handleFilterChange}
               className="border rounded px-2 py-1"
             />
-            <label for="dateTo">To Contract Sign Date:</label>
+            <label htmlFor="dateTo">To Contract Sign Date:</label>
             <input
               id="dateTo"
               type="date"

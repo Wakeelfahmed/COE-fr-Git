@@ -94,12 +94,40 @@ const ReportsView = () => {
 
     const headers = Object.keys(firstItem).filter(key => key !== '_id');
 
+    // Reorder headers to place createdBy before createdAt
+    const reorderedHeaders = [];
+    const createdByIndex = headers.indexOf('createdBy');
+    const createdAtIndex = headers.indexOf('createdAt');
+    const updatedAtIndex = headers.indexOf('updatedAt');
+
+    // Add all headers except createdBy, createdAt, and updatedAt first
+    headers.forEach(header => {
+      if (header !== 'createdBy' && header !== 'createdAt' && header !== 'updatedAt') {
+        reorderedHeaders.push(header);
+      }
+    });
+
+    // Add createdBy before createdAt
+    if (createdByIndex !== -1) {
+      reorderedHeaders.push('createdBy');
+    }
+
+    // Add createdAt after createdBy
+    if (createdAtIndex !== -1) {
+      reorderedHeaders.push('createdAt');
+    }
+
+    // Add updatedAt at the end
+    if (updatedAtIndex !== -1) {
+      reorderedHeaders.push('updatedAt');
+    }
+
     return (
       <div className="overflow-x-auto">
         <table className="min-w-full bg-white border border-gray-300">
           <thead>
             <tr className="bg-gray-100">
-              {headers.map((header) => (
+              {reorderedHeaders.map((header) => (
                 <th key={header} className="py-2 px-4 border-b text-left font-semibold">{header}</th>
               ))}
             </tr>
@@ -107,9 +135,33 @@ const ReportsView = () => {
           <tbody>
             {data.map((row, index) => (
               <tr key={index} className={index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}>
-                {headers.map((header) => {
+                {reorderedHeaders.map((header) => {
                   const cellValue = row[header];
-                  const displayValue = cellValue !== null && cellValue !== undefined ? cellValue.toString() : '';
+
+                  let displayValue;
+
+                  // Handle nested objects (like createdBy)
+                  if (typeof cellValue === 'object' && cellValue !== null) {
+                    if (header === 'createdBy') {
+                      if (cellValue.name && cellValue.id) {
+                        displayValue = `${cellValue.name} (${cellValue.id})`;
+                      } else if (cellValue.name) {
+                        displayValue = cellValue.name;
+                      } else if (cellValue.id) {
+                        displayValue = cellValue.id;
+                      } else if (typeof cellValue === 'string') {
+                        displayValue = cellValue;
+                      } else {
+                        displayValue = JSON.stringify(cellValue);
+                      }
+                    } else if (cellValue.toString) {
+                      displayValue = JSON.stringify(cellValue);
+                    } else {
+                      displayValue = '[object Object]';
+                    }
+                  } else {
+                    displayValue = cellValue !== null && cellValue !== undefined ? cellValue.toString() : '';
+                  }
 
                   // Format date fields
                   const formattedValue = isDateField(header) ? formatDate(displayValue) : displayValue;
@@ -167,10 +219,63 @@ const ReportsView = () => {
       const firstItem = selectedReport.reportData[0];
       if (firstItem && typeof firstItem === 'object') {
         const headers = Object.keys(firstItem).filter(key => key !== '_id');
+
+        // Reorder headers to place createdBy before createdAt
+        const reorderedHeaders = [];
+        const createdByIndex = headers.indexOf('createdBy');
+        const createdAtIndex = headers.indexOf('createdAt');
+        const updatedAtIndex = headers.indexOf('updatedAt');
+
+        // Add all headers except createdBy, createdAt, and updatedAt first
+        headers.forEach(header => {
+          if (header !== 'createdBy' && header !== 'createdAt' && header !== 'updatedAt') {
+            reorderedHeaders.push(header);
+          }
+        });
+
+        // Add createdBy before createdAt
+        if (createdByIndex !== -1) {
+          reorderedHeaders.push('createdBy');
+        }
+
+        // Add createdAt after createdBy
+        if (createdAtIndex !== -1) {
+          reorderedHeaders.push('createdAt');
+        }
+
+        // Add updatedAt at the end
+        if (updatedAtIndex !== -1) {
+          reorderedHeaders.push('updatedAt');
+        }
+
         const data = selectedReport.reportData.map(row =>
-          headers.map(header => {
+          reorderedHeaders.map(header => {
             const cellData = row[header];
-            const displayValue = cellData !== null && cellData !== undefined ? cellData.toString() : '';
+
+            let displayValue;
+
+            // Handle nested objects (like createdBy)
+            if (typeof cellData === 'object' && cellData !== null) {
+              if (header === 'createdBy') {
+                if (cellData.name && cellData.id) {
+                  displayValue = `${cellData.name} (${cellData.id})`;
+                } else if (cellData.name) {
+                  displayValue = cellData.name;
+                } else if (cellData.id) {
+                  displayValue = cellData.id;
+                } else if (typeof cellData === 'string') {
+                  displayValue = cellData;
+                } else {
+                  displayValue = JSON.stringify(cellData);
+                }
+              } else if (cellData.toString) {
+                displayValue = JSON.stringify(cellData);
+              } else {
+                displayValue = '[object Object]';
+              }
+            } else {
+              displayValue = cellData !== null && cellData !== undefined ? cellData.toString() : '';
+            }
 
             // Format date fields for PDF
             return isDateField(header) ? formatDate(displayValue) : displayValue;
@@ -178,12 +283,12 @@ const ReportsView = () => {
         );
 
         doc.autoTable({
-          head: [headers],
+          head: [reorderedHeaders],
           body: data,
           startY: yPos + 10,
           margin: { left: marginX, right: marginX },
           styles: { fontSize: 8, cellPadding: 2 },
-          columnStyles: headers.reduce((acc, header, index) => {
+          columnStyles: reorderedHeaders.reduce((acc, header, index) => {
             acc[index] = { cellWidth: 'auto' };
             return acc;
           }, {}),
@@ -216,10 +321,63 @@ const ReportsView = () => {
     }
 
     const headers = Object.keys(firstItem).filter(key => key !== '_id');
-    const csvData = [headers, ...selectedReport.reportData.map(row =>
-      headers.map(header => {
+
+    // Reorder headers to place createdBy before createdAt
+    const reorderedHeaders = [];
+    const createdByIndex = headers.indexOf('createdBy');
+    const createdAtIndex = headers.indexOf('createdAt');
+    const updatedAtIndex = headers.indexOf('updatedAt');
+
+    // Add all headers except createdBy, createdAt, and updatedAt first
+    headers.forEach(header => {
+      if (header !== 'createdBy' && header !== 'createdAt' && header !== 'updatedAt') {
+        reorderedHeaders.push(header);
+      }
+    });
+
+    // Add createdBy before createdAt
+    if (createdByIndex !== -1) {
+      reorderedHeaders.push('createdBy');
+    }
+
+    // Add createdAt after createdBy
+    if (createdAtIndex !== -1) {
+      reorderedHeaders.push('createdAt');
+    }
+
+    // Add updatedAt at the end
+    if (updatedAtIndex !== -1) {
+      reorderedHeaders.push('updatedAt');
+    }
+
+    const csvData = [reorderedHeaders, ...selectedReport.reportData.map(row =>
+      reorderedHeaders.map(header => {
         const cellData = row[header];
-        const displayValue = cellData !== null && cellData !== undefined ? cellData.toString() : '';
+
+        let displayValue;
+
+        // Handle nested objects (like createdBy)
+        if (typeof cellData === 'object' && cellData !== null) {
+          if (header === 'createdBy') {
+            if (cellData.name && cellData.id) {
+              displayValue = `${cellData.name} (${cellData.id})`;
+            } else if (cellData.name) {
+              displayValue = cellData.name;
+            } else if (cellData.id) {
+              displayValue = cellData.id;
+            } else if (typeof cellData === 'string') {
+              displayValue = cellData;
+            } else {
+              displayValue = JSON.stringify(cellData);
+            }
+          } else if (cellData.toString) {
+            displayValue = JSON.stringify(cellData);
+          } else {
+            displayValue = '[object Object]';
+          }
+        } else {
+          displayValue = cellData !== null && cellData !== undefined ? cellData.toString() : '';
+        }
 
         // Format date fields for CSV
         return isDateField(header) ? formatDate(displayValue) : displayValue;

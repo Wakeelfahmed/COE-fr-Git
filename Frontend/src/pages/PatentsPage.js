@@ -162,7 +162,7 @@ const PatentsView = () => {
 
     setCurrentPatent({
       ...patent,
-      coInventor: patent?.coInventor?.join(', '),
+      coInventor: patent?.coInventor ? patent.coInventor.join(', ') : '',
       dateOfSubmission: formatDateForInput(patent.dateOfSubmission),
       dateOfApproval: formatDateForInput(patent.dateOfApproval)
     });
@@ -184,7 +184,9 @@ const PatentsView = () => {
     e.preventDefault();
     const patentData = {
       ...currentPatent,
-      coInventor: currentPatent?.coInventor?.split(',').map(member => member.trim())
+      coInventor: currentPatent?.coInventor
+        ? currentPatent.coInventor.split(',').map(member => member.trim()).filter(member => member.length > 0)
+        : []
     };
 
     try {
@@ -344,7 +346,7 @@ const PatentsView = () => {
               <option value="National">National</option>
               <option value="International">International</option>
             </select>
-            <label for="dateFrom">From Submission Date:</label>
+            <label htmlFor="dateFrom">From Submission Date:</label>
             <input
               type="date"
               placeholder="From Date"
@@ -353,7 +355,7 @@ const PatentsView = () => {
               onChange={handleFilterChange}
               className="border rounded px-2 py-1"
             />
-            <label for="dateTo">To Submission Date:</label>
+            <label htmlFor="dateTo">To Submission Date:</label>
             <input
               type="date"
               placeholder="To Date"

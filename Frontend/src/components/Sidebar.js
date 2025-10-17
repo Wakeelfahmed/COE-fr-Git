@@ -10,6 +10,7 @@ const activityItems = [
   { name: 'Internships', path: '/internships' },
   { name: 'Events', path: '/events' },
   { name: 'Trainings Conducted', path: '/trainings-conducted' },
+  { name: 'Competitions', path: '/competitions' },
 ];
 
 const otherItems = [
