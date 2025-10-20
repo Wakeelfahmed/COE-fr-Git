@@ -3,6 +3,7 @@ import axios from 'axios';
 import { useUser } from '../context/UserContext';
 import { FaInfoCircle } from 'react-icons/fa';
 import Select from 'react-select';
+import AccountFilter from '../components/AccountFilter';
 
 axios.defaults.withCredentials = true;
 const API_BASE_URL = process.env.REACT_APP_BACKEND;
@@ -459,59 +460,12 @@ const CollaborationPage = () => {
               onChange={handleFilterChange}
               className="border rounded px-2 py-1"
             />
-            <select
-              name="accountFilter"
-              value={filterCriteria.accountFilter}
-              onChange={handleFilterChange}
-              className="border rounded px-2 py-1"
-            >
-              <option value="">All Accounts</option>
-              {accounts.map((account) => (
-                <option key={account._id} value={account._id}>
-                  {account.firstName} {account.lastName} ({account.email})
-                </option>
-              ))}
-            </select>
-            <label for="dateFrom">From Start Date:</label>
-            <input
-              type="date"
-              placeholder="From Date"
-              name="dateFrom"
-              value={filterCriteria.dateFrom}
-              onChange={handleFilterChange}
-              className="border rounded px-2 py-1"
-            />
-            <label for="dateTo">To Start Date:</label>
-            <input
-              id="dateTo"
-              type="date"
-              name="dateTo"
-              value={filterCriteria.dateTo}
-              onChange={handleFilterChange}
-              className="border rounded px-2 py-1"
-            />
-            <div className="flex gap-2">
-              <select
-                name="collaborationScope"
-                value={filterCriteria.collaborationScope}
+            {user?.role === 'director' && (
+              <AccountFilter
+                value={filterCriteria.accountFilter}
                 onChange={handleFilterChange}
-                className="border rounded px-2 py-1 flex-1"
-              >
-                <option value="">All Scopes</option>
-                <option value="local">Local</option>
-                <option value="foreign">Foreign</option>
-              </select>
-              {filterCriteria.collaborationScope === 'foreign' && (
-                <input
-                  type="text"
-                  placeholder="Filter by Country"
-                  name="collaboratingCountry"
-                  value={filterCriteria.collaboratingCountry}
-                  onChange={handleFilterChange}
-                  className="border rounded px-2 py-1 flex-1"
-                />
-              )}
-            </div>
+              />
+            )}
           </div>
           <button onClick={clearFilters} className="bg-gray-300 text-gray-700 px-4 py-2 rounded">
             Clear Filters

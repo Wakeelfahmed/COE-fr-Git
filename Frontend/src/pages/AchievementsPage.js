@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useUser } from '../context/UserContext';
+import AccountFilter from '../components/AccountFilter';
 
 axios.defaults.withCredentials = true;
 const API_BASE_URL = process.env.REACT_APP_BACKEND;
@@ -20,6 +21,17 @@ const AchievementsPage = () => {
   const [isEditMode, setIsEditMode] = useState(false);
   const { user } = useUser();
   const [showOnlyMine, setShowOnlyMine] = useState(false);
+
+  // Debug logging
+  console.log('AchievementsPage Debug:', {
+    user: user,
+    userRole: user?.role,
+    isDirector: user?.role === 'director',
+    userType: typeof user?.role,
+    userExists: !!user,
+    hasRole: !!user?.role
+  });
+
   const [showFilters, setShowFilters] = useState(false);
   const [showReportModal, setShowReportModal] = useState(false);
   const [reportTitle, setReportTitle] = useState('');
@@ -28,7 +40,8 @@ const AchievementsPage = () => {
     organizer: '',
     participantOfEvent: '',
     participantFromCoEAI: '',
-    roleOfParticipantFromCoEAI: ''
+    roleOfParticipantFromCoEAI: '',
+    accountFilter: '' // Add account filter
   });
 
   useEffect(() => {
@@ -132,7 +145,8 @@ const AchievementsPage = () => {
       organizer: '',
       participantOfEvent: '',
       participantFromCoEAI: '',
-      roleOfParticipantFromCoEAI: ''
+      roleOfParticipantFromCoEAI: '',
+      accountFilter: ''
     });
   };
 
@@ -166,7 +180,8 @@ const AchievementsPage = () => {
            (achievement.organizer || '').toLowerCase().includes(filterCriteria.organizer.toLowerCase()) &&
            (achievement.participantOfEvent || '').toLowerCase().includes(filterCriteria.participantOfEvent.toLowerCase()) &&
            (achievement.participantFromCoEAI || '').toLowerCase().includes(filterCriteria.participantFromCoEAI.toLowerCase()) &&
-           (achievement.roleOfParticipantFromCoEAI || '').toLowerCase().includes(filterCriteria.roleOfParticipantFromCoEAI.toLowerCase());
+           (achievement.roleOfParticipantFromCoEAI || '').toLowerCase().includes(filterCriteria.roleOfParticipantFromCoEAI.toLowerCase()) &&
+           (filterCriteria.accountFilter === '' || (achievement.createdBy?.id === filterCriteria.accountFilter));
   });
 
   return (
@@ -177,7 +192,7 @@ const AchievementsPage = () => {
           <button onClick={handleNewAchievement} className="bg-blue-600 text-white px-4 py-2 rounded mr-2">
             New Achievement
           </button>
-          {user?.role === 'director' && (
+            {user?.role && user.role === 'director' && (
             <button 
               onClick={() => setShowOnlyMine(!showOnlyMine)} 
               className="bg-green-600 text-white px-4 py-2 rounded mr-2"
@@ -193,7 +208,7 @@ const AchievementsPage = () => {
 
       {showFilters && (
         <div className="mb-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2 mb-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2 mb-2">
             <input
               type="text"
               placeholder="Filter by Event"
@@ -234,6 +249,22 @@ const AchievementsPage = () => {
               onChange={handleFilterChange}
               className="border rounded px-2 py-1"
             />
+            {/* Debug: Check if director condition is met */}
+            {(() => {
+              console.log('Director check in render:', {
+                userRole: user?.role,
+                isDirector: user?.role === 'director',
+                conditionResult: user?.role === 'director',
+                hasRole: !!user?.role
+              });
+              return null;
+            })()}
+            {user?.role && user.role === 'director' && (
+              <AccountFilter
+                value={filterCriteria.accountFilter}
+                onChange={handleFilterChange}
+              />
+            )}
           </div>
           <button onClick={clearFilters} className="bg-gray-300 text-gray-700 px-4 py-2 rounded">
             Clear Filters

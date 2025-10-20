@@ -3,6 +3,7 @@ import axios from 'axios';
 import { useUser } from '../context/UserContext';
 import { storage } from '../firebaseConfig';
 import { ref, uploadBytes, getDownloadURL,deleteObject, getMetadata } from "firebase/storage";
+import AccountFilter from '../components/AccountFilter';
 
 axios.defaults.withCredentials = true;
 const API_BASE_URL = process.env.REACT_APP_BACKEND;
@@ -138,7 +139,8 @@ const ProjectsView = () => {
     teamLead: '',
     clientCompany: '',
     dateFrom: '',
-    dateTo: ''
+    dateTo: '',
+    accountFilter: '' // Add account filter
   });
   const [selectedFiles, setSelectedFiles] = useState({});
 
@@ -329,7 +331,8 @@ const ProjectsView = () => {
       teamLead: '',
       clientCompany: '',
       dateFrom: '',
-      dateTo: ''
+      dateTo: '',
+      accountFilter: ''
     });
   };
 
@@ -424,7 +427,8 @@ const ProjectsView = () => {
       (project.teamLead || '').toLowerCase().includes((filterCriteria.teamLead || '').toLowerCase()) &&
       (project.clientCompany || '').toLowerCase().includes((filterCriteria.clientCompany || '').toLowerCase()) &&
       (filterCriteria.dateFrom === '' || project.dateOfContractSign >= filterCriteria.dateFrom) &&
-      (filterCriteria.dateTo === '' || project.dateOfContractSign <= filterCriteria.dateTo);
+      (filterCriteria.dateTo === '' || project.dateOfContractSign <= filterCriteria.dateTo) &&
+      (filterCriteria.accountFilter === '' || (project.createdBy?.id === filterCriteria.accountFilter));
   });
 
   return (
@@ -451,7 +455,7 @@ const ProjectsView = () => {
 
       {showFilters && (
         <div className="mb-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2 mb-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2 mb-2">
             <input
               type="text"
               placeholder="Filter by Project Title"
@@ -476,6 +480,12 @@ const ProjectsView = () => {
               onChange={handleFilterChange}
               className="border rounded px-2 py-1"
             />
+            {user?.role && user.role === 'director' && (
+              <AccountFilter
+                value={filterCriteria.accountFilter}
+                onChange={handleFilterChange}
+              />
+            )}
             <label htmlFor="dateFrom">From Contract Sign Date:</label>
             <input
               type="date"

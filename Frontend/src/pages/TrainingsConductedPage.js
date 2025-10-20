@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useUser } from '../context/UserContext';
+import AccountFilter from '../components/AccountFilter';
 
 axios.defaults.withCredentials = true;
 const API_BASE_URL = process.env.REACT_APP_BACKEND;
@@ -26,7 +27,8 @@ const TrainingsConductedPage = () => {
     resourcePersons: '',
     targetSDG: '',
     dateFrom: '',
-    dateTo: ''
+    dateTo: '',
+    accountFilter: '' // Add account filter
   });
 
   const { user } = useUser();
@@ -172,7 +174,8 @@ const TrainingsConductedPage = () => {
       resourcePersons: '',
       targetSDG: '',
       dateFrom: '',
-      dateTo: ''
+      dateTo: '',
+      accountFilter: ''
     });
   };
 
@@ -232,7 +235,8 @@ const TrainingsConductedPage = () => {
            (training.organizer || '').toLowerCase().includes((filterCriteria.organizer || '').toLowerCase()) &&
            (training.resourcePersons || '').toLowerCase().includes((filterCriteria.resourcePersons || '').toLowerCase()) &&
            targetSDGMatch &&
-           passDateFilters;
+           passDateFilters &&
+           (filterCriteria.accountFilter === '' || (training.createdBy?.id === filterCriteria.accountFilter));
   });
 
   return (
@@ -259,7 +263,7 @@ const TrainingsConductedPage = () => {
 
       {showFilters && (
         <div className="mb-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-2 mb-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-8 gap-2 mb-2">
             <input
               type="text"
               placeholder="Filter by Attendees"
@@ -293,6 +297,12 @@ const TrainingsConductedPage = () => {
               onChange={handleFilterChange}
               className="border rounded px-2 py-1"
             />
+            {user?.role && user.role === 'director' && (
+              <AccountFilter
+                value={filterCriteria.accountFilter}
+                onChange={handleFilterChange}
+              />
+            )}
             <label htmlFor="dateFrom">From Date:</label>
             <input
               type="date"

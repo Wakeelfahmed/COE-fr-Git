@@ -3,6 +3,7 @@ import axios from 'axios';
 import { useUser } from '../context/UserContext';
 import { storage } from '../firebaseConfig';
 import { ref, uploadBytes, getDownloadURL, deleteObject, getMetadata } from "firebase/storage";
+import AccountFilter from '../components/AccountFilter';
 
 axios.defaults.withCredentials = true;
 const API_BASE_URL = process.env.REACT_APP_BACKEND;
@@ -59,7 +60,8 @@ const PublicationsView = () => {
     author: '',
     typeOfPublication: '',
     dateFrom: '',
-    dateTo: ''
+    dateTo: '',
+    accountFilter: '' // Add account filter
   });
   const [selectedFiles, setSelectedFiles] = useState({});
   const [fileOperations, setFileOperations] = useState({});
@@ -211,7 +213,8 @@ const PublicationsView = () => {
       author: '',
       typeOfPublication: '',
       dateFrom: '',
-      dateTo: ''
+      dateTo: '',
+      accountFilter: ''
     });
   };
 
@@ -278,7 +281,8 @@ const PublicationsView = () => {
     return publication.author.toLowerCase().includes(filterCriteria.author.toLowerCase()) &&
            publication.typeOfPublication.toLowerCase().includes(filterCriteria.typeOfPublication.toLowerCase()) &&
            (filterCriteria.dateFrom === '' || publication.dateOfPublication >= filterCriteria.dateFrom) &&
-           (filterCriteria.dateTo === '' || publication.dateOfPublication <= filterCriteria.dateTo);
+           (filterCriteria.dateTo === '' || publication.dateOfPublication <= filterCriteria.dateTo) &&
+           (filterCriteria.accountFilter === '' || (publication.createdBy?.id === filterCriteria.accountFilter));
   });
 
 
@@ -338,7 +342,7 @@ const PublicationsView = () => {
 
       {showFilters && (
         <div className="mb-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 mb-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2 mb-2">
             <input
               type="text"
               placeholder="Filter by Author"
@@ -355,6 +359,12 @@ const PublicationsView = () => {
               onChange={handleFilterChange}
               className="border rounded px-2 py-1"
             />
+            {user?.role && user.role === 'director' && (
+              <AccountFilter
+                value={filterCriteria.accountFilter}
+                onChange={handleFilterChange}
+              />
+            )}
             <label for="dateFrom">From Date of Publication:</label>
             <input
               type="date"
@@ -364,7 +374,7 @@ const PublicationsView = () => {
               onChange={handleFilterChange}
               className="border rounded px-2 py-1"
             />
-            <label for="dateTo">From Date of Publication:</label>
+            <label for="dateTo">To Date of Publication:</label>
             <input
               type="date"
               placeholder="To Date"

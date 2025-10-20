@@ -3,6 +3,7 @@ import axios from 'axios';
 import { useUser } from '../context/UserContext';
 import { storage } from '../firebaseConfig';
 import { ref, uploadBytes, getDownloadURL, deleteObject, getMetadata } from "firebase/storage";
+import AccountFilter from '../components/AccountFilter';
 
 axios.defaults.withCredentials = true;
 const API_BASE_URL = process.env.REACT_APP_BACKEND;
@@ -65,7 +66,8 @@ const PatentsView = () => {
     inventor: '',
     scope: '',
     dateFrom: '',
-    dateTo: ''
+    dateTo: '',
+    accountFilter: '' // Add account filter
   });
   const [selectedFiles, setSelectedFiles] = useState({});
 
@@ -244,7 +246,8 @@ const PatentsView = () => {
       inventor: '',
       scope: '',
       dateFrom: '',
-      dateTo: ''
+      dateTo: '',
+      accountFilter: ''
     });
   };
 
@@ -306,7 +309,8 @@ const PatentsView = () => {
            (patent.inventor || '').toLowerCase().includes((filterCriteria.inventor || '').toLowerCase()) &&
            (patent.scope || '').toLowerCase().includes((filterCriteria.scope || '').toLowerCase()) &&
            (filterCriteria.dateFrom === '' || patent.dateOfSubmission >= filterCriteria.dateFrom) &&
-           (filterCriteria.dateTo === '' || patent.dateOfSubmission <= filterCriteria.dateTo);
+           (filterCriteria.dateTo === '' || patent.dateOfSubmission <= filterCriteria.dateTo) &&
+           (filterCriteria.accountFilter === '' || (patent.createdBy?.id === filterCriteria.accountFilter));
   });
 
   return (
@@ -333,7 +337,7 @@ const PatentsView = () => {
 
       {showFilters && (
         <div className="mb-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2 mb-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2 mb-2">
             <input
               type="text"
               placeholder="Filter by Title"
@@ -360,6 +364,12 @@ const PatentsView = () => {
               <option value="National">National</option>
               <option value="International">International</option>
             </select>
+            {user?.role && user.role === 'director' && (
+              <AccountFilter
+                value={filterCriteria.accountFilter}
+                onChange={handleFilterChange}
+              />
+            )}
             <label htmlFor="dateFrom">From Submission Date:</label>
             <input
               type="date"

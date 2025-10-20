@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useUser } from '../context/UserContext';
+import AccountFilter from '../components/AccountFilter';
 
 axios.defaults.withCredentials = true;
 const API_BASE_URL = process.env.REACT_APP_BACKEND;
@@ -27,7 +28,8 @@ const CompetitionsPage = () => {
     participants: '',
     scope: '',
     dateFrom: '',
-    dateTo: ''
+    dateTo: '',
+    accountFilter: '' // Add account filter
   });
 
   const { user } = useUser();
@@ -156,7 +158,8 @@ const CompetitionsPage = () => {
       participants: '',
       scope: '',
       dateFrom: '',
-      dateTo: ''
+      dateTo: '',
+      accountFilter: ''
     });
   };
 
@@ -201,7 +204,8 @@ const CompetitionsPage = () => {
            (competition.participants || '').toLowerCase().includes((filterCriteria.participants || '').toLowerCase()) &&
            (competition.scope || '').toLowerCase().includes((filterCriteria.scope || '').toLowerCase()) &&
            (filterCriteria.dateFrom === '' || competition.date >= filterCriteria.dateFrom) &&
-           (filterCriteria.dateTo === '' || competition.date <= filterCriteria.dateTo);
+           (filterCriteria.dateTo === '' || competition.date <= filterCriteria.dateTo) &&
+           (filterCriteria.accountFilter === '' || (competition.createdBy?.id === filterCriteria.accountFilter));
   });
 
   return (
@@ -228,7 +232,7 @@ const CompetitionsPage = () => {
 
       {showFilters && (
         <div className="mb-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2 mb-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-2 mb-2">
             <input
               type="text"
               placeholder="Filter by Organizer"
@@ -265,6 +269,12 @@ const CompetitionsPage = () => {
               <option value="International">International</option>
               <option value="Other">Other</option>
             </select>
+            {user?.role && user.role === 'director' && (
+              <AccountFilter
+                value={filterCriteria.accountFilter}
+                onChange={handleFilterChange}
+              />
+            )}
             <label htmlFor="dateFrom">From Date:</label>
             <input
               type="date"

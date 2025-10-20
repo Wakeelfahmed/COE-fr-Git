@@ -3,6 +3,7 @@ import axios from 'axios';
 import { useUser } from '../context/UserContext';
 import { storage } from '../firebaseConfig';
 import { ref, uploadBytes, getDownloadURL, deleteObject, getMetadata } from "firebase/storage";
+import AccountFilter from '../components/AccountFilter';
 
 axios.defaults.withCredentials = true;
 const API_BASE_URL = process.env.REACT_APP_BACKEND;
@@ -64,7 +65,8 @@ const EventsView = () => {
     resourcePerson: '',
     mode: '',
     dateFrom: '',
-    dateTo: ''
+    dateTo: '',
+    accountFilter: '' // Add account filter
   });
   const [selectedFiles, setSelectedFiles] = useState({});
 
@@ -237,7 +239,8 @@ const EventsView = () => {
       resourcePerson: '',
       mode: '',
       dateFrom: '',
-      dateTo: ''
+      dateTo: '',
+      accountFilter: ''
     });
   };
 
@@ -321,7 +324,8 @@ const EventsView = () => {
     const passFrom = !hasFrom || (evDate && evDate >= fromDate);
     const passTo = !hasTo || (evDate && evDate <= toDate);
 
-    return passTextFilters && passFrom && passTo;
+    return passTextFilters && passFrom && passTo &&
+           (filterCriteria.accountFilter === '' || (event.createdBy?.id === filterCriteria.accountFilter));
   });
 
   return (
@@ -348,7 +352,7 @@ const EventsView = () => {
 
       {showFilters && (
         <div className="mb-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2 mb-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-2 mb-2">
             <select
               name="type"
               value={filterCriteria.type}
@@ -386,6 +390,12 @@ const EventsView = () => {
               <option value="Onsite">Onsite</option>
               <option value="Online">Online</option>
             </select>
+            {user?.role && user.role === 'director' && (
+              <AccountFilter
+                value={filterCriteria.accountFilter}
+                onChange={handleFilterChange}
+              />
+            )}
             <label for="dateFrom">From Event Date:</label>
             <input
               type="date"

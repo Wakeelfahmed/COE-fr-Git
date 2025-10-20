@@ -3,6 +3,7 @@ import axios from 'axios';
 import { useUser } from '../context/UserContext';
 import { storage } from '../firebaseConfig';
 import { ref, uploadBytes, getDownloadURL, deleteObject, getMetadata } from "firebase/storage";
+import AccountFilter from '../components/AccountFilter';
 
 axios.defaults.withCredentials = true;
 const API_BASE_URL = process.env.REACT_APP_BACKEND;
@@ -66,7 +67,8 @@ const FundingsView = () => {
     fundingSource: '',
     team: '',
     dateFrom: '',
-    dateTo: ''
+    dateTo: '',
+    accountFilter: '' // Add account filter
   });
   const [selectedFiles, setSelectedFiles] = useState({});
 
@@ -235,7 +237,8 @@ const FundingsView = () => {
       fundingSource: '',
       team: '',
       dateFrom: '',
-      dateTo: ''
+      dateTo: '',
+      accountFilter: ''
     });
   };
 
@@ -298,7 +301,8 @@ const FundingsView = () => {
            (fundedProject.fundingSource || '').toLowerCase().includes((filterCriteria.fundingSource || '').toLowerCase()) &&
            (fundedProject.team || '').toLowerCase().includes((filterCriteria.team || '').toLowerCase()) &&
            (filterCriteria.dateFrom === '' || fundedProject.dateOfSubmission >= filterCriteria.dateFrom) &&
-           (filterCriteria.dateTo === '' || fundedProject.dateOfSubmission <= filterCriteria.dateTo);
+           (filterCriteria.dateTo === '' || fundedProject.dateOfSubmission <= filterCriteria.dateTo) &&
+           (filterCriteria.accountFilter === '' || (fundedProject.createdBy?.id === filterCriteria.accountFilter));
   });
 
 
@@ -332,7 +336,7 @@ const FundingsView = () => {
 
       {showFilters && (
         <div className="mb-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2 mb-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-2 mb-2">
             <input
               type="text"
               placeholder="Filter by Project Title"
@@ -357,6 +361,12 @@ const FundingsView = () => {
               onChange={handleFilterChange}
               className="border rounded px-2 py-1"
             />
+            {user?.role && user.role === 'director' && (
+              <AccountFilter
+                value={filterCriteria.accountFilter}
+                onChange={handleFilterChange}
+              />
+            )}
             <label for="dateFrom">From Submission Date:</label>
             <input
               type="date"
@@ -366,7 +376,7 @@ const FundingsView = () => {
               onChange={handleFilterChange}
               className="border rounded px-2 py-1"
             />
-            <label for="dateTo">From Submission Date:</label>
+            <label for="dateTo">To Submission Date:</label>
             <input
               type="date"
               placeholder="To Date"

@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useUser } from '../context/UserContext';
+import AccountFilter from '../components/AccountFilter';
 
 axios.defaults.withCredentials = true;
 const API_BASE_URL = process.env.REACT_APP_BACKEND;
@@ -26,7 +27,8 @@ const EventsPage = () => {
     organizer: '',
     resourcePerson: '',
     role: '',
-    type: ''
+    type: '',
+    accountFilter: '' // Add account filter
   });
 
   const { user } = useUser();
@@ -154,7 +156,8 @@ const EventsPage = () => {
       organizer: '',
       resourcePerson: '',
       role: '',
-      type: ''
+      type: '',
+      accountFilter: ''
     });
   };
 
@@ -188,7 +191,8 @@ const EventsPage = () => {
       (event.organizer || '').toLowerCase().includes((filterCriteria.organizer || '').toLowerCase()) &&
       (event.resourcePerson || '').toLowerCase().includes((filterCriteria.resourcePerson || '').toLowerCase()) &&
       (event.role || '').toLowerCase().includes((filterCriteria.role || '').toLowerCase()) &&
-      (event.type || '').toLowerCase().includes((filterCriteria.type || '').toLowerCase());
+      (event.type || '').toLowerCase().includes((filterCriteria.type || '').toLowerCase()) &&
+      (filterCriteria.accountFilter === '' || (event.createdBy?.id === filterCriteria.accountFilter));
   });
 
   return (
@@ -215,7 +219,7 @@ const EventsPage = () => {
 
       {showFilters && (
         <div className="mb-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2 mb-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2 mb-2">
             <input
               type="text"
               placeholder="Filter by Activity"
@@ -252,6 +256,12 @@ const EventsPage = () => {
               <option value="participant">Participant</option>
               <option value="other">Other</option>
             </select>
+            {user?.role && user.role === 'director' && (
+              <AccountFilter
+                value={filterCriteria.accountFilter}
+                onChange={handleFilterChange}
+              />
+            )}
             <input
               type="text"
               placeholder="Filter by Type"

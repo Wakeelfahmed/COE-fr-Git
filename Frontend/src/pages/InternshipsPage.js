@@ -3,6 +3,7 @@ import axios from 'axios';
 import { useUser } from '../context/UserContext';
 import { storage } from '../firebaseConfig';
 import { ref, uploadBytes, getDownloadURL, deleteObject, getMetadata } from "firebase/storage";
+import AccountFilter from '../components/AccountFilter';
 
 axios.defaults.withCredentials = true;
 const API_BASE_URL = process.env.REACT_APP_BACKEND;
@@ -63,7 +64,8 @@ const InternshipView = () => {
     year: '',
     applicantName: '',
     supervisor: '',
-    centerName: ''
+    centerName: '',
+    accountFilter: '' // Add account filter
   });
   const [selectedFiles, setSelectedFiles] = useState({});
 
@@ -202,7 +204,8 @@ const InternshipView = () => {
       year: '',
       applicantName: '',
       supervisor: '',
-      centerName: ''
+      centerName: '',
+      accountFilter: ''
     });
   };
 
@@ -264,7 +267,8 @@ const InternshipView = () => {
       (filterCriteria.year === '' || internship.year.toString().includes(filterCriteria.year)) &&
       internship.applicantName.toLowerCase().includes(filterCriteria.applicantName.toLowerCase()) &&
       internship.supervisor.toLowerCase().includes(filterCriteria.supervisor.toLowerCase()) &&
-      internship.centerName.toLowerCase().includes(filterCriteria.centerName.toLowerCase())
+      internship.centerName.toLowerCase().includes(filterCriteria.centerName.toLowerCase()) &&
+      (filterCriteria.accountFilter === '' || (internship.createdBy?.id === filterCriteria.accountFilter))
     );
   });
 
@@ -292,7 +296,7 @@ const InternshipView = () => {
 
       {showFilters && (
         <div className="mb-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2 mb-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-2 mb-2">
             <input
               type="number"
               placeholder="Filter by Year"
@@ -325,6 +329,12 @@ const InternshipView = () => {
               onChange={handleFilterChange}
               className="border rounded px-2 py-1"
             />
+            {user?.role && user.role === 'director' && (
+              <AccountFilter
+                value={filterCriteria.accountFilter}
+                onChange={handleFilterChange}
+              />
+            )}
           </div>
           <button onClick={clearFilters} className="bg-gray-300 text-gray-700 px-4 py-2 rounded">
             Clear Filters
