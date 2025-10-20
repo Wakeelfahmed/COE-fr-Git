@@ -144,61 +144,182 @@ exports.generateAccountReport = async (req, res) => {
       return res.status(404).json({ error: 'Account not found' });
     }
 
-    // Get activity counts from different collections
+    // Import all models
     const CommercializationProject = require('../models/CommercializationProject');
     const Publication = require('../models/Publication');
     const Event = require('../models/Event');
     const Collaboration = require('../models/Collaboration');
+    const Patent = require('../models/Patent');
+    const Funding = require('../models/Funding');
+    const FundingProposal = require('../models/FundingProposal');
+    const Achievement = require('../models/Achievement');
+    const TrainingsConducted = require('../models/TrainingsConducted');
+    const Intership = require('../models/Intership');
+    const TalkTrainingConference = require('../models/TalkTrainingConference');
+    const Competition = require('../models/Competition');
 
+    // Get activity counts from all collections
     const [
       projectCount,
       publicationCount,
       eventCount,
-      collaborationCount
+      collaborationCount,
+      patentCount,
+      fundingCount,
+      fundingProposalCount,
+      achievementCount,
+      trainingConductedCount,
+      internshipCount,
+      talkTrainingConferenceCount,
+      competitionCount
     ] = await Promise.all([
       CommercializationProject.countDocuments({ 'createdBy.id': accountId }),
       Publication.countDocuments({ 'createdBy.id': accountId }),
       Event.countDocuments({ 'createdBy.id': accountId }),
-      Collaboration.countDocuments({ 'createdBy.id': accountId })
+      Collaboration.countDocuments({ 'createdBy.id': accountId }),
+      Patent.countDocuments({ 'createdBy.id': accountId }),
+      Funding.countDocuments({ 'createdBy.id': accountId }),
+      FundingProposal.countDocuments({ 'createdBy.id': accountId }),
+      Achievement.countDocuments({ 'createdBy.id': accountId }),
+      TrainingsConducted.countDocuments({ 'createdBy.id': accountId }),
+      Intership.countDocuments({ 'createdBy.id': accountId }),
+      TalkTrainingConference.countDocuments({ 'createdBy.id': accountId }),
+      Competition.countDocuments({ 'createdBy.id': accountId })
     ]);
 
-    // Get all activities from each category (not just recent)
+    // Get all activities from each category
     const allActivities = [];
 
+    // Projects
     const allProjects = await CommercializationProject.find({ 'createdBy.id': accountId })
-      .sort({ createdAt: -1 }).select('projectTitle createdAt');
+      .sort({ createdAt: -1 }).select('projectTitle clientCompany dateOfContractSign createdAt');
     allProjects.forEach(p => allActivities.push({
-      type: 'Project',
+      type: 'Industry/Commercial Project',
       title: p.projectTitle,
-      date: p.createdAt,
+      clientCompany: p.clientCompany,
+      date: p.dateOfContractSign,
       status: 'Active'
     }));
 
+    // Publications
     const allPublications = await Publication.find({ 'createdBy.id': accountId })
-      .sort({ createdAt: -1 }).select('title createdAt');
+      .sort({ createdAt: -1 }).select('author publicationDetails typeOfPublication dateOfPublication');
     allPublications.forEach(p => allActivities.push({
       type: 'Publication',
-      title: p.title,
-      date: p.createdAt,
+      title: p.author || 'N/A',
+      publicationType: p.typeOfPublication,
+      date: p.dateOfPublication || p.createdAt,
       status: 'Published'
     }));
 
+    // Events
     const allEvents = await Event.find({ 'createdBy.id': accountId })
-      .sort({ createdAt: -1 }).select('activity date');
+      .sort({ createdAt: -1 }).select('activity organizer date');
     allEvents.forEach(e => allActivities.push({
       type: 'Event',
       title: e.activity,
+      organizer: e.organizer,
       date: e.date,
       status: 'Attended'
     }));
 
+    // Collaborations
     const allCollaborations = await Collaboration.find({ 'createdBy.id': accountId })
-      .sort({ createdAt: -1 }).select('memberOfCoE createdAt');
+      .sort({ createdAt: -1 }).select('memberOfCoE foreignCollaboratingInstitute durationStart currentStatus');
     allCollaborations.forEach(c => allActivities.push({
       type: 'Collaboration',
-      title: c.memberOfCoE,
-      date: c.createdAt,
+      title: c.memberOfCoE || 'N/A',
+      collaboratingInstitute: c.foreignCollaboratingInstitute,
+      date: c.durationStart || c.createdAt,
+      status: c.currentStatus || 'Active'
+    }));
+
+    // Patents
+    const allPatents = await Patent.find({ 'createdBy.id': accountId })
+      .sort({ createdAt: -1 }).select('title patentOrg dateOfSubmission');
+    allPatents.forEach(p => allActivities.push({
+      type: 'Patent',
+      title: p.title,
+      patentOrg: p.patentOrg,
+      date: p.dateOfSubmission,
+      status: 'Filed'
+    }));
+
+    // Fundings
+    const allFundings = await Funding.find({ 'createdBy.id': accountId })
+      .sort({ createdAt: -1 }).select('projectTitle fundingSource dateOfSubmission');
+    allFundings.forEach(f => allActivities.push({
+      type: 'Funding',
+      title: f.projectTitle || 'N/A',
+      fundingAgency: f.fundingSource,
+      date: f.dateOfSubmission,
       status: 'Active'
+    }));
+
+    // Funding Proposals
+    const allFundingProposals = await FundingProposal.find({ 'createdBy.id': accountId })
+      .sort({ createdAt: -1 }).select('projectTitle fundingSource team dateOfSubmission status');
+    allFundingProposals.forEach(fp => allActivities.push({
+      type: 'Funding Proposal',
+      title: fp.projectTitle,
+      fundingAgency: fp.team,
+      date: fp.dateOfSubmission,
+      status: fp.status || 'Submitted'
+    }));
+
+    // Achievements
+    const allAchievements = await Achievement.find({ 'createdBy.id': accountId })
+      .sort({ createdAt: -1 }).select('event organizer date');
+    allAchievements.forEach(a => allActivities.push({
+      type: 'Achievement',
+      title: a.event,
+      organizer: a.organizer,
+      date: a.date,
+      status: 'Achieved'
+    }));
+
+    // Trainings Conducted
+    const allTrainingsConducted = await TrainingsConducted.find({ 'createdBy.id': accountId })
+      .sort({ createdAt: -1 }).select('organizer resourcePersons date');
+    allTrainingsConducted.forEach(tc => allActivities.push({
+      type: 'Training Conducted',
+      title: tc.organizer,
+      resourcePersons: tc.resourcePersons,
+      date: tc.date,
+      status: 'Conducted'
+    }));
+
+    // Internships
+    const allInternships = await Intership.find({ 'createdBy.id': accountId })
+      .sort({ createdAt: -1 }).select('applicantName centerName year');
+    allInternships.forEach(i => allActivities.push({
+      type: 'Internship',
+      title: i.applicantName,
+      centerName: i.centerName,
+      date: new Date(i.year, 0, 1), // Convert year to date
+      status: 'Active'
+    }));
+
+    // Talks/Trainings Attended
+    const allTalksTrainings = await TalkTrainingConference.find({ 'createdBy.id': accountId })
+      .sort({ createdAt: -1 }).select('title resourcePerson date');
+    allTalksTrainings.forEach(tt => allActivities.push({
+      type: 'TalkTrainingConference',
+      title: tt.title,
+      resourcePerson: tt.resourcePerson,
+      date: tt.date,
+      status: 'Attended'
+    }));
+
+    // Competitions
+    const allCompetitions = await Competition.find({ 'createdBy.id': accountId })
+      .sort({ createdAt: -1 }).select('title organizer date');
+    allCompetitions.forEach(c => allActivities.push({
+      type: 'Competition',
+      title: c.title,
+      organizer: c.organizer,
+      date: c.date,
+      status: 'Participated'
     }));
 
     // Sort all activities by date (most recent first)
@@ -214,11 +335,21 @@ exports.generateAccountReport = async (req, res) => {
         joinDate: user.joinDate
       },
       summary: {
-        totalActivities: projectCount + publicationCount + eventCount + collaborationCount,
+        totalActivities: projectCount + publicationCount + eventCount + collaborationCount +
+                        patentCount + fundingCount + fundingProposalCount + achievementCount +
+                        trainingConductedCount + internshipCount + talkTrainingConferenceCount + competitionCount,
         projects: projectCount,
         publications: publicationCount,
         collaborations: collaborationCount,
-        events: eventCount
+        events: eventCount,
+        patents: patentCount,
+        fundings: fundingCount,
+        fundingProposals: fundingProposalCount,
+        achievements: achievementCount,
+        trainingsConducted: trainingConductedCount,
+        internships: internshipCount,
+        talkTrainingConference: talkTrainingConferenceCount,
+        competitions: competitionCount
       },
       allActivities: allActivities
     };

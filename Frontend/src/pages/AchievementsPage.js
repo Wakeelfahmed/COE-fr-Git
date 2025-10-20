@@ -22,15 +22,15 @@ const AchievementsPage = () => {
   const { user } = useUser();
   const [showOnlyMine, setShowOnlyMine] = useState(false);
 
-  // Debug logging
-  console.log('AchievementsPage Debug:', {
-    user: user,
-    userRole: user?.role,
-    isDirector: user?.role === 'director',
-    userType: typeof user?.role,
-    userExists: !!user,
-    hasRole: !!user?.role
-  });
+  // // Debug logging
+  // console.log('AchievementsPage Debug:', {
+  //   user: user,
+  //   userRole: user?.role,
+  //   isDirector: user?.role === 'director',
+  //   userType: typeof user?.role,
+  //   userExists: !!user,
+  //   hasRole: !!user?.role
+  // });
 
   const [showFilters, setShowFilters] = useState(false);
   const [showReportModal, setShowReportModal] = useState(false);

@@ -90,12 +90,12 @@ function App() {
         // console.log('App: Fetching user data');
         try {
           const response = await axios.get(`${API_BASE_URL}/auth/profile`);
-          console.log('App: User data fetched', response.data);
+          // console.log('App: User data fetched', response.data);
           const currentUser = user; // Store current user before merging
           const mergedUser = { ...currentUser, ...response.data };
-          console.log('App: Merging user data:', { prevUser: currentUser?.email, mergedUser: mergedUser?.email, mergedRole: mergedUser?.role });
+          // console.log('App: Merging user data:', { prevUser: currentUser?.email, mergedUser: mergedUser?.email, mergedRole: mergedUser?.role });
           setUser(mergedUser);
-          console.log('App: User after setUser:', mergedUser?.email, mergedUser?.role);
+          // console.log('App: User after setUser:', mergedUser?.email, mergedUser?.role);
         } catch (err) {
           // console.error('App: Failed to fetch user data', err);
           setError('Failed to load user data');
