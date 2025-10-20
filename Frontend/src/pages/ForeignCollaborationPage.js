@@ -196,18 +196,36 @@ const CollaborationPage = () => {
   const [showKeyOutcomesHint, setShowKeyOutcomesHint] = useState(false);
   const [showReportModal, setShowReportModal] = useState(false);
   const [reportTitle, setReportTitle] = useState('');
+  const [accounts, setAccounts] = useState([]);
   const [filterCriteria, setFilterCriteria] = useState({
     memberOfCoE: '',
     collaboratingForeignResearcher: '', // Changed from 'foreignResearcher'
     collaboratingCountry: '', // Changed from 'country'
     currentStatus: '', // Changed from 'status'
-    collaborationScope: ''
+    collaborationScope: '',
+    accountFilter: '' // Add account filter
   });
 
   useEffect(() => {
     fetchCollaborations();
   }, [showOnlyMine]);
 
+  useEffect(() => {
+    fetchAccounts();
+  }, []);
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape' && showModal) {
+        setShowModal(false);
+   } else if ((e.key === '~' || e.key === '`') && e.shiftKey && !showModal && !showReportModal) 
+{        handleNewCollaboration();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [showModal, showReportModal]);
   const fetchCollaborations = async () => {
     try {
       const response = await axios.get(`${API_BASE_URL}/collaborations`, {
@@ -217,6 +235,15 @@ const CollaborationPage = () => {
     } catch (error) {
       console.error('Error fetching collaborations:', error);
       alert('Error fetching collaborations. Please try again.');
+    }
+  };
+
+  const fetchAccounts = async () => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/auth/accounts`);
+      setAccounts(response.data.accounts || []);
+    } catch (error) {
+      console.error('Error fetching accounts:', error);
     }
   };
 
@@ -320,7 +347,8 @@ const CollaborationPage = () => {
       collaboratingForeignResearcher: '',
       collaboratingCountry: '',
       currentStatus: '',
-      collaborationScope: ''
+      collaborationScope: '',
+      accountFilter: ''
     });
   };
 
@@ -353,10 +381,21 @@ const CollaborationPage = () => {
     // Text filters
     const passTextFilters =
       (collab.memberOfCoE || '').toLowerCase().includes((filterCriteria.memberOfCoE || '').toLowerCase()) &&
-      (collab.collaboratingForeignResearcher || '').toLowerCase().includes((filterCriteria.foreignResearcher || '').toLowerCase()) &&
-      (collab.collaboratingCountry || '').toLowerCase().includes((filterCriteria.country || '').toLowerCase()) &&
-      (collab.currentStatus || '').toLowerCase().includes((filterCriteria.status || '').toLowerCase()) &&
-      (filterCriteria.collaborationScope === '' || (collab.collaborationScope || 'foreign') === filterCriteria.collaborationScope);
+      (collab.collaboratingForeignResearcher || '').toLowerCase().includes((filterCriteria.collaboratingForeignResearcher || '').toLowerCase()) &&
+      (collab.currentStatus || '').toLowerCase().includes((filterCriteria.currentStatus || '').toLowerCase());
+
+    // Scope filter
+    const passScopeFilter = filterCriteria.collaborationScope === '' ||
+      (collab.collaborationScope || 'foreign') === filterCriteria.collaborationScope;
+
+    // Country filter - only apply when scope is foreign
+    const passCountryFilter = filterCriteria.collaborationScope !== 'foreign' ||
+      filterCriteria.collaboratingCountry === '' ||
+      (collab.collaboratingCountry || '').toLowerCase().includes((filterCriteria.collaboratingCountry || '').toLowerCase());
+
+    // Account filter - filter by creator
+    const passAccountFilter = filterCriteria.accountFilter === '' ||
+      (collab.createdBy?.id === filterCriteria.accountFilter);
 
     // Date filters (handle undefined dates safely)
     const hasFrom = !!filterCriteria.dateFrom;
@@ -368,7 +407,7 @@ const CollaborationPage = () => {
     const passFrom = !hasFrom || (collabDate && collabDate >= fromDate);
     const passTo = !hasTo || (collabDate && collabDate <= toDate);
 
-    return passTextFilters && passFrom && passTo;
+    return passTextFilters && passScopeFilter && passCountryFilter && passAccountFilter && passFrom && passTo;
   });
 
   return (
@@ -395,7 +434,7 @@ const CollaborationPage = () => {
 
       {showFilters && (
         <div className="mb-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2 mb-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-2 mb-2">
             <input
               type="text"
               placeholder="Filter by Member of CoE"
@@ -406,7 +445,7 @@ const CollaborationPage = () => {
             />
             <input
               type="text"
-              placeholder="Filter by Foreign Researcher"
+              placeholder="Filter by Researcher"
               name="collaboratingForeignResearcher"
               value={filterCriteria.collaboratingForeignResearcher}
               onChange={handleFilterChange}
@@ -420,6 +459,19 @@ const CollaborationPage = () => {
               onChange={handleFilterChange}
               className="border rounded px-2 py-1"
             />
+            <select
+              name="accountFilter"
+              value={filterCriteria.accountFilter}
+              onChange={handleFilterChange}
+              className="border rounded px-2 py-1"
+            >
+              <option value="">All Accounts</option>
+              {accounts.map((account) => (
+                <option key={account._id} value={account._id}>
+                  {account.firstName} {account.lastName} ({account.email})
+                </option>
+              ))}
+            </select>
             <label for="dateFrom">From Start Date:</label>
             <input
               type="date"
@@ -476,8 +528,8 @@ const CollaborationPage = () => {
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">#</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Member of CoE-AI</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Foreign Researcher</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Foreign Institute</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Researcher</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Institute</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Scope</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Country</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
@@ -503,7 +555,11 @@ const CollaborationPage = () => {
                   </span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">{collab.collaboratingCountry || 'N/A'}</td>
-                <td className="px-6 py-4 whitespace-nowrap">{collab.typeOfCollaboration}</td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  {collab.typeOfCollaboration === 'Other' && collab.otherTypeDescription
+                    ? `Other: ${collab.otherTypeDescription}`
+                    : collab.typeOfCollaboration}
+                </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   {new Date(collab.durationStart).toLocaleDateString()} - {collab.durationEnd ? new Date(collab.durationEnd).toLocaleDateString() : 'Ongoing'}
                 </td>
@@ -542,7 +598,7 @@ const CollaborationPage = () => {
                 </div>
                 <div className="mb-4">
                   <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="collaboratingForeignResearcher">
-                    Collaborating Foreign Researcher
+                    Collaborating Researcher
                   </label>
                   <input
                     type="text"
@@ -556,7 +612,7 @@ const CollaborationPage = () => {
                 </div>
                 <div className="mb-4">
                   <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="foreignCollaboratingInstitute">
-                    Foreign Collaborating Institute
+                    Collaborating Institute
                   </label>
                   <input
                     type="text"

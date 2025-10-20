@@ -19,6 +19,7 @@ import CollaborationPage from './pages/ForeignCollaborationPage';
 import AchievementsPage from './pages/AchievementsPage';
 import TrainingsConductedPage from './pages/TrainingsConductedPage';
 import CompetitionsPage from './pages/CompetitionsPage';
+import AccountReportsPage from './pages/AccountReportsPage';
 import AuthRedirect from './authRedirect';
 import { UserProvider, useUser } from './context/UserContext';
 import Loading from './components/Loading';
@@ -96,6 +97,7 @@ function App() {
                   <Route path="/publications" element={<PublicationsPage />} />
                   <Route path="/competitions" element={<CompetitionsPage />} />
                   <Route path="/reports" element={<ReportsPage />} />
+                  <Route path="/account-reports" element={<AccountReportsPage />} />
                   <Route path="/" element={<Navigate to="/projects" replace />} />
                 </Routes>
               </main>

@@ -137,13 +137,18 @@ const ReportsView = () => {
               <tr key={index} className={index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}>
                 {reorderedHeaders.map((header) => {
                   const cellValue = row[header];
-
+ if (header === 'createdBy') {
+        console.log('createdBy cell:', cellValue);
+      }
                   let displayValue;
 
                   // Handle nested objects (like createdBy)
                   if (typeof cellValue === 'object' && cellValue !== null) {
                     if (header === 'createdBy') {
-                      if (cellValue.name && cellValue.id) {
+                      if(cellValue.name && cellValue.email){
+                        displayValue = `${cellValue.name} (${cellValue.email})`;
+                      }
+                      else if (cellValue.name && cellValue.id) {
                         displayValue = `${cellValue.name} (${cellValue.id})`;
                       } else if (cellValue.name) {
                         displayValue = cellValue.name;
@@ -359,7 +364,9 @@ const ReportsView = () => {
         // Handle nested objects (like createdBy)
         if (typeof cellData === 'object' && cellData !== null) {
           if (header === 'createdBy') {
-            if (cellData.name && cellData.id) {
+            if (cellData.name && cellData.id && cellData.email) {
+              displayValue = `${cellData.name} (${cellData.id}) (${cellData.email})`;
+            } else if (cellData.name && cellData.id) {
               displayValue = `${cellData.name} (${cellData.id})`;
             } else if (cellData.name) {
               displayValue = cellData.name;

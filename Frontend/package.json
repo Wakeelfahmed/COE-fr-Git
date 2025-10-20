@@ -1,5 +1,5 @@
 {
-  "name": "internship",
+  "name": "coe-ai-CMS",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
@@ -10,7 +10,7 @@
     "@testing-library/user-event": "^13.5.0",
     "autoprefixer": "^10.4.20",
     "axios": "^1.7.7",
-    "firebase": "^10.13.1",
+    "firebase": "^10.14.1",
     "jspdf": "^2.5.2",
     "jspdf-autotable": "^3.8.3",
     "lucide-react": "^0.438.0",

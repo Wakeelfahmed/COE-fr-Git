@@ -11,7 +11,6 @@ const Login = () => {
   const [formData, setFormData] = useState({
     email: '',
     password: '',
-    role: '',
   });
   const [errors, setErrors] = useState({});
   const navigate = useNavigate();
@@ -31,11 +30,6 @@ const Login = () => {
     // Password validation
     if (!formData.password) {
       newErrors.password = 'Password is required';
-    }
-
-    // Role validation
-    if (!formData.role) {
-      newErrors.role = 'Role is required';
     }
 
     setErrors(newErrors);
@@ -61,7 +55,6 @@ const Login = () => {
         const response = await axios.post(`${process.env.REACT_APP_BACKEND}/auth/login`, {
           email: formData.email,
           password: formData.password,
-          role: formData.role,
         });
 
         // Cookie is set automatically by the backend
@@ -106,19 +99,6 @@ const Login = () => {
               value={formData.password}
               onChange={handleChange}
               error={errors.password}
-            />
-            <SelectField
-              name="role"
-              value={formData.role}
-              onChange={handleChange}
-              error={errors.role}
-              options={[
-                { value: "", label: "Select Role" },
-                { value: "director", label: "Director" },
-                { value: "department head", label: "Department Head" },
-                { value: "wing head", label: "Wing Head" },
-                { value: "RO/Dev", label: "RO/Dev" }
-              ]}
             />
           </div>
           {errors.submit && (

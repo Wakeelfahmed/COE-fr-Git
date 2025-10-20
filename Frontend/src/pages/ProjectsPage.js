@@ -199,6 +199,19 @@ const ProjectsView = () => {
     fetchProjects();
   }, [showOnlyMine]);
 
+    // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape' && showModal) {
+        setShowModal(false);
+   } else if ((e.key === '~' || e.key === '`') && e.shiftKey && !showModal && !showReportModal) 
+{        handleNewProject();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [showModal, showReportModal]);
   const fetchProjects = async () => {
     try {
       const response = await axios.get(`${API_BASE_URL}/projects`, {

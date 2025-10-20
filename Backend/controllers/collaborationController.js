@@ -50,6 +50,11 @@ exports.createCollaboration = async (req, res) => {
 exports.getAllCollaborations = async (req, res) => {
   const user = getUserFromToken(req);
   if (!user) return res.status(401).json({ message: 'Unauthorized' });
+  
+  console.log('=== GET ALL Collaborations ===');
+  console.log('User ID:', user._id);
+  console.log('User Role:', user.role);
+  console.log('Only Mine:', req.query.onlyMine);
 
   try {
     let collaborations;
@@ -64,6 +69,9 @@ exports.getAllCollaborations = async (req, res) => {
         ]
       });
     }
+    console.log('Collaborations found:', collaborations.length);
+    console.log('Collaborations:', collaborations);
+
     res.json(collaborations);
   } catch (error) {
     res.status(500).json({ message: error.message });

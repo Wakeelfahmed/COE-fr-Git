@@ -35,25 +35,18 @@ const AchievementsPage = () => {
     fetchAchievements();
   }, [showOnlyMine]);
 
-  // Add Escape key listener to close modals
+  // Keyboard shortcuts
   useEffect(() => {
-    const handleKeyDown = (event) => {
-      if (event.key === 'Escape') {
-        if (showModal) {
-          setShowModal(false);
-        }
-        if (showReportModal) {
-          setShowReportModal(false);
-        }
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape' && showModal) {
+        setShowModal(false);
+   } else if ((e.key === '~' || e.key === '`') && e.shiftKey && !showModal && !showReportModal) 
+{        handleNewAchievement();
       }
     };
 
     document.addEventListener('keydown', handleKeyDown);
-
-    // Cleanup event listener on component unmount
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-    };
+    return () => document.removeEventListener('keydown', handleKeyDown);
   }, [showModal, showReportModal]);
 
   const fetchAchievements = async () => {

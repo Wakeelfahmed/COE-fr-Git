@@ -81,6 +81,20 @@ const PublicationsView = () => {
     fetchPublications();
   }, [showOnlyMine]);
 
+    // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape' && showModal) {
+        setShowModal(false);
+   } else if ((e.key === '~' || e.key === '`') && e.shiftKey && !showModal && !showReportModal) 
+{        handleNewPublication();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [showModal, showReportModal]);
+
   const fetchPublications = async () => {
     console.log('=== FETCHING PUBLICATIONS ===');
     console.log('Show Only Mine:', showOnlyMine);

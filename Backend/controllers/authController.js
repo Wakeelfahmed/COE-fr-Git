@@ -84,21 +84,19 @@ exports.checkAuth = async (req, res) => {
     if (!token) {
       return res.status(401).send({ authenticated: false });
     }
-    
+
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const user = await User.findOne({ _id: decoded._id });
-    
+
     if (!user) {
       return res.status(401).send({ authenticated: false });
     }
-    
+
     res.send({ authenticated: true, user });
   } catch (error) {
     res.status(401).send({ authenticated: false });
   }
 };
-
-
 
 
 exports.getProfile = async (req, res) => {
@@ -122,5 +120,112 @@ exports.getProfile = async (req, res) => {
       return res.status(401).json({ error: 'Invalid token' });
     }
     res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+
+exports.getAllAccounts = async (req, res) => {
+  try {
+    const users = await User.find({}).select('firstName lastName email role uid joinDate');
+    res.json({ accounts: users });
+  } catch (error) {
+    console.error('Error fetching accounts:', error);
+    res.status(500).json({ error: 'Failed to fetch accounts' });
+  }
+};
+
+
+exports.generateAccountReport = async (req, res) => {
+  try {
+    const { accountId } = req.body;
+    const user = await User.findById(accountId);
+
+    if (!user) {
+      return res.status(404).json({ error: 'Account not found' });
+    }
+
+    // Get activity counts from different collections
+    const CommercializationProject = require('../models/CommercializationProject');
+    const Publication = require('../models/Publication');
+    const Event = require('../models/Event');
+    const Collaboration = require('../models/Collaboration');
+
+    const [
+      projectCount,
+      publicationCount,
+      eventCount,
+      collaborationCount
+    ] = await Promise.all([
+      CommercializationProject.countDocuments({ 'createdBy.id': accountId }),
+      Publication.countDocuments({ 'createdBy.id': accountId }),
+      Event.countDocuments({ 'createdBy.id': accountId }),
+      Collaboration.countDocuments({ 'createdBy.id': accountId })
+    ]);
+
+    // Get all activities from each category (not just recent)
+    const allActivities = [];
+
+    const allProjects = await CommercializationProject.find({ 'createdBy.id': accountId })
+      .sort({ createdAt: -1 }).select('projectTitle createdAt');
+    allProjects.forEach(p => allActivities.push({
+      type: 'Project',
+      title: p.projectTitle,
+      date: p.createdAt,
+      status: 'Active'
+    }));
+
+    const allPublications = await Publication.find({ 'createdBy.id': accountId })
+      .sort({ createdAt: -1 }).select('title createdAt');
+    allPublications.forEach(p => allActivities.push({
+      type: 'Publication',
+      title: p.title,
+      date: p.createdAt,
+      status: 'Published'
+    }));
+
+    const allEvents = await Event.find({ 'createdBy.id': accountId })
+      .sort({ createdAt: -1 }).select('activity date');
+    allEvents.forEach(e => allActivities.push({
+      type: 'Event',
+      title: e.activity,
+      date: e.date,
+      status: 'Attended'
+    }));
+
+    const allCollaborations = await Collaboration.find({ 'createdBy.id': accountId })
+      .sort({ createdAt: -1 }).select('memberOfCoE createdAt');
+    allCollaborations.forEach(c => allActivities.push({
+      type: 'Collaboration',
+      title: c.memberOfCoE,
+      date: c.createdAt,
+      status: 'Active'
+    }));
+
+    // Sort all activities by date (most recent first)
+    allActivities.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+    const reportData = {
+      account: {
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        role: user.role,
+        uid: user.uid,
+        joinDate: user.joinDate
+      },
+      summary: {
+        totalActivities: projectCount + publicationCount + eventCount + collaborationCount,
+        projects: projectCount,
+        publications: publicationCount,
+        collaborations: collaborationCount,
+        events: eventCount
+      },
+      allActivities: allActivities
+    };
+
+    res.json(reportData);
+  } catch (error) {
+    console.error('Error generating account report:', error);
+    res.status(500).json({ error: 'Failed to generate account report' });
   }
 };

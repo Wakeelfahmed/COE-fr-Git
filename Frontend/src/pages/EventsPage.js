@@ -38,6 +38,20 @@ const EventsPage = () => {
     fetchEvents();
   }, [showOnlyMine]);
 
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape' && showModal) {
+        setShowModal(false);
+      } else if ((e.key === '~' || e.key === '`') && e.shiftKey && !showModal && !showReportModal) {
+        handleNewEvent();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [showModal, showReportModal]);
+
   const fetchEvents = async () => {
     console.log('=== FETCHING EVENTS ===');
     console.log('Show Only Mine:', showOnlyMine);
@@ -171,10 +185,10 @@ const EventsPage = () => {
 
   const filteredEvents = events.filter(event => {
     return (event.activity || '').toLowerCase().includes((filterCriteria.activity || '').toLowerCase()) &&
-           (event.organizer || '').toLowerCase().includes((filterCriteria.organizer || '').toLowerCase()) &&
-           (event.resourcePerson || '').toLowerCase().includes((filterCriteria.resourcePerson || '').toLowerCase()) &&
-           (event.role || '').toLowerCase().includes((filterCriteria.role || '').toLowerCase()) &&
-           (event.type || '').toLowerCase().includes((filterCriteria.type || '').toLowerCase());
+      (event.organizer || '').toLowerCase().includes((filterCriteria.organizer || '').toLowerCase()) &&
+      (event.resourcePerson || '').toLowerCase().includes((filterCriteria.resourcePerson || '').toLowerCase()) &&
+      (event.role || '').toLowerCase().includes((filterCriteria.role || '').toLowerCase()) &&
+      (event.type || '').toLowerCase().includes((filterCriteria.type || '').toLowerCase());
   });
 
   return (

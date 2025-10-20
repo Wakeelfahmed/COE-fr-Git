@@ -113,6 +113,20 @@ const FundingProposalsView = () => {
     fetchFundingProposals();
   }, [showOnlyMine]);
 
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape' && showModal) {
+        setShowModal(false);
+   } else if ((e.key === '~' || e.key === '`') && e.shiftKey && !showModal && !showReportModal) 
+{        handleNewFundingProposal();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [showModal, showReportModal]);
+
   const fetchFundingProposals = async () => {
     try {
       const response = await axios.get(`${API_BASE_URL}/funding-proposals`, {

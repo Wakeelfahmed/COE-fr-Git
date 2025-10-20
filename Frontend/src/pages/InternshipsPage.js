@@ -105,25 +105,18 @@ const InternshipView = () => {
     fetchInternships();
   }, [showOnlyMine]);
 
-  // Add Escape key listener to close modals
+  // Keyboard shortcuts
   useEffect(() => {
-    const handleKeyDown = (event) => {
-      if (event.key === 'Escape') {
-        if (showModal) {
-          setShowModal(false);
-        }
-        if (showReportModal) {
-          setShowReportModal(false);
-        }
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape' && showModal) {
+        setShowModal(false);
+   } else if ((e.key === '~' || e.key === '`') && e.shiftKey && !showModal && !showReportModal) 
+{        handleNewInternship();
       }
     };
 
     document.addEventListener('keydown', handleKeyDown);
-
-    // Cleanup event listener on component unmount
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-    };
+    return () => document.removeEventListener('keydown', handleKeyDown);
   }, [showModal, showReportModal]);
 
   const fetchInternships = async () => {
@@ -585,8 +578,6 @@ const InternshipView = () => {
           </div>
         )}
 
-
-      )}
 
 {showReportModal && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full">

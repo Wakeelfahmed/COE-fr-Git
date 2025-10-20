@@ -23,6 +23,7 @@ const otherItems = [
   { name: 'Publications', path: '/publications' },
   // { name: 'Forms', path: '/forms' },
   { name: 'Reports', path: '/reports' },
+  { name: 'Account Reports', path: '/account-reports' },
 ];
 
 const Sidebar = ({ isOpen }) => {

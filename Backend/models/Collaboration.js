@@ -43,6 +43,13 @@ const collaborationSchema = new mongoose.Schema({
       'Other'
     ]
   },
+  otherTypeDescription: {
+    type: String,
+    required: function() {
+      return this.typeOfCollaboration === 'Other';
+    },
+    trim: true
+  },
   durationStart: {
     type: Date,
     required: true
