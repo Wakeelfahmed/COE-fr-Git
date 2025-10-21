@@ -8,6 +8,6 @@ router.post('/login', authController.login);
 router.get('/check', authController.checkAuth);
 router.get('/profile', authController.getProfile);
 router.get('/accounts', authController.getAllAccounts);
-router.post('/reports/account', authController.generateAccountReport);
+router.get('/account-report/:accountId', authController.generateAccountReport);
 
 module.exports = router;

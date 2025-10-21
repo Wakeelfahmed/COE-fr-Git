@@ -9,7 +9,6 @@ const AccountReportsPage = () => {
   const [loading, setLoading] = useState(false);
   const [reportData, setReportData] = useState(null);
   const [detailedReportData, setDetailedReportData] = useState(null);
-  const [loadingDetailed, setLoadingDetailed] = useState(false);
 
   useEffect(() => {
     fetchAccounts();
@@ -45,23 +44,17 @@ const AccountReportsPage = () => {
   };
 
   const generateDetailedReport = async () => {
-    if (!selectedAccount) {
-      alert('Please select an account');
-      return;
-    }
+    if (!selectedAccount) return;
 
-    setLoadingDetailed(true);
+    setLoading(true);
     try {
-      const response = await axios.post(`${API_BASE_URL}/auth/reports/account`, {
-        accountId: selectedAccount,
-        detailed: true
-      });
+      const response = await axios.get(`${API_BASE_URL}/auth/account-report/${selectedAccount}?detailed=true`);
       setDetailedReportData(response.data);
     } catch (error) {
       console.error('Error generating detailed report:', error);
-      alert('Error generating detailed report');
+      alert('Error generating detailed report. Please try again.');
     } finally {
-      setLoadingDetailed(false);
+      setLoading(false);
     }
   };
 
@@ -120,77 +113,391 @@ const AccountReportsPage = () => {
     if (!data) return null;
 
     return (
-      <div className="bg-white p-6 rounded-lg shadow-md">
+      <div className="bg-white p-6 rounded-lg shadow-md mt-6">
         <h3 className="text-xl font-bold mb-4">Detailed Account Report</h3>
 
-        <div className="mb-6">
-          <h4 className="font-semibold text-lg mb-2">Account Information</h4>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <p><strong>Name:</strong> {data.account.firstName} {data.account.lastName}</p>
-              <p><strong>Email:</strong> {data.account.email}</p>
-              <p><strong>Role:</strong> {data.account.role}</p>
-              <p><strong>UID:</strong> {data.account.uid}</p>
-            </div>
-            <div className="space-y-2">
-              <p><strong>Join Date:</strong> {new Date(data.account.joinDate).toLocaleDateString()}</p>
-              <p><strong>Contact:</strong> {data.account.contactNumber}</p>
-              <p><strong>Date of Birth:</strong> {data.account.dateOfBirth ? new Date(data.account.dateOfBirth).toLocaleDateString() : 'N/A'}</p>
+        {/* Projects Table */}
+        {data.projects && data.projects.length > 0 && (
+          <div className="mb-8">
+            <h4 className="text-lg font-semibold mb-4">Projects ({data.projects.length})</h4>
+            <div className="overflow-x-auto">
+              <table className="min-w-full table-auto">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-4 py-2 text-left">#</th>
+                    <th className="px-4 py-2 text-left">Title</th>
+                    <th className="px-4 py-2 text-left">Description</th>
+                    <th className="px-4 py-2 text-left">Start Date</th>
+                    <th className="px-4 py-2 text-left">End Date</th>
+                    <th className="px-4 py-2 text-left">Status</th>
+                    <th className="px-4 py-2 text-left">Team Members</th>
+                    <th className="px-4 py-2 text-left">Budget</th>
+                    <th className="px-4 py-2 text-left">Funding Agency</th>
+                    <th className="px-4 py-2 text-left">Project Type</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {data.projects.map((project, index) => (
+                    <tr key={project._id} className="border-t">
+                      <td className="px-4 py-2">{index + 1}</td>
+                      <td className="px-4 py-2">{project.title}</td>
+                      <td className="px-4 py-2">{project.description}</td>
+                      <td className="px-4 py-2">{new Date(project.startDate).toLocaleDateString()}</td>
+                      <td className="px-4 py-2">{project.endDate ? new Date(project.endDate).toLocaleDateString() : 'N/A'}</td>
+                      <td className="px-4 py-2">{project.status}</td>
+                      <td className="px-4 py-2">{project.teamMembers}</td>
+                      <td className="px-4 py-2">{project.budget}</td>
+                      <td className="px-4 py-2">{project.fundingAgency}</td>
+                      <td className="px-4 py-2">{project.projectType}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
-        </div>
+        )}
 
-        <div className="mb-6">
-          <h4 className="font-semibold text-lg mb-2">Activity Summary</h4>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="bg-blue-50 p-3 rounded">
-              <p className="text-sm text-gray-600">Total Activities</p>
-              <p className="text-xl font-bold">{data.summary.totalActivities}</p>
-            </div>
-            <div className="bg-green-50 p-3 rounded">
-              <p className="text-sm text-gray-600">Projects</p>
-              <p className="text-xl font-bold">{data.summary.projects}</p>
-            </div>
-            <div className="bg-yellow-50 p-3 rounded">
-              <p className="text-sm text-gray-600">Publications</p>
-              <p className="text-xl font-bold">{data.summary.publications}</p>
-            </div>
-            <div className="bg-purple-50 p-3 rounded">
-              <p className="text-sm text-gray-600">Events</p>
-              <p className="text-xl font-bold">{data.summary.events}</p>
+        {/* Publications Table */}
+        {data.publications && data.publications.length > 0 && (
+          <div className="mb-8">
+            <h4 className="text-lg font-semibold mb-4">Publications ({data.publications.length})</h4>
+            <div className="overflow-x-auto">
+              <table className="min-w-full table-auto">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-4 py-2 text-left">#</th>
+                    <th className="px-4 py-2 text-left">Title</th>
+                    <th className="px-4 py-2 text-left">Authors</th>
+                    <th className="px-4 py-2 text-left">Journal/Conference</th>
+                    <th className="px-4 py-2 text-left">Publication Date</th>
+                    <th className="px-4 py-2 text-left">DOI</th>
+                    <th className="px-4 py-2 text-left">Publication Type</th>
+                    <th className="px-4 py-2 text-left">Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {data.publications.map((pub, index) => (
+                    <tr key={pub._id} className="border-t">
+                      <td className="px-4 py-2">{index + 1}</td>
+                      <td className="px-4 py-2">{pub.title}</td>
+                      <td className="px-4 py-2">{pub.authors}</td>
+                      <td className="px-4 py-2">{pub.journalConference}</td>
+                      <td className="px-4 py-2">{new Date(pub.publicationDate).toLocaleDateString()}</td>
+                      <td className="px-4 py-2">{pub.doi}</td>
+                      <td className="px-4 py-2">{pub.publicationType}</td>
+                      <td className="px-4 py-2">{pub.status}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
-        </div>
+        )}
 
-        <div>
-          <h4 className="font-semibold text-lg mb-4">All Activity Records ({data.allActivities.length})</h4>
-          {data.allActivities.length > 0 ? (
-            <div className="space-y-6">
-              {data.allActivities.map((activity, index) => (
-                <div key={index} className="border rounded-lg p-4 bg-gray-50">
-                  <h5 className="font-semibold text-md mb-3">Activity #{index + 1} - {activity.type}</h5>
-                  <div className="grid grid-cols-1 gap-2 text-sm">
-                    {Object.entries(activity).filter(([key]) => key !== 'status').map(([key, value]) => (
-                      <div key={key} className="flex">
-                        <span className="font-medium w-32 flex-shrink-0">{key}:</span>
-                        <span className="flex-1">
-                          {value && typeof value === 'object' ? JSON.stringify(value) :
-                           value ? String(value) : 'N/A'}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ))}
+        {/* Events Table */}
+        {data.events && data.events.length > 0 && (
+          <div className="mb-8">
+            <h4 className="text-lg font-semibold mb-4">Events ({data.events.length})</h4>
+            <div className="overflow-x-auto">
+              <table className="min-w-full table-auto">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-4 py-2 text-left">#</th>
+                    <th className="px-4 py-2 text-left">Activity</th>
+                    <th className="px-4 py-2 text-left">Organizer</th>
+                    <th className="px-4 py-2 text-left">Resource Person</th>
+                    <th className="px-4 py-2 text-left">Role</th>
+                    <th className="px-4 py-2 text-left">Type</th>
+                    <th className="px-4 py-2 text-left">Participants</th>
+                    <th className="px-4 py-2 text-left">Date</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {data.events.map((event, index) => (
+                    <tr key={event._id} className="border-t">
+                      <td className="px-4 py-2">{index + 1}</td>
+                      <td className="px-4 py-2">{event.activity}</td>
+                      <td className="px-4 py-2">{event.organizer}</td>
+                      <td className="px-4 py-2">{event.resourcePerson}</td>
+                      <td className="px-4 py-2">{event.role === 'other' ? event.otherRole : event.role}</td>
+                      <td className="px-4 py-2">{event.type}</td>
+                      <td className="px-4 py-2">{event.participantsOfEvent}</td>
+                      <td className="px-4 py-2">{new Date(event.date).toLocaleDateString()}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
-          ) : (
-            <p className="text-gray-500 text-center py-8">No activities found for this account.</p>
-          )}
-        </div>
+          </div>
+        )}
+
+        {/* Collaborations Table */}
+        {data.collaborations && data.collaborations.length > 0 && (
+          <div className="mb-8">
+            <h4 className="text-lg font-semibold mb-4">Collaborations ({data.collaborations.length})</h4>
+            <div className="overflow-x-auto">
+              <table className="min-w-full table-auto">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-4 py-2 text-left">#</th>
+                    <th className="px-4 py-2 text-left">Member of CoE</th>
+                    <th className="px-4 py-2 text-left">Collaborating Institute</th>
+                    <th className="px-4 py-2 text-left">Duration Start</th>
+                    <th className="px-4 py-2 text-left">Current Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {data.collaborations.map((collab, index) => (
+                    <tr key={collab._id} className="border-t">
+                      <td className="px-4 py-2">{index + 1}</td>
+                      <td className="px-4 py-2">{collab.memberOfCoE || 'N/A'}</td>
+                      <td className="px-4 py-2">{collab.foreignCollaboratingInstitute}</td>
+                      <td className="px-4 py-2">{collab.durationStart ? new Date(collab.durationStart).toLocaleDateString() : 'N/A'}</td>
+                      <td className="px-4 py-2">{collab.currentStatus || 'Active'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* Patents Table */}
+        {data.patents && data.patents.length > 0 && (
+          <div className="mb-8">
+            <h4 className="text-lg font-semibold mb-4">Patents ({data.patents.length})</h4>
+            <div className="overflow-x-auto">
+              <table className="min-w-full table-auto">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-4 py-2 text-left">#</th>
+                    <th className="px-4 py-2 text-left">Title</th>
+                    <th className="px-4 py-2 text-left">Patent Organization</th>
+                    <th className="px-4 py-2 text-left">Date of Submission</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {data.patents.map((patent, index) => (
+                    <tr key={patent._id} className="border-t">
+                      <td className="px-4 py-2">{index + 1}</td>
+                      <td className="px-4 py-2">{patent.title}</td>
+                      <td className="px-4 py-2">{patent.patentOrg}</td>
+                      <td className="px-4 py-2">{new Date(patent.dateOfSubmission).toLocaleDateString()}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* Fundings Table */}
+        {data.fundings && data.fundings.length > 0 && (
+          <div className="mb-8">
+            <h4 className="text-lg font-semibold mb-4">Funded Projects ({data.fundings.length})</h4>
+            <div className="overflow-x-auto">
+              <table className="min-w-full table-auto">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-4 py-2 text-left">#</th>
+                    <th className="px-4 py-2 text-left">Project Title</th>
+                    <th className="px-4 py-2 text-left">Funding Source</th>
+                    <th className="px-4 py-2 text-left">Date of Submission</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {data.fundings.map((funding, index) => (
+                    <tr key={funding._id} className="border-t">
+                      <td className="px-4 py-2">{index + 1}</td>
+                      <td className="px-4 py-2">{funding.projectTitle || 'N/A'}</td>
+                      <td className="px-4 py-2">{funding.fundingSource}</td>
+                      <td className="px-4 py-2">{new Date(funding.dateOfSubmission).toLocaleDateString()}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* Funding Proposals Table */}
+        {data.fundingProposals && data.fundingProposals.length > 0 && (
+          <div className="mb-8">
+            <h4 className="text-lg font-semibold mb-4">Funding Proposals ({data.fundingProposals.length})</h4>
+            <div className="overflow-x-auto">
+              <table className="min-w-full table-auto">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-4 py-2 text-left">#</th>
+                    <th className="px-4 py-2 text-left">Project Title</th>
+                    <th className="px-4 py-2 text-left">Team</th>
+                    <th className="px-4 py-2 text-left">Date of Submission</th>
+                    <th className="px-4 py-2 text-left">Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {data.fundingProposals.map((proposal, index) => (
+                    <tr key={proposal._id} className="border-t">
+                      <td className="px-4 py-2">{index + 1}</td>
+                      <td className="px-4 py-2">{proposal.projectTitle}</td>
+                      <td className="px-4 py-2">{proposal.team}</td>
+                      <td className="px-4 py-2">{new Date(proposal.dateOfSubmission).toLocaleDateString()}</td>
+                      <td className="px-4 py-2">{proposal.status || 'Submitted'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* Achievements Table */}
+        {data.achievements && data.achievements.length > 0 && (
+          <div className="mb-8">
+            <h4 className="text-lg font-semibold mb-4">Achievements ({data.achievements.length})</h4>
+            <div className="overflow-x-auto">
+              <table className="min-w-full table-auto">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-4 py-2 text-left">#</th>
+                    <th className="px-4 py-2 text-left">Event</th>
+                    <th className="px-4 py-2 text-left">Organizer</th>
+                    <th className="px-4 py-2 text-left">Date</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {data.achievements.map((achievement, index) => (
+                    <tr key={achievement._id} className="border-t">
+                      <td className="px-4 py-2">{index + 1}</td>
+                      <td className="px-4 py-2">{achievement.event}</td>
+                      <td className="px-4 py-2">{achievement.organizer}</td>
+                      <td className="px-4 py-2">{new Date(achievement.date).toLocaleDateString()}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* Trainings Conducted Table */}
+        {data.trainingsConducted && data.trainingsConducted.length > 0 && (
+          <div className="mb-8">
+            <h4 className="text-lg font-semibold mb-4">Trainings Conducted ({data.trainingsConducted.length})</h4>
+            <div className="overflow-x-auto">
+              <table className="min-w-full table-auto">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-4 py-2 text-left">#</th>
+                    <th className="px-4 py-2 text-left">Organizer</th>
+                    <th className="px-4 py-2 text-left">Resource Persons</th>
+                    <th className="px-4 py-2 text-left">Date</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {data.trainingsConducted.map((training, index) => (
+                    <tr key={training._id} className="border-t">
+                      <td className="px-4 py-2">{index + 1}</td>
+                      <td className="px-4 py-2">{training.organizer}</td>
+                      <td className="px-4 py-2">{training.resourcePersons}</td>
+                      <td className="px-4 py-2">{new Date(training.date).toLocaleDateString()}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* Internships Table */}
+        {data.internships && data.internships.length > 0 && (
+          <div className="mb-8">
+            <h4 className="text-lg font-semibold mb-4">Internships ({data.internships.length})</h4>
+            <div className="overflow-x-auto">
+              <table className="min-w-full table-auto">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-4 py-2 text-left">#</th>
+                    <th className="px-4 py-2 text-left">Applicant Name</th>
+                    <th className="px-4 py-2 text-left">Center Name</th>
+                    <th className="px-4 py-2 text-left">Year</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {data.internships.map((internship, index) => (
+                    <tr key={internship._id} className="border-t">
+                      <td className="px-4 py-2">{index + 1}</td>
+                      <td className="px-4 py-2">{internship.applicantName}</td>
+                      <td className="px-4 py-2">{internship.centerName}</td>
+                      <td className="px-4 py-2">{internship.year}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* Talks/Trainings Table */}
+        {data.talkTrainings && data.talkTrainings.length > 0 && (
+          <div className="mb-8">
+            <h4 className="text-lg font-semibold mb-4">Talks/Trainings Attended ({data.talkTrainings.length})</h4>
+            <div className="overflow-x-auto">
+              <table className="min-w-full table-auto">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-4 py-2 text-left">#</th>
+                    <th className="px-4 py-2 text-left">Title</th>
+                    <th className="px-4 py-2 text-left">Resource Person</th>
+                    <th className="px-4 py-2 text-left">Date</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {data.talkTrainings.map((talk, index) => (
+                    <tr key={talk._id} className="border-t">
+                      <td className="px-4 py-2">{index + 1}</td>
+                      <td className="px-4 py-2">{talk.title}</td>
+                      <td className="px-4 py-2">{talk.resourcePerson}</td>
+                      <td className="px-4 py-2">{new Date(talk.date).toLocaleDateString()}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* Competitions Table */}
+        {data.competitions && data.competitions.length > 0 && (
+          <div className="mb-8">
+            <h4 className="text-lg font-semibold mb-4">Competitions ({data.competitions.length})</h4>
+            <div className="overflow-x-auto">
+              <table className="min-w-full table-auto">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-4 py-2 text-left">#</th>
+                    <th className="px-4 py-2 text-left">Title</th>
+                    <th className="px-4 py-2 text-left">Organizer</th>
+                    <th className="px-4 py-2 text-left">Date</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {data.competitions.map((competition, index) => (
+                    <tr key={competition._id} className="border-t">
+                      <td className="px-4 py-2">{index + 1}</td>
+                      <td className="px-4 py-2">{competition.title}</td>
+                      <td className="px-4 py-2">{competition.organizer}</td>
+                      <td className="px-4 py-2">{new Date(competition.date).toLocaleDateString()}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
       </div>
     );
   };
-
   const formatReportData = (data, sortedActivities) => {
     if (!data) return null;
 
@@ -328,15 +635,16 @@ const AccountReportsPage = () => {
           </button>
           <button
             onClick={generateDetailedReport}
-            disabled={loadingDetailed || !selectedAccount}
+            disabled={loading || !selectedAccount}
             className="bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700 disabled:bg-gray-400"
           >
-            {loadingDetailed ? 'Generating...' : 'Generate Detailed Report'}
+            {loading ? 'Generating...' : 'Generate Detailed Report'}
           </button>
         </div>
       </div>
 
       {reportData && formatReportData(reportData, sortedActivities)}
+
       {detailedReportData && formatDetailedReportData(detailedReportData)}
     </div>
   );
