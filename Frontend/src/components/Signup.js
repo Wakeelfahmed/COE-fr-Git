@@ -162,9 +162,9 @@ const Signup = () => {
               options={[
                 { value: "", label: "Select Role" },
                 { value: "director", label: "Director" },
-                { value: "department head", label: "Department Head" },
+                { value: "center Head", label: "Center Head" },
                 { value: "wing head", label: "Wing Head" },
-                { value: "RO/Dev", label: "RO/Dev" }
+                { value: "Researcher/Dev", label: "Researcher/Dev" }
               ]}
             />
             <InputField

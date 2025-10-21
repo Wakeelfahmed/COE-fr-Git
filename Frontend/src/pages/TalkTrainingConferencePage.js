@@ -334,14 +334,14 @@ const EventsView = () => {
         <h2 className="text-xl font-bold">Talks/Trainings Attended</h2>
         <div>
           <button onClick={handleNewEvent} className="bg-blue-600 text-white px-4 py-2 rounded mr-2">
-            New Talk/Training/Conference
+            New Talks/Trainings/Conferences
           </button>
           {user?.role === 'director' && (
             <button 
               onClick={() => setShowOnlyMine(!showOnlyMine)} 
               className="bg-green-600 text-white px-4 py-2 rounded mr-2"
             >
-              {showOnlyMine ? 'All Events' : 'My Events'}
+              {showOnlyMine ? 'All Talks/Trainings/Conferences' : 'My Talks/Trainings/Conferences'}
             </button>
           )}
           <button onClick={toggleFilters} className="border border-blue-600 text-blue-600 px-4 py-2 rounded">
@@ -498,7 +498,7 @@ const EventsView = () => {
           <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full">
             <div className="relative top-20 mx-auto p-5 border w-11/12 max-w-4xl shadow-lg rounded-md bg-white">
               <h3 className="text-lg font-medium leading-6 text-gray-900 mb-4">
-                {isEditMode ? 'Edit Event' : 'New Event'}
+                {isEditMode ? 'Edit Talks/Trainings/Conferences' : 'New Talks/Trainings/Conferences'}
               </h3>
               <form onSubmit={handleSubmit}>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

@@ -190,135 +190,237 @@ exports.generateAccountReport = async (req, res) => {
     // Get all activities from each category
     const allActivities = [];
 
-    // Projects
+    // Projects (Industry/Commercial)
+    const projectSelectFields = req.body.detailed
+      ? 'clientCompany projectTitle projectType startDate endDate status description budget'
+      : 'clientCompany projectTitle projectType startDate endDate status';
+
     const allProjects = await CommercializationProject.find({ 'createdBy.id': accountId })
-      .sort({ createdAt: -1 }).select('projectTitle clientCompany dateOfContractSign createdAt');
+      .sort({ createdAt: -1 }).select(projectSelectFields);
     allProjects.forEach(p => allActivities.push({
       type: 'Industry/Commercial Project',
-      title: p.projectTitle,
+      title: p.projectTitle || p.clientCompany || 'N/A',
       clientCompany: p.clientCompany,
-      date: p.dateOfContractSign,
-      status: 'Active'
+      projectTitle: p.projectTitle,
+      projectType: p.projectType,
+      startDate: p.startDate,
+      endDate: p.endDate,
+      status: p.status || 'Active',
+      description: p.description,
+      budget: p.budget
     }));
 
     // Publications
+    const publicationSelectFields = req.body.detailed
+      ? 'title publicationType journalConference authors doi isbn pages volume issue year'
+      : 'title publicationType journalConference authors doi';
+
     const allPublications = await Publication.find({ 'createdBy.id': accountId })
-      .sort({ createdAt: -1 }).select('author publicationDetails typeOfPublication dateOfPublication');
+      .sort({ createdAt: -1 }).select(publicationSelectFields);
     allPublications.forEach(p => allActivities.push({
       type: 'Publication',
-      title: p.author || 'N/A',
-      publicationType: p.typeOfPublication,
-      date: p.dateOfPublication || p.createdAt,
+      title: p.title,
+      publicationType: p.publicationType,
+      journalConference: p.journalConference,
+      authors: p.authors,
+      doi: p.doi,
+      isbn: p.isbn,
+      pages: p.pages,
+      volume: p.volume,
+      issue: p.issue,
+      year: p.year,
+      date: p.year ? new Date(p.year, 0, 1) : p.createdAt,
       status: 'Published'
     }));
 
     // Events
+    const eventSelectFields = req.body.detailed
+      ? 'activity organizer resourcePerson role otherRole type participantsOfEvent nameOfAttendee date description'
+      : 'activity organizer resourcePerson role type participantsOfEvent nameOfAttendee date';
+
     const allEvents = await Event.find({ 'createdBy.id': accountId })
-      .sort({ createdAt: -1 }).select('activity organizer date');
+      .sort({ createdAt: -1 }).select(eventSelectFields);
     allEvents.forEach(e => allActivities.push({
       type: 'Event',
       title: e.activity,
+      activity: e.activity,
       organizer: e.organizer,
+      resourcePerson: e.resourcePerson,
+      role: e.role === 'other' ? e.otherRole : e.role,
+      type: e.type,
+      participantsOfEvent: e.participantsOfEvent,
+      nameOfAttendee: e.nameOfAttendee,
       date: e.date,
+      description: e.description,
       status: 'Attended'
     }));
 
     // Collaborations
+    const collaborationSelectFields = req.body.detailed
+      ? 'memberOfCoE foreignCollaboratingInstitute durationStart durationEnd currentStatus description'
+      : 'memberOfCoE foreignCollaboratingInstitute durationStart currentStatus';
+
     const allCollaborations = await Collaboration.find({ 'createdBy.id': accountId })
-      .sort({ createdAt: -1 }).select('memberOfCoE foreignCollaboratingInstitute durationStart currentStatus');
+      .sort({ createdAt: -1 }).select(collaborationSelectFields);
     allCollaborations.forEach(c => allActivities.push({
       type: 'Collaboration',
       title: c.memberOfCoE || 'N/A',
       collaboratingInstitute: c.foreignCollaboratingInstitute,
+      collaborationType: c.memberOfCoE,
+      startDate: c.durationStart,
+      endDate: c.durationEnd,
+      description: c.description,
       date: c.durationStart || c.createdAt,
       status: c.currentStatus || 'Active'
     }));
 
     // Patents
+    const patentSelectFields = req.body.detailed
+      ? 'title patentOrg applicationNumber filingDate patentNumber patentStatus inventors description'
+      : 'title patentOrg applicationNumber filingDate patentNumber patentStatus';
+
     const allPatents = await Patent.find({ 'createdBy.id': accountId })
-      .sort({ createdAt: -1 }).select('title patentOrg dateOfSubmission');
+      .sort({ createdAt: -1 }).select(patentSelectFields);
     allPatents.forEach(p => allActivities.push({
       type: 'Patent',
       title: p.title,
       patentOrg: p.patentOrg,
-      date: p.dateOfSubmission,
-      status: 'Filed'
+      applicationNumber: p.applicationNumber,
+      filingDate: p.filingDate,
+      patentNumber: p.patentNumber,
+      patentStatus: p.patentStatus,
+      inventors: p.inventors,
+      description: p.description,
+      date: p.filingDate || p.createdAt,
+      status: p.patentStatus || 'Filed'
     }));
 
     // Fundings
+    const fundingSelectFields = req.body.detailed
+      ? 'projectTitle fundingSource amount startDate endDate status description'
+      : 'projectTitle fundingSource amount startDate endDate status';
+
     const allFundings = await Funding.find({ 'createdBy.id': accountId })
-      .sort({ createdAt: -1 }).select('projectTitle fundingSource dateOfSubmission');
+      .sort({ createdAt: -1 }).select(fundingSelectFields);
     allFundings.forEach(f => allActivities.push({
       type: 'Funding',
       title: f.projectTitle || 'N/A',
       fundingAgency: f.fundingSource,
-      date: f.dateOfSubmission,
-      status: 'Active'
+      amount: f.amount,
+      startDate: f.startDate,
+      endDate: f.endDate,
+      status: f.status || 'Active',
+      description: f.description,
+      date: f.startDate || f.createdAt
     }));
 
     // Funding Proposals
+    const fundingProposalSelectFields = req.body.detailed
+      ? 'projectTitle fundingSource proposedAmount team submissionDate status description'
+      : 'projectTitle fundingSource team proposedAmount submissionDate status';
+
     const allFundingProposals = await FundingProposal.find({ 'createdBy.id': accountId })
-      .sort({ createdAt: -1 }).select('projectTitle fundingSource team dateOfSubmission status');
+      .sort({ createdAt: -1 }).select(fundingProposalSelectFields);
     allFundingProposals.forEach(fp => allActivities.push({
       type: 'Funding Proposal',
       title: fp.projectTitle,
-      fundingAgency: fp.team,
-      date: fp.dateOfSubmission,
-      status: fp.status || 'Submitted'
+      fundingAgency: fp.fundingSource,
+      proposedAmount: fp.proposedAmount,
+      teamMembers: fp.team,
+      submissionDate: fp.submissionDate,
+      status: fp.status || 'Submitted',
+      description: fp.description,
+      date: fp.submissionDate || fp.createdAt
     }));
 
     // Achievements
+    const achievementSelectFields = req.body.detailed
+      ? 'event organizer date description awardType category'
+      : 'event organizer date description awardType';
+
     const allAchievements = await Achievement.find({ 'createdBy.id': accountId })
-      .sort({ createdAt: -1 }).select('event organizer date');
+      .sort({ createdAt: -1 }).select(achievementSelectFields);
     allAchievements.forEach(a => allActivities.push({
       type: 'Achievement',
       title: a.event,
       organizer: a.organizer,
       date: a.date,
+      description: a.description,
+      awardType: a.awardType,
+      category: a.category,
       status: 'Achieved'
     }));
 
     // Trainings Conducted
+    const trainingConductedSelectFields = req.body.detailed
+      ? 'organizer resourcePersons date participants duration venue'
+      : 'organizer resourcePersons date participants duration';
+
     const allTrainingsConducted = await TrainingsConducted.find({ 'createdBy.id': accountId })
-      .sort({ createdAt: -1 }).select('organizer resourcePersons date');
+      .sort({ createdAt: -1 }).select(trainingConductedSelectFields);
     allTrainingsConducted.forEach(tc => allActivities.push({
       type: 'Training Conducted',
-      title: tc.organizer,
+      title: tc.organizer ? `Organizer: ${tc.organizer}` : 'N/A',
       resourcePersons: tc.resourcePersons,
       date: tc.date,
+      participants: tc.participants,
+      duration: tc.duration,
+      venue: tc.venue,
       status: 'Conducted'
     }));
 
     // Internships
+    const internshipSelectFields = req.body.detailed
+      ? 'applicantName centerName year duration stipend location'
+      : 'applicantName centerName year duration';
+
     const allInternships = await Intership.find({ 'createdBy.id': accountId })
-      .sort({ createdAt: -1 }).select('applicantName centerName year');
+      .sort({ createdAt: -1 }).select(internshipSelectFields);
     allInternships.forEach(i => allActivities.push({
       type: 'Internship',
-      title: i.applicantName,
+      title: i.applicantName ? `Applicant: ${i.applicantName}` : 'N/A',
       centerName: i.centerName,
+      year: i.year,
+      duration: i.duration,
+      stipend: i.stipend,
+      location: i.location,
       date: new Date(i.year, 0, 1), // Convert year to date
       status: 'Active'
     }));
 
     // Talks/Trainings Attended
+    const talkTrainingSelectFields = req.body.detailed
+      ? 'title resourcePerson date venue duration certificate'
+      : 'title resourcePerson date venue duration';
+
     const allTalksTrainings = await TalkTrainingConference.find({ 'createdBy.id': accountId })
-      .sort({ createdAt: -1 }).select('title resourcePerson date');
+      .sort({ createdAt: -1 }).select(talkTrainingSelectFields);
     allTalksTrainings.forEach(tt => allActivities.push({
       type: 'TalkTrainingConference',
       title: tt.title,
       resourcePerson: tt.resourcePerson,
       date: tt.date,
+      venue: tt.venue,
+      duration: tt.duration,
+      certificate: tt.certificate,
       status: 'Attended'
     }));
 
     // Competitions
+    const competitionSelectFields = req.body.detailed
+      ? 'title organizer date position prize category'
+      : 'title organizer date position prize';
+
     const allCompetitions = await Competition.find({ 'createdBy.id': accountId })
-      .sort({ createdAt: -1 }).select('title organizer date');
+      .sort({ createdAt: -1 }).select(competitionSelectFields);
     allCompetitions.forEach(c => allActivities.push({
       type: 'Competition',
       title: c.title,
       organizer: c.organizer,
       date: c.date,
+      position: c.position,
+      prize: c.prize,
+      category: c.category,
       status: 'Participated'
     }));
 

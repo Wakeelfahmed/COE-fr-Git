@@ -45,7 +45,7 @@ const Sidebar = ({ isOpen }) => {
   }
 
   return (
-    <aside className={`bg-gray-700 text-white w-64 min-h-screen ${isOpen ? 'block' : 'hidden'} transition-all duration-300`}>
+    <aside className={`bg-gray-700 text-white w-64 min-h-screen overflow-y-auto ${isOpen ? 'block' : 'hidden'} transition-all duration-300`}>
       <nav className="p-0">
         <ul className="space-y-0">
           <li>

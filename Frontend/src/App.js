@@ -122,9 +122,9 @@ function App() {
         ) : user ? (
           <>
             <Sidebar isOpen={isSidebarOpen} />
-            <div className="flex-1 flex flex-col overflow-hidden">
+            <div className="flex-1 flex flex-col min-w-0">
               <Header toggleSidebar={toggleSidebar} />
-              <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-200">
+              <main className="flex-1 overflow-x-hidden overflow-auto bg-gray-200">
                 <Routes>
                   <Route path="/profile" element={<Profile />} />
                   <Route path="/projects" element={<ProjectsPage />} />

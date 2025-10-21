@@ -19,7 +19,8 @@ const EventsPage = () => {
     otherRole: '',
     type: '',
     participantsOfEvent: '',
-    nameOfAttendee: ''
+    nameOfAttendee: '',
+    date: ''
   });
   const [isEditMode, setIsEditMode] = useState(false);
   const [filterCriteria, setFilterCriteria] = useState({
@@ -28,6 +29,8 @@ const EventsPage = () => {
     resourcePerson: '',
     role: '',
     type: '',
+    dateFrom: '',
+    dateTo: '',
     accountFilter: '' // Add account filter
   });
 
@@ -83,7 +86,8 @@ const EventsPage = () => {
       otherRole: '',
       type: '',
       participantsOfEvent: '',
-      nameOfAttendee: ''
+      nameOfAttendee: '',
+      date: ''
     });
     setShowModal(true);
   };
@@ -157,6 +161,8 @@ const EventsPage = () => {
       resourcePerson: '',
       role: '',
       type: '',
+      dateFrom: '',
+      dateTo: '',
       accountFilter: ''
     });
   };
@@ -187,12 +193,18 @@ const EventsPage = () => {
   };
 
   const filteredEvents = events.filter(event => {
+    const eventDate = new Date(event.date);
+    const fromDate = filterCriteria.dateFrom ? new Date(filterCriteria.dateFrom) : null;
+    const toDate = filterCriteria.dateTo ? new Date(filterCriteria.dateTo) : null;
+
     return (event.activity || '').toLowerCase().includes((filterCriteria.activity || '').toLowerCase()) &&
       (event.organizer || '').toLowerCase().includes((filterCriteria.organizer || '').toLowerCase()) &&
       (event.resourcePerson || '').toLowerCase().includes((filterCriteria.resourcePerson || '').toLowerCase()) &&
       (event.role || '').toLowerCase().includes((filterCriteria.role || '').toLowerCase()) &&
       (event.type || '').toLowerCase().includes((filterCriteria.type || '').toLowerCase()) &&
-      (filterCriteria.accountFilter === '' || (event.createdBy?.id === filterCriteria.accountFilter));
+      (filterCriteria.accountFilter === '' || (event.createdBy?.id === filterCriteria.accountFilter)) &&
+      (!fromDate || eventDate >= fromDate) &&
+      (!toDate || eventDate <= toDate);
   });
 
   return (
@@ -270,6 +282,24 @@ const EventsPage = () => {
               onChange={handleFilterChange}
               className="border rounded px-2 py-1"
             />
+            <label htmlFor="dateFrom">From Date:</label>
+            <input
+              type="date"
+              placeholder="From Date"
+              name="dateFrom"
+              value={filterCriteria.dateFrom}
+              onChange={handleFilterChange}
+              className="border rounded px-2 py-1"
+            />
+            <label htmlFor="dateTo">To Date:</label>
+            <input
+              type="date"
+              placeholder="To Date"
+              name="dateTo"
+              value={filterCriteria.dateTo}
+              onChange={handleFilterChange}
+              className="border rounded px-2 py-1"
+            />
           </div>
           <button onClick={clearFilters} className="bg-gray-300 text-gray-700 px-4 py-2 rounded">
             Clear Filters
@@ -291,7 +321,7 @@ const EventsPage = () => {
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Participants</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Attendee Name</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
             </tr>
           </thead>
@@ -307,7 +337,7 @@ const EventsPage = () => {
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">{event.type}</td>
                 <td className="px-6 py-4 whitespace-nowrap">{event.participantsOfEvent}</td>
-                <td className="px-6 py-4 whitespace-nowrap">{event.nameOfAttendee}</td>
+                <td className="px-6 py-4 whitespace-nowrap">{new Date(event.date).toLocaleDateString()}</td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <button onClick={() => handleEditEvent(event)} className="text-blue-600 hover:text-blue-900 mr-2">Edit</button>
                   <button onClick={() => handleDeleteEvent(event._id)} className="text-red-600 hover:text-red-900">Delete</button>
@@ -403,20 +433,6 @@ const EventsPage = () => {
                 </div>
               )}
               <div className="mb-4">
-                <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="type">
-                  Type
-                </label>
-                <input
-                  type="text"
-                  id="type"
-                  name="type"
-                  value={currentEvent.type}
-                  onChange={handleInputChange}
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                  required
-                />
-              </div>
-              <div className="mb-4">
                 <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="participantsOfEvent">
                   Participants of Event <span className="text-gray-500 font-normal">(Student, Faculty, Industry etc)</span>
                 </label>
@@ -425,6 +441,20 @@ const EventsPage = () => {
                   id="participantsOfEvent"
                   name="participantsOfEvent"
                   value={currentEvent.participantsOfEvent}
+                  onChange={handleInputChange}
+                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                  required
+                />
+              </div>
+              <div className="mb-4">
+                <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="date">
+                  Event Date
+                </label>
+                <input
+                  type="date"
+                  id="date"
+                  name="date"
+                  value={currentEvent.date}
                   onChange={handleInputChange}
                   className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                   required

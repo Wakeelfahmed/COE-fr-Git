@@ -8,6 +8,8 @@ const AccountReportsPage = () => {
   const [selectedAccount, setSelectedAccount] = useState('');
   const [loading, setLoading] = useState(false);
   const [reportData, setReportData] = useState(null);
+  const [detailedReportData, setDetailedReportData] = useState(null);
+  const [loadingDetailed, setLoadingDetailed] = useState(false);
 
   useEffect(() => {
     fetchAccounts();
@@ -39,6 +41,27 @@ const AccountReportsPage = () => {
       alert('Error generating report');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const generateDetailedReport = async () => {
+    if (!selectedAccount) {
+      alert('Please select an account');
+      return;
+    }
+
+    setLoadingDetailed(true);
+    try {
+      const response = await axios.post(`${API_BASE_URL}/auth/reports/account`, {
+        accountId: selectedAccount,
+        detailed: true
+      });
+      setDetailedReportData(response.data);
+    } catch (error) {
+      console.error('Error generating detailed report:', error);
+      alert('Error generating detailed report');
+    } finally {
+      setLoadingDetailed(false);
     }
   };
 
@@ -91,6 +114,81 @@ const AccountReportsPage = () => {
       return ' ↕️'; // Both arrows when not sorted
     }
     return sortConfig.direction === 'ascending' ? ' ↑' : ' ↓';
+  };
+
+  const formatDetailedReportData = (data) => {
+    if (!data) return null;
+
+    return (
+      <div className="bg-white p-6 rounded-lg shadow-md">
+        <h3 className="text-xl font-bold mb-4">Detailed Account Report</h3>
+
+        <div className="mb-6">
+          <h4 className="font-semibold text-lg mb-2">Account Information</h4>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <p><strong>Name:</strong> {data.account.firstName} {data.account.lastName}</p>
+              <p><strong>Email:</strong> {data.account.email}</p>
+              <p><strong>Role:</strong> {data.account.role}</p>
+              <p><strong>UID:</strong> {data.account.uid}</p>
+            </div>
+            <div className="space-y-2">
+              <p><strong>Join Date:</strong> {new Date(data.account.joinDate).toLocaleDateString()}</p>
+              <p><strong>Contact:</strong> {data.account.contactNumber}</p>
+              <p><strong>Date of Birth:</strong> {data.account.dateOfBirth ? new Date(data.account.dateOfBirth).toLocaleDateString() : 'N/A'}</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="mb-6">
+          <h4 className="font-semibold text-lg mb-2">Activity Summary</h4>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="bg-blue-50 p-3 rounded">
+              <p className="text-sm text-gray-600">Total Activities</p>
+              <p className="text-xl font-bold">{data.summary.totalActivities}</p>
+            </div>
+            <div className="bg-green-50 p-3 rounded">
+              <p className="text-sm text-gray-600">Projects</p>
+              <p className="text-xl font-bold">{data.summary.projects}</p>
+            </div>
+            <div className="bg-yellow-50 p-3 rounded">
+              <p className="text-sm text-gray-600">Publications</p>
+              <p className="text-xl font-bold">{data.summary.publications}</p>
+            </div>
+            <div className="bg-purple-50 p-3 rounded">
+              <p className="text-sm text-gray-600">Events</p>
+              <p className="text-xl font-bold">{data.summary.events}</p>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <h4 className="font-semibold text-lg mb-4">All Activity Records ({data.allActivities.length})</h4>
+          {data.allActivities.length > 0 ? (
+            <div className="space-y-6">
+              {data.allActivities.map((activity, index) => (
+                <div key={index} className="border rounded-lg p-4 bg-gray-50">
+                  <h5 className="font-semibold text-md mb-3">Activity #{index + 1} - {activity.type}</h5>
+                  <div className="grid grid-cols-1 gap-2 text-sm">
+                    {Object.entries(activity).filter(([key]) => key !== 'status').map(([key, value]) => (
+                      <div key={key} className="flex">
+                        <span className="font-medium w-32 flex-shrink-0">{key}:</span>
+                        <span className="flex-1">
+                          {value && typeof value === 'object' ? JSON.stringify(value) :
+                           value ? String(value) : 'N/A'}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-gray-500 text-center py-8">No activities found for this account.</p>
+          )}
+        </div>
+      </div>
+    );
   };
 
   const formatReportData = (data, sortedActivities) => {
@@ -228,10 +326,18 @@ const AccountReportsPage = () => {
           >
             {loading ? 'Generating...' : 'Generate Report'}
           </button>
+          <button
+            onClick={generateDetailedReport}
+            disabled={loadingDetailed || !selectedAccount}
+            className="bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700 disabled:bg-gray-400"
+          >
+            {loadingDetailed ? 'Generating...' : 'Generate Detailed Report'}
+          </button>
         </div>
       </div>
 
       {reportData && formatReportData(reportData, sortedActivities)}
+      {detailedReportData && formatDetailedReportData(detailedReportData)}
     </div>
   );
 };
