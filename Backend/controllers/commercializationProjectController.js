@@ -4,10 +4,17 @@ const jwt = require('jsonwebtoken');
 // Helper function to get user info from token
 const getUserFromToken = (req) => {
   const token = req.cookies.token;
+  console.log('=== TOKEN DEBUG ===');
+  console.log('Token from cookies:', token ? 'PRESENT' : 'MISSING');
   if (!token) return null;
+
   try {
-    return jwt.verify(token, process.env.JWT_SECRET);
+    console.log('Verifying JWT token...');
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    console.log('Token verified successfully for user:', decoded._id);
+    return decoded;
   } catch (error) {
+    console.error('JWT verification failed:', error.message);
     return null;
   }
 };

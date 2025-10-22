@@ -110,8 +110,10 @@ const FundingsView = () => {
   };
 
   useEffect(() => {
-    fetchFundedProjects();
-  }, [showOnlyMine]);
+    if (user) {
+      fetchFundedProjects();
+    }
+  }, [showOnlyMine, user]);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -128,13 +130,24 @@ const FundingsView = () => {
   }, [showModal, showReportModal]);
 
   const fetchFundedProjects = async () => {
+    if (!user) {
+      console.log('User not authenticated, skipping fetch');
+      return;
+    }
+
     try {
+      console.log('Fetching funded projects for user:', user.email);
       const response = await axios.get(`${API_BASE_URL}/fundings`, {
         params: { onlyMine: showOnlyMine }
       });
+      console.log('Funded projects fetched successfully:', response.data.length);
       setFundedProjects(response.data);
     } catch (error) {
       console.error('Error fetching funded projects:', error);
+      if (error.response?.status === 401) {
+        console.log('Authentication failed, user may need to login again');
+        // Optionally redirect to login or show login prompt
+      }
       alert('Error fetching funded projects. Please try again.');
     }
   };

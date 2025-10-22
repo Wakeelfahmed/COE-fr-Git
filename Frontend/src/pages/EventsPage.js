@@ -39,9 +39,28 @@ const EventsPage = () => {
   const [showReportModal, setShowReportModal] = useState(false);
   const [reportTitle, setReportTitle] = useState('');
 
+  // Helper function to format dates for display (dd-mm-year format)
+  const formatDateForDisplay = (dateString) => {
+    if (!dateString) return 'N/A';
+    const date = new Date(dateString);
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}-${month}-${year}`;
+  };
+
+  // Helper function to format dates for HTML date inputs (YYYY-MM-DD format)
+  const formatDateForInput = (dateString) => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    return date.toISOString().split('T')[0]; // Convert to YYYY-MM-DD format
+  };
+
   useEffect(() => {
-    fetchEvents();
-  }, [showOnlyMine]);
+    if (user) {
+      fetchEvents();
+    }
+  }, [showOnlyMine, user]);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -58,20 +77,24 @@ const EventsPage = () => {
   }, [showModal, showReportModal]);
 
   const fetchEvents = async () => {
-    console.log('=== FETCHING EVENTS ===');
-    console.log('Show Only Mine:', showOnlyMine);
-    console.log('API URL:', `${API_BASE_URL}/events`);
+    if (!user) {
+      console.log('User not authenticated, skipping fetch');
+      return;
+    }
+
     try {
+      console.log('Fetching events for user:', user.email);
       const response = await axios.get(`${API_BASE_URL}/events`, {
         params: { onlyMine: showOnlyMine }
       });
-      console.log('Events fetched:', response.data.length, 'records');
-      console.log('Events data:', response.data);
+      console.log('Events fetched successfully:', response.data.length);
       setEvents(response.data);
     } catch (error) {
-      console.error('=== ERROR FETCHING EVENTS ===');
-      console.error('Error:', error);
-      console.error('Error response:', error.response?.data);
+      console.error('Error fetching events:', error);
+      if (error.response?.status === 401) {
+        console.log('Authentication failed, user may need to login again');
+        // Optionally redirect to login or show login prompt
+      }
       alert('Error fetching events. Please try again.');
     }
   };
@@ -94,7 +117,10 @@ const EventsPage = () => {
 
   const handleEditEvent = (event) => {
     setIsEditMode(true);
-    setCurrentEvent(event);
+    setCurrentEvent({
+      ...event,
+      date: formatDateForInput(event.date)
+    });
     setShowModal(true);
   };
 
@@ -337,7 +363,7 @@ const EventsPage = () => {
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">{event.type}</td>
                 <td className="px-6 py-4 whitespace-nowrap">{event.participantsOfEvent}</td>
-                <td className="px-6 py-4 whitespace-nowrap">{new Date(event.date).toLocaleDateString()}</td>
+                <td className="px-6 py-4 whitespace-nowrap">{formatDateForDisplay(event.date)}</td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <button onClick={() => handleEditEvent(event)} className="text-blue-600 hover:text-blue-900 mr-2">Edit</button>
                   <button onClick={() => handleDeleteEvent(event._id)} className="text-red-600 hover:text-red-900">Delete</button>
@@ -432,6 +458,30 @@ const EventsPage = () => {
                   />
                 </div>
               )}
+              <div className="mb-4">
+                <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="type">
+                  Event Type
+                </label>
+                <select
+                  id="type"
+                  name="type"
+                  value={currentEvent.type}
+                  onChange={handleInputChange}
+                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                  required
+                >
+                  <option value="">Select Event Type</option>
+                  <option value="Conference">Conference</option>
+                  <option value="Workshop">Workshop</option>
+                  <option value="Seminar">Seminar</option>
+                  <option value="Training">Training</option>
+                  <option value="Webinar">Webinar</option>
+                  <option value="Symposium">Symposium</option>
+                  <option value="Competition">Competition</option>
+                  <option value="Exhibition">Exhibition</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
               <div className="mb-4">
                 <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="participantsOfEvent">
                   Participants of Event <span className="text-gray-500 font-normal">(Student, Faculty, Industry etc)</span>

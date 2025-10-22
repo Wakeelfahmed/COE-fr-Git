@@ -508,7 +508,7 @@ const CollaborationPage = () => {
                     {(collab.collaborationScope || 'foreign') === 'foreign' ? 'Foreign' : 'Local'}
                   </span>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap">{collab.collaboratingCountry || 'N/A'}</td>
+                <td className="px-6 py-4 whitespace-nowrap">{collab.collaboratingCountry || '-'}</td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   {collab.typeOfCollaboration === 'Other' && collab.otherTypeDescription
                     ? `Other: ${collab.otherTypeDescription}`

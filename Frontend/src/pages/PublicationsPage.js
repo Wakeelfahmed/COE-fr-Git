@@ -80,8 +80,10 @@ const PublicationsView = () => {
   
 
   useEffect(() => {
-    fetchPublications();
-  }, [showOnlyMine]);
+    if (user) {
+      fetchPublications();
+    }
+  }, [showOnlyMine, user]);
 
     // Keyboard shortcuts
   useEffect(() => {
@@ -98,20 +100,24 @@ const PublicationsView = () => {
   }, [showModal, showReportModal]);
 
   const fetchPublications = async () => {
-    console.log('=== FETCHING PUBLICATIONS ===');
-    console.log('Show Only Mine:', showOnlyMine);
-    console.log('API URL:', `${API_BASE_URL}/publications`);
+    if (!user) {
+      console.log('User not authenticated, skipping fetch');
+      return;
+    }
+
     try {
+      console.log('Fetching publications for user:', user.email);
       const response = await axios.get(`${API_BASE_URL}/publications`, {
         params: { onlyMine: showOnlyMine }
       });
-      console.log('Publications fetched:', response.data.length, 'records');
-      console.log('Publications data:', response.data);
+      console.log('Publications fetched successfully:', response.data.length);
       setPublications(response.data);
     } catch (error) {
-      console.error('=== ERROR FETCHING PUBLICATIONS ===');
-      console.error('Error:', error);
-      console.error('Error response:', error.response?.data);
+      console.error('Error fetching publications:', error);
+      if (error.response?.status === 401) {
+        console.log('Authentication failed, user may need to login again');
+        // Optionally redirect to login or show login prompt
+      }
       alert('Error fetching publications. Please try again.');
     }
   };

@@ -56,23 +56,40 @@ exports.signup = async (req, res) => {
 
 exports.login = async (req, res) => {
   try {
+    console.log('=== BACKEND LOGIN DEBUG ===');
+    console.log('Login attempt for email:', req.body.email);
+    console.log('JWT_SECRET available:', !!process.env.JWT_SECRET);
+
     const { email, password } = req.body;
-    const user = await User.findOne({ email });
-    if (!user || !(await user.comparePassword(password))) {
+    let user = await User.findOne({ email });
+
+    if (!user) {
+      console.log('User not found in database for email:', email);
+      console.log('This might be a Firebase-only user. Login cannot proceed without backend user record.');
+      return res.status(401).send({ error: 'User not found. Please contact administrator or sign up first.' });
+    }
+
+    if (!(await user.comparePassword(password))) {
+      console.log('Invalid password for email:', email);
       return res.status(401).send({ error: 'Invalid login credentials' });
     }
+
+    console.log('User found:', user.email, 'with role:', user.role);
     const token = jwt.sign({ _id: user._id, role:user.role  }, process.env.JWT_SECRET);
-    
+    console.log('JWT token created successfully');
+
     // Set the token as an HTTP-only cookie
-    res.cookie('token', token, { 
+    res.cookie('token', token, {
       httpOnly: true,
       sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
       secure: process.env.NODE_ENV === 'production',
       maxAge: 24 * 60 * 60 * 1000 // 1 day
     });
 
+    console.log('Cookie set, sending response...');
     res.send({ user });
   } catch (error) {
+    console.error('Backend login error:', error);
     res.status(400).send(error);
   }
 };
@@ -98,6 +115,73 @@ exports.checkAuth = async (req, res) => {
   }
 };
 
+// Sync Firebase user with backend database
+exports.syncFirebaseUser = async (req, res) => {
+  try {
+    console.log('=== SYNC FIREBASE USER ===');
+    const { email, uid, displayName } = req.body;
+
+    if (!email || !uid) {
+      return res.status(400).json({ error: 'Email and UID are required' });
+    }
+
+    // Check if user already exists
+    let user = await User.findOne({ $or: [{ email }, { uid }] });
+
+    if (user) {
+      console.log('User already exists in backend:', user.email);
+      const token = jwt.sign({ _id: user._id, role: user.role }, process.env.JWT_SECRET);
+
+      res.cookie('token', token, {
+        httpOnly: true,
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+        secure: process.env.NODE_ENV === 'production',
+        maxAge: 24 * 60 * 60 * 1000
+      });
+
+      return res.json({ user });
+    }
+
+    // Create new user record for Firebase user
+    console.log('Creating new backend user for Firebase user:', email);
+
+    // Split displayName into first and last name if available
+    let firstName = 'Unknown';
+    let lastName = 'User';
+    if (displayName) {
+      const nameParts = displayName.split(' ');
+      firstName = nameParts[0] || 'Unknown';
+      lastName = nameParts.slice(1).join(' ') || 'User';
+    }
+
+    user = new User({
+      email,
+      password: 'firebase-user-' + Date.now(), // Dummy password for Firebase users
+      role: 'Researcher/Dev', // Default role
+      firstName,
+      lastName,
+      uid,
+      joinDate: new Date()
+    });
+
+    await user.save();
+    console.log('Backend user created successfully');
+
+    const token = jwt.sign({ _id: user._id, role: user.role }, process.env.JWT_SECRET);
+
+    res.cookie('token', token, {
+      httpOnly: true,
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 24 * 60 * 60 * 1000
+    });
+
+    res.status(201).json({ user });
+  } catch (error) {
+    console.error('Sync Firebase user error:', error);
+    res.status(500).json({ error: 'Failed to sync user' });
+  }
+};
 
 exports.getProfile = async (req, res) => {
   try {
@@ -122,7 +206,6 @@ exports.getProfile = async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 };
-
 
 exports.getAllAccounts = async (req, res) => {
   try {
@@ -292,112 +375,184 @@ exports.generateAccountReport = async (req, res) => {
 
     // Events
     const allEvents = await Event.find({ 'createdBy.id': accountId })
-      .sort({ createdAt: -1 }).select('activity organizer date');
+      .sort({ createdAt: -1 });
     allEvents.forEach(e => allActivities.push({
       type: 'Event',
       title: e.activity,
       organizer: e.organizer,
+      resourcePerson: e.resourcePerson,
+      role: e.role,
+      otherRole: e.otherRole,
+      eventType: e.type,
+      participants: e.participantsOfEvent,
+      nameOfAttendee: e.nameOfAttendee,
       date: e.date,
       status: 'Attended'
     }));
 
     // Collaborations
     const allCollaborations = await Collaboration.find({ 'createdBy.id': accountId })
-      .sort({ createdAt: -1 }).select('memberOfCoE foreignCollaboratingInstitute durationStart currentStatus');
+      .sort({ createdAt: -1 });
     allCollaborations.forEach(c => allActivities.push({
       type: 'Collaboration',
       title: c.memberOfCoE || 'N/A',
-      collaboratingInstitute: c.foreignCollaboratingInstitute,
+      memberOfCoE: c.memberOfCoE,
+      collaboratingForeignResearcher: c.collaboratingForeignResearcher,
+      foreignCollaboratingInstitute: c.foreignCollaboratingInstitute,
+      collaborationScope: c.collaborationScope,
+      collaboratingCountry: c.collaboratingCountry,
+      typeOfCollaboration: c.typeOfCollaboration,
+      otherTypeDescription: c.otherTypeDescription,
+      durationStart: c.durationStart,
+      durationEnd: c.durationEnd,
+      currentStatus: c.currentStatus,
+      keyOutcomes: c.keyOutcomes,
+      detailsOfOutcome: c.detailsOfOutcome,
       date: c.durationStart || c.createdAt,
       status: c.currentStatus || 'Active'
     }));
 
     // Patents
     const allPatents = await Patent.find({ 'createdBy.id': accountId })
-      .sort({ createdAt: -1 }).select('title patentOrg dateOfSubmission');
+      .sort({ createdAt: -1 });
     allPatents.forEach(p => allActivities.push({
       type: 'Patent',
       title: p.title,
+      inventor: p.inventor,
+      coInventor: p.coInventor,
       patentOrg: p.patentOrg,
+      affiliationOfCoInventor: p.affiliationOfCoInventor,
+      dateOfSubmission: p.dateOfSubmission,
+      scope: p.scope,
+      directoryNumber: p.directoryNumber,
+      patentNumber: p.patentNumber,
+      dateOfApproval: p.dateOfApproval,
+      targetSDG: p.targetSDG,
       date: p.dateOfSubmission,
       status: 'Filed'
     }));
 
     // Fundings
     const allFundings = await Funding.find({ 'createdBy.id': accountId })
-      .sort({ createdAt: -1 }).select('projectTitle fundingSource dateOfSubmission');
+      .sort({ createdAt: -1 });
     allFundings.forEach(f => allActivities.push({
       type: 'Funding',
       title: f.projectTitle || 'N/A',
-      fundingAgency: f.fundingSource,
-      date: f.dateOfSubmission,
-      status: 'Active'
+      projectTitle: f.projectTitle,
+      pi: f.pi,
+      researchTeam: f.researchTeam,
+      dateOfSubmission: f.dateOfSubmission,
+      dateOfApproval: f.dateOfApproval,
+      fundingSource: f.fundingSource,
+      pkr: f.pkr,
+      team: f.team,
+      status: f.status,
+      closingDate: f.closingDate,
+      targetSDG: f.targetSDG,
+      date: f.dateOfSubmission
     }));
 
     // Funding Proposals
     const allFundingProposals = await FundingProposal.find({ 'createdBy.id': accountId })
-      .sort({ createdAt: -1 }).select('projectTitle fundingSource team dateOfSubmission status');
+      .sort({ createdAt: -1 });
     allFundingProposals.forEach(fp => allActivities.push({
       type: 'Funding Proposal',
       title: fp.projectTitle,
-      fundingAgency: fp.team,
-      date: fp.dateOfSubmission,
-      status: fp.status || 'Submitted'
+      projectTitle: fp.projectTitle,
+      pi: fp.pi,
+      researchTeam: fp.researchTeam,
+      dateOfSubmission: fp.dateOfSubmission,
+      fundingSource: fp.fundingSource,
+      pkr: fp.pkr,
+      team: fp.team,
+      status: fp.status,
+      targetSDG: fp.targetSDG,
+      date: fp.dateOfSubmission
     }));
 
     // Achievements
     const allAchievements = await Achievement.find({ 'createdBy.id': accountId })
-      .sort({ createdAt: -1 }).select('event organizer date');
+      .sort({ createdAt: -1 });
     allAchievements.forEach(a => allActivities.push({
       type: 'Achievement',
       title: a.event,
+      event: a.event,
       organizer: a.organizer,
       date: a.date,
+      participantOfEvent: a.participantOfEvent,
+      participantFromCoEAI: a.participantFromCoEAI,
+      roleOfParticipantFromCoEAI: a.roleOfParticipantFromCoEAI,
+      detailsOfAchievement: a.detailsOfAchievement,
       status: 'Achieved'
     }));
 
     // Trainings Conducted
     const allTrainingsConducted = await TrainingsConducted.find({ 'createdBy.id': accountId })
-      .sort({ createdAt: -1 }).select('organizer resourcePersons date');
+      .sort({ createdAt: -1 });
     allTrainingsConducted.forEach(tc => allActivities.push({
       type: 'Training Conducted',
-      // title: tc.organizer,
       title: tc.organizer ? `Organizer: ${tc.organizer}` : 'N/A',
+      attendees: tc.attendees,
+      numberOfAttendees: tc.numberOfAttendees,
+      organizer: tc.organizer,
       resourcePersons: tc.resourcePersons,
       date: tc.date,
+      targetSDG: tc.targetSDG,
+      totalRevenueGenerated: tc.totalRevenueGenerated,
       status: 'Conducted'
     }));
 
     // Internships
     const allInternships = await Intership.find({ 'createdBy.id': accountId })
-      .sort({ createdAt: -1 }).select('applicantName centerName year');
+      .sort({ createdAt: -1 });
     allInternships.forEach(i => allActivities.push({
       type: 'Internship',
       title: i.applicantName ? `Applicant: ${i.applicantName}` : 'N/A',
+      year: i.year,
+      duration: i.duration,
+      certificateNumber: i.certificateNumber,
+      applicantName: i.applicantName,
+      officialEmail: i.officialEmail,
+      contactNumber: i.contactNumber,
+      affiliation: i.affiliation,
       centerName: i.centerName,
+      supervisor: i.supervisor,
+      tasksCompleted: i.tasksCompleted,
       date: new Date(i.year, 0, 1), // Convert year to date
       status: 'Active'
     }));
 
     // Talks/Trainings Attended
     const allTalksTrainings = await TalkTrainingConference.find({ 'createdBy.id': accountId })
-      .sort({ createdAt: -1 }).select('title resourcePerson date');
+      .sort({ createdAt: -1 });
     allTalksTrainings.forEach(tt => allActivities.push({
       type: 'TalkTrainingConference',
       title: tt.title,
+      eventType: tt.type,
       resourcePerson: tt.resourcePerson,
+      participants: tt.participants,
+      mode: tt.mode,
       date: tt.date,
+      targetSDG: tt.targetSDG,
+      agenda: tt.agenda,
+      followUpActivity: tt.followUpActivity,
       status: 'Attended'
     }));
 
     // Competitions
     const allCompetitions = await Competition.find({ 'createdBy.id': accountId })
-      .sort({ createdAt: -1 }).select('title organizer date');
+      .sort({ createdAt: -1 });
     allCompetitions.forEach(c => allActivities.push({
       type: 'Competition',
       title: c.title,
       organizer: c.organizer,
       date: c.date,
+      participants: c.participants,
+      scope: c.scope,
+      scopeOther: c.scopeOther,
+      participantsFromBU: c.participantsFromBU,
+      prizeMoney: c.prizeMoney,
+      details: c.details,
       status: 'Participated'
     }));
 

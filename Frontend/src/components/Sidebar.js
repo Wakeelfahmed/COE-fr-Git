@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/solid';
 import { auth } from '../firebaseConfig';
+import { useUser } from '../context/UserContext';
 
 
 const activityItems = [
@@ -28,21 +29,22 @@ const otherItems = [
 
 const Sidebar = ({ isOpen }) => {
   const [isActivitiesOpen, setIsActivitiesOpen] = useState(true);
+  const { user, setUser } = useUser();
 
   const toggleActivities = () => {
     setIsActivitiesOpen(!isActivitiesOpen);
   };
 
-  const handleSignOut = ()=>{
-    auth.signOut()
-    .then(() => {
-      console.log("User signed out.");
+  const handleSignOut = async () => {
+    try {
+      await auth.signOut();
+      setUser(null); // Clear user context
+      console.log("User signed out and context cleared.");
       window.location.href = '/login'; // Redirect to login page after logging out
-    })
-    .catch(error => {
+    } catch (error) {
       console.error("Error signing out: ", error);
-    });
-  }
+    }
+  };
 
   return (
     <aside className={`bg-gray-700 text-white w-64 min-h-screen overflow-y-auto ${isOpen ? 'block' : 'hidden'} transition-all duration-300`}>
@@ -82,7 +84,7 @@ const Sidebar = ({ isOpen }) => {
         </ul>
       </nav>
 
-      { auth.currentUser &&<button className='fixed bottom-10 ml-[20px] border p-3 px-5 rounded-xl hover:bg-black' onClick={handleSignOut}>Sign Out</button>}
+      {user && <button className='fixed bottom-10 ml-[20px] border p-3 px-5 rounded-xl hover:bg-black' onClick={handleSignOut}>Sign Out</button>}
     </aside>
   );
 };

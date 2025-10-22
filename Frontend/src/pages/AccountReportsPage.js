@@ -123,30 +123,40 @@ const AccountReportsPage = () => {
                 <thead className="bg-gray-50">
                   <tr>
                     <th className="px-4 py-2 text-left">#</th>
-                    <th className="px-4 py-2 text-left">Title</th>
-                    <th className="px-4 py-2 text-left">Description</th>
-                    <th className="px-4 py-2 text-left">Start Date</th>
-                    <th className="px-4 py-2 text-left">End Date</th>
-                    <th className="px-4 py-2 text-left">Status</th>
-                    <th className="px-4 py-2 text-left">Team Members</th>
-                    <th className="px-4 py-2 text-left">Budget</th>
-                    <th className="px-4 py-2 text-left">Funding Agency</th>
-                    <th className="px-4 py-2 text-left">Project Type</th>
+                    <th className="px-4 py-2 text-left">Project Title</th>
+                    <th className="px-4 py-2 text-left">Team Lead</th>
+                    <th className="px-4 py-2 text-left">R&D Team</th>
+                    <th className="px-4 py-2 text-left">Client Company</th>
+                    <th className="px-4 py-2 text-left">Contract Date</th>
+                    <th className="px-4 py-2 text-left">Deployment Date (Contract)</th>
+                    <th className="px-4 py-2 text-left">Amount (PKR M)</th>
+                    <th className="px-4 py-2 text-left">Adv. Payment %</th>
+                    <th className="px-4 py-2 text-left">Adv. Payment Date</th>
+                    <th className="px-4 py-2 text-left">Actual Deployment Date</th>
+                    <th className="px-4 py-2 text-left">Complete Payment Date</th>
+                    <th className="px-4 py-2 text-left">Tax Paid By</th>
+                    <th className="px-4 py-2 text-left">Target SDG</th>
+                    <th className="px-4 py-2 text-left">Remarks</th>
                   </tr>
                 </thead>
                 <tbody>
                   {data.projects.map((project, index) => (
                     <tr key={project._id} className="border-t">
                       <td className="px-4 py-2">{index + 1}</td>
-                      <td className="px-4 py-2">{project.title}</td>
-                      <td className="px-4 py-2">{project.description}</td>
-                      <td className="px-4 py-2">{new Date(project.startDate).toLocaleDateString()}</td>
-                      <td className="px-4 py-2">{project.endDate ? new Date(project.endDate).toLocaleDateString() : 'N/A'}</td>
-                      <td className="px-4 py-2">{project.status}</td>
-                      <td className="px-4 py-2">{project.teamMembers}</td>
-                      <td className="px-4 py-2">{project.budget}</td>
-                      <td className="px-4 py-2">{project.fundingAgency}</td>
-                      <td className="px-4 py-2">{project.projectType}</td>
+                      <td className="px-4 py-2">{project.projectTitle || 'N/A'}</td>
+                      <td className="px-4 py-2">{project.teamLead || 'N/A'}</td>
+                      <td className="px-4 py-2">{project.rndTeam ? project.rndTeam.join(', ') : 'N/A'}</td>
+                      <td className="px-4 py-2">{project.clientCompany || 'N/A'}</td>
+                      <td className="px-4 py-2">{project.dateOfContractSign ? new Date(project.dateOfContractSign).toLocaleDateString() : 'N/A'}</td>
+                      <td className="px-4 py-2">{project.dateOfDeploymentAsPerContract ? new Date(project.dateOfDeploymentAsPerContract).toLocaleDateString() : 'N/A'}</td>
+                      <td className="px-4 py-2">{project.amountInPKRM ? project.amountInPKRM.toLocaleString() : 'N/A'}</td>
+                      <td className="px-4 py-2">{project.advPaymentPercentage ? project.advPaymentPercentage + '%' : 'N/A'}</td>
+                      <td className="px-4 py-2">{project.dateOfReceivingAdvancePayment ? new Date(project.dateOfReceivingAdvancePayment).toLocaleDateString() : 'N/A'}</td>
+                      <td className="px-4 py-2">{project.actualDateOfDeployment ? new Date(project.actualDateOfDeployment).toLocaleDateString() : 'N/A'}</td>
+                      <td className="px-4 py-2">{project.dateOfReceivingCompletePayment ? new Date(project.dateOfReceivingCompletePayment).toLocaleDateString() : 'N/A'}</td>
+                      <td className="px-4 py-2">{project.taxPaidBy || 'N/A'}</td>
+                      <td className="px-4 py-2">{project.targetSDG ? project.targetSDG.join(', ') : 'N/A'}</td>
+                      <td className="px-4 py-2">{project.remarks || 'N/A'}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -164,26 +174,24 @@ const AccountReportsPage = () => {
                 <thead className="bg-gray-50">
                   <tr>
                     <th className="px-4 py-2 text-left">#</th>
-                    <th className="px-4 py-2 text-left">Title</th>
-                    <th className="px-4 py-2 text-left">Authors</th>
-                    <th className="px-4 py-2 text-left">Journal/Conference</th>
-                    <th className="px-4 py-2 text-left">Publication Date</th>
-                    <th className="px-4 py-2 text-left">DOI</th>
-                    <th className="px-4 py-2 text-left">Publication Type</th>
-                    <th className="px-4 py-2 text-left">Status</th>
+                    <th className="px-4 py-2 text-left">Author</th>
+                    <th className="px-4 py-2 text-left">Publication Details</th>
+                    <th className="px-4 py-2 text-left">Type of Publication</th>
+                    <th className="px-4 py-2 text-left">Last Known Impact Factor</th>
+                    <th className="px-4 py-2 text-left">Date of Publication</th>
+                    <th className="px-4 py-2 text-left">HEC Category</th>
                   </tr>
                 </thead>
                 <tbody>
                   {data.publications.map((pub, index) => (
                     <tr key={pub._id} className="border-t">
                       <td className="px-4 py-2">{index + 1}</td>
-                      <td className="px-4 py-2">{pub.title}</td>
-                      <td className="px-4 py-2">{pub.authors}</td>
-                      <td className="px-4 py-2">{pub.journalConference}</td>
-                      <td className="px-4 py-2">{new Date(pub.publicationDate).toLocaleDateString()}</td>
-                      <td className="px-4 py-2">{pub.doi}</td>
-                      <td className="px-4 py-2">{pub.publicationType}</td>
-                      <td className="px-4 py-2">{pub.status}</td>
+                      <td className="px-4 py-2">{pub.author}</td>
+                      <td className="px-4 py-2">{pub.publicationDetails}</td>
+                      <td className="px-4 py-2">{pub.typeOfPublication}</td>
+                      <td className="px-4 py-2">{pub.lastKnownImpactFactor}</td>
+                      <td className="px-4 py-2">{new Date(pub.dateOfPublication).toLocaleDateString()}</td>
+                      <td className="px-4 py-2">{pub.hecCategory}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -238,20 +246,42 @@ const AccountReportsPage = () => {
                 <thead className="bg-gray-50">
                   <tr>
                     <th className="px-4 py-2 text-left">#</th>
-                    <th className="px-4 py-2 text-left">Member of CoE</th>
-                    <th className="px-4 py-2 text-left">Collaborating Institute</th>
-                    <th className="px-4 py-2 text-left">Duration Start</th>
-                    <th className="px-4 py-2 text-left">Current Status</th>
+                    <th className="px-4 py-2 text-left">Member of CoE-AI</th>
+                    <th className="px-4 py-2 text-left">Researcher</th>
+                    <th className="px-4 py-2 text-left">Institute</th>
+                    <th className="px-4 py-2 text-left">Scope</th>
+                    <th className="px-4 py-2 text-left">Country</th>
+                    <th className="px-4 py-2 text-left">Type</th>
+                    <th className="px-4 py-2 text-left">Duration</th>
+                    <th className="px-4 py-2 text-left">Status</th>
                   </tr>
                 </thead>
                 <tbody>
                   {data.collaborations.map((collab, index) => (
                     <tr key={collab._id} className="border-t">
                       <td className="px-4 py-2">{index + 1}</td>
-                      <td className="px-4 py-2">{collab.memberOfCoE || 'N/A'}</td>
+                      <td className="px-4 py-2">{collab.memberOfCoE}</td>
+                      <td className="px-4 py-2">{collab.collaboratingForeignResearcher}</td>
                       <td className="px-4 py-2">{collab.foreignCollaboratingInstitute}</td>
-                      <td className="px-4 py-2">{collab.durationStart ? new Date(collab.durationStart).toLocaleDateString() : 'N/A'}</td>
-                      <td className="px-4 py-2">{collab.currentStatus || 'Active'}</td>
+                      <td className="px-4 py-2">
+                        <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
+                          (collab.collaborationScope || 'foreign') === 'foreign'
+                            ? 'bg-blue-100 text-blue-800'
+                            : 'bg-green-100 text-green-800'
+                        }`}>
+                          {(collab.collaborationScope || 'foreign') === 'foreign' ? 'Foreign' : 'Local'}
+                        </span>
+                      </td>
+                      <td className="px-4 py-2">{collab.collaboratingCountry || '-'}</td>
+                      <td className="px-4 py-2">
+                        {collab.typeOfCollaboration === 'Other' && collab.otherTypeDescription
+                          ? `Other: ${collab.otherTypeDescription}`
+                          : collab.typeOfCollaboration}
+                      </td>
+                      <td className="px-4 py-2">
+                        {new Date(collab.durationStart).toLocaleDateString()} - {collab.durationEnd ? new Date(collab.durationEnd).toLocaleDateString() : 'Ongoing'}
+                      </td>
+                      <td className="px-4 py-2">{collab.currentStatus}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -270,17 +300,35 @@ const AccountReportsPage = () => {
                   <tr>
                     <th className="px-4 py-2 text-left">#</th>
                     <th className="px-4 py-2 text-left">Title</th>
-                    <th className="px-4 py-2 text-left">Patent Organization</th>
-                    <th className="px-4 py-2 text-left">Date of Submission</th>
+                    <th className="px-4 py-2 text-left">Inventor</th>
+                    <th className="px-4 py-2 text-left">Co-Inventor</th>
+                    <th className="px-4 py-2 text-left">Patent Org</th>
+                    <th className="px-4 py-2 text-left">Co-Inventor Affiliation</th>
+                    <th className="px-4 py-2 text-left">Submission Date</th>
+                    <th className="px-4 py-2 text-left">Scope</th>
+                    <th className="px-4 py-2 text-left">Directory Number</th>
+                    <th className="px-4 py-2 text-left">Patent Number</th>
+                    <th className="px-4 py-2 text-left">Approval Date</th>
+                    <th className="px-4 py-2 text-left">Target SDG</th>
                   </tr>
                 </thead>
                 <tbody>
                   {data.patents.map((patent, index) => (
                     <tr key={patent._id} className="border-t">
                       <td className="px-4 py-2">{index + 1}</td>
-                      <td className="px-4 py-2">{patent.title}</td>
-                      <td className="px-4 py-2">{patent.patentOrg}</td>
-                      <td className="px-4 py-2">{new Date(patent.dateOfSubmission).toLocaleDateString()}</td>
+                      <td className="px-4 py-2">{patent.title || 'N/A'}</td>
+                      <td className="px-4 py-2">{patent.inventor || 'N/A'}</td>
+                      <td className="px-4 py-2">
+                        {Array.isArray(patent.coInventor) ? patent.coInventor.join(', ') : patent.coInventor || 'N/A'}
+                      </td>
+                      <td className="px-4 py-2">{patent.patentOrg || '-'}</td>
+                      <td className="px-4 py-2">{patent.affiliationOfCoInventor || '-'}</td>
+                      <td className="px-4 py-2">{patent.dateOfSubmission ? new Date(patent.dateOfSubmission).toLocaleDateString() : 'N/A'}</td>
+                      <td className="px-4 py-2">{patent.scope || 'N/A'}</td>
+                      <td className="px-4 py-2">{patent.directoryNumber || 'N/A'}</td>
+                      <td className="px-4 py-2">{patent.patentNumber || 'N/A'}</td>
+                      <td className="px-4 py-2">{patent.dateOfApproval ? new Date(patent.dateOfApproval).toLocaleDateString() : 'N/A'}</td>
+                      <td className="px-4 py-2">{patent.targetSDG ? patent.targetSDG.join(', ') : 'N/A'}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -299,17 +347,33 @@ const AccountReportsPage = () => {
                   <tr>
                     <th className="px-4 py-2 text-left">#</th>
                     <th className="px-4 py-2 text-left">Project Title</th>
+                    <th className="px-4 py-2 text-left">PI</th>
+                    <th className="px-4 py-2 text-left">Research Team</th>
+                    <th className="px-4 py-2 text-left">Submission Date</th>
+                    <th className="px-4 py-2 text-left">Approval Date</th>
                     <th className="px-4 py-2 text-left">Funding Source</th>
-                    <th className="px-4 py-2 text-left">Date of Submission</th>
+                    <th className="px-4 py-2 text-left">PKR (M)</th>
+                    <th className="px-4 py-2 text-left">Team</th>
+                    <th className="px-4 py-2 text-left">Status</th>
+                    <th className="px-4 py-2 text-left">Closing Date</th>
+                    <th className="px-4 py-2 text-left">Target SDG</th>
                   </tr>
                 </thead>
                 <tbody>
                   {data.fundings.map((funding, index) => (
                     <tr key={funding._id} className="border-t">
                       <td className="px-4 py-2">{index + 1}</td>
-                      <td className="px-4 py-2">{funding.projectTitle || 'N/A'}</td>
+                      <td className="px-4 py-2">{funding.projectTitle}</td>
+                      <td className="px-4 py-2">{funding.pi}</td>
+                      <td className="px-4 py-2">{funding.researchTeam}</td>
+                      <td className="px-4 py-2">{funding.dateOfSubmission ? new Date(funding.dateOfSubmission).toLocaleDateString() : 'N/A'}</td>
+                      <td className="px-4 py-2">{funding.dateOfApproval ? new Date(funding.dateOfApproval).toLocaleDateString() : 'N/A'}</td>
                       <td className="px-4 py-2">{funding.fundingSource}</td>
-                      <td className="px-4 py-2">{new Date(funding.dateOfSubmission).toLocaleDateString()}</td>
+                      <td className="px-4 py-2">{funding.pkr ? funding.pkr.toLocaleString() : 'N/A'}</td>
+                      <td className="px-4 py-2">{funding.team}</td>
+                      <td className="px-4 py-2">{funding.status}</td>
+                      <td className="px-4 py-2">{funding.closingDate ? new Date(funding.closingDate).toLocaleDateString() : 'N/A'}</td>
+                      <td className="px-4 py-2">{funding.targetSDG ? funding.targetSDG.join(', ') : 'N/A'}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -328,9 +392,14 @@ const AccountReportsPage = () => {
                   <tr>
                     <th className="px-4 py-2 text-left">#</th>
                     <th className="px-4 py-2 text-left">Project Title</th>
+                    <th className="px-4 py-2 text-left">PI</th>
+                    <th className="px-4 py-2 text-left">Research Team</th>
+                    <th className="px-4 py-2 text-left">Submission Date</th>
+                    <th className="px-4 py-2 text-left">Funding Source</th>
+                    <th className="px-4 py-2 text-left">PKR (M)</th>
                     <th className="px-4 py-2 text-left">Team</th>
-                    <th className="px-4 py-2 text-left">Date of Submission</th>
                     <th className="px-4 py-2 text-left">Status</th>
+                    <th className="px-4 py-2 text-left">Target SDG</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -338,9 +407,14 @@ const AccountReportsPage = () => {
                     <tr key={proposal._id} className="border-t">
                       <td className="px-4 py-2">{index + 1}</td>
                       <td className="px-4 py-2">{proposal.projectTitle}</td>
+                      <td className="px-4 py-2">{proposal.pi}</td>
+                      <td className="px-4 py-2">{proposal.researchTeam}</td>
+                      <td className="px-4 py-2">{proposal.dateOfSubmission ? new Date(proposal.dateOfSubmission).toLocaleDateString() : 'N/A'}</td>
+                      <td className="px-4 py-2">{proposal.fundingSource}</td>
+                      <td className="px-4 py-2">{proposal.pkr ? proposal.pkr.toLocaleString() : 'N/A'}</td>
                       <td className="px-4 py-2">{proposal.team}</td>
-                      <td className="px-4 py-2">{new Date(proposal.dateOfSubmission).toLocaleDateString()}</td>
-                      <td className="px-4 py-2">{proposal.status || 'Submitted'}</td>
+                      <td className="px-4 py-2">{proposal.status}</td>
+                      <td className="px-4 py-2">{proposal.targetSDG ? proposal.targetSDG.join(', ') : 'N/A'}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -361,6 +435,10 @@ const AccountReportsPage = () => {
                     <th className="px-4 py-2 text-left">Event</th>
                     <th className="px-4 py-2 text-left">Organizer</th>
                     <th className="px-4 py-2 text-left">Date</th>
+                    <th className="px-4 py-2 text-left">Participant of Event</th>
+                    <th className="px-4 py-2 text-left">Participant from CoE-AI</th>
+                    <th className="px-4 py-2 text-left">Role</th>
+                    <th className="px-4 py-2 text-left">Details of Achievement</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -370,6 +448,10 @@ const AccountReportsPage = () => {
                       <td className="px-4 py-2">{achievement.event}</td>
                       <td className="px-4 py-2">{achievement.organizer}</td>
                       <td className="px-4 py-2">{new Date(achievement.date).toLocaleDateString()}</td>
+                      <td className="px-4 py-2">{achievement.participantOfEvent}</td>
+                      <td className="px-4 py-2">{achievement.participantFromCoEAI}</td>
+                      <td className="px-4 py-2">{achievement.roleOfParticipantFromCoEAI}</td>
+                      <td className="px-4 py-2">{achievement.detailsOfAchievement}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -387,18 +469,26 @@ const AccountReportsPage = () => {
                 <thead className="bg-gray-50">
                   <tr>
                     <th className="px-4 py-2 text-left">#</th>
+                    <th className="px-4 py-2 text-left">Attendees</th>
+                    <th className="px-4 py-2 text-left"># of Attendees</th>
                     <th className="px-4 py-2 text-left">Organizer</th>
                     <th className="px-4 py-2 text-left">Resource Persons</th>
                     <th className="px-4 py-2 text-left">Date</th>
+                    <th className="px-4 py-2 text-left">Target SDG</th>
+                    <th className="px-4 py-2 text-left">Total Revenue Generated</th>
                   </tr>
                 </thead>
                 <tbody>
                   {data.trainingsConducted.map((training, index) => (
                     <tr key={training._id} className="border-t">
                       <td className="px-4 py-2">{index + 1}</td>
+                      <td className="px-4 py-2">{training.attendees}</td>
+                      <td className="px-4 py-2">{training.numberOfAttendees || 'N/A'}</td>
                       <td className="px-4 py-2">{training.organizer}</td>
                       <td className="px-4 py-2">{training.resourcePersons}</td>
                       <td className="px-4 py-2">{new Date(training.date).toLocaleDateString()}</td>
+                      <td className="px-4 py-2">{training.targetSDG ? training.targetSDG.join(', ') : 'N/A'}</td>
+                      <td className="px-4 py-2">{training.totalRevenueGenerated ? `Rs. ${training.totalRevenueGenerated.toLocaleString()}` : 'N/A'}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -416,18 +506,32 @@ const AccountReportsPage = () => {
                 <thead className="bg-gray-50">
                   <tr>
                     <th className="px-4 py-2 text-left">#</th>
-                    <th className="px-4 py-2 text-left">Applicant Name</th>
-                    <th className="px-4 py-2 text-left">Center Name</th>
                     <th className="px-4 py-2 text-left">Year</th>
+                    <th className="px-4 py-2 text-left">Duration</th>
+                    <th className="px-4 py-2 text-left">Certificate Number</th>
+                    <th className="px-4 py-2 text-left">Applicant Name</th>
+                    <th className="px-4 py-2 text-left">Official Email</th>
+                    <th className="px-4 py-2 text-left">Contact Number</th>
+                    <th className="px-4 py-2 text-left">Affiliation</th>
+                    <th className="px-4 py-2 text-left">Center Name</th>
+                    <th className="px-4 py-2 text-left">Supervisor</th>
+                    <th className="px-4 py-2 text-left">Tasks Completed</th>
                   </tr>
                 </thead>
                 <tbody>
                   {data.internships.map((internship, index) => (
                     <tr key={internship._id} className="border-t">
                       <td className="px-4 py-2">{index + 1}</td>
-                      <td className="px-4 py-2">{internship.applicantName}</td>
-                      <td className="px-4 py-2">{internship.centerName}</td>
                       <td className="px-4 py-2">{internship.year}</td>
+                      <td className="px-4 py-2">{internship.duration}</td>
+                      <td className="px-4 py-2">{internship.certificateNumber}</td>
+                      <td className="px-4 py-2">{internship.applicantName}</td>
+                      <td className="px-4 py-2">{internship.officialEmail}</td>
+                      <td className="px-4 py-2">{internship.contactNumber}</td>
+                      <td className="px-4 py-2">{internship.affiliation}</td>
+                      <td className="px-4 py-2">{internship.centerName}</td>
+                      <td className="px-4 py-2">{internship.supervisor}</td>
+                      <td className="px-4 py-2">{internship.tasksCompleted}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -445,18 +549,26 @@ const AccountReportsPage = () => {
                 <thead className="bg-gray-50">
                   <tr>
                     <th className="px-4 py-2 text-left">#</th>
+                    <th className="px-4 py-2 text-left">Type</th>
                     <th className="px-4 py-2 text-left">Title</th>
                     <th className="px-4 py-2 text-left">Resource Person</th>
+                    <th className="px-4 py-2 text-left">Participants</th>
+                    <th className="px-4 py-2 text-left">Mode</th>
                     <th className="px-4 py-2 text-left">Date</th>
+                    <th className="px-4 py-2 text-left">Target SDG</th>
                   </tr>
                 </thead>
                 <tbody>
                   {data.talkTrainings.map((talk, index) => (
                     <tr key={talk._id} className="border-t">
                       <td className="px-4 py-2">{index + 1}</td>
+                      <td className="px-4 py-2">{talk.type}</td>
                       <td className="px-4 py-2">{talk.title}</td>
                       <td className="px-4 py-2">{talk.resourcePerson}</td>
+                      <td className="px-4 py-2">{talk.participants}</td>
+                      <td className="px-4 py-2">{talk.mode}</td>
                       <td className="px-4 py-2">{new Date(talk.date).toLocaleDateString()}</td>
+                      <td className="px-4 py-2">{talk.targetSDG ? talk.targetSDG.join(', ') : 'N/A'}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -474,18 +586,28 @@ const AccountReportsPage = () => {
                 <thead className="bg-gray-50">
                   <tr>
                     <th className="px-4 py-2 text-left">#</th>
-                    <th className="px-4 py-2 text-left">Title</th>
                     <th className="px-4 py-2 text-left">Organizer</th>
+                    <th className="px-4 py-2 text-left">Title</th>
                     <th className="px-4 py-2 text-left">Date</th>
+                    <th className="px-4 py-2 text-left">Participants</th>
+                    <th className="px-4 py-2 text-left">Scope</th>
+                    <th className="px-4 py-2 text-left">Participants from BU</th>
+                    <th className="px-4 py-2 text-left">Prize Money (PKR)</th>
+                    <th className="px-4 py-2 text-left">Details</th>
                   </tr>
                 </thead>
                 <tbody>
                   {data.competitions.map((competition, index) => (
                     <tr key={competition._id} className="border-t">
                       <td className="px-4 py-2">{index + 1}</td>
-                      <td className="px-4 py-2">{competition.title}</td>
                       <td className="px-4 py-2">{competition.organizer}</td>
+                      <td className="px-4 py-2">{competition.title}</td>
                       <td className="px-4 py-2">{new Date(competition.date).toLocaleDateString()}</td>
+                      <td className="px-4 py-2">{competition.participants}</td>
+                      <td className="px-4 py-2">{competition.scope}</td>
+                      <td className="px-4 py-2">{competition.participantsFromBU}</td>
+                      <td className="px-4 py-2">{competition.prizeMoney ? `Rs. ${competition.prizeMoney.toLocaleString()}` : 'N/A'}</td>
+                      <td className="px-4 py-2">{competition.details}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -577,11 +699,11 @@ const AccountReportsPage = () => {
                         const details = [];
                         if (activity.type === 'Industry/Commercial Project' && activity.clientCompany) details.push(`Client: ${activity.clientCompany}`);
                         if (activity.type === 'Publication' && activity.publicationType) details.push(`Type: ${activity.publicationType}`);
-                        if (activity.type === 'Collaboration' && activity.collaboratingInstitute) details.push(`Institute: ${activity.collaboratingInstitute}`);
+                        if (activity.type === 'Collaboration' && activity.foreignCollaboratingInstitute) details.push(`Institute: ${activity.foreignCollaboratingInstitute}`);
                         if (activity.type === 'Patent' && activity.patentOrg) details.push(`Organization: ${activity.patentOrg}`);
                         if (activity.type === 'Event' && activity.organizer) details.push(`Organizer: ${activity.organizer}`);
-                        if (activity.type === 'Funding' && activity.fundingAgency) details.push(`Agency: ${activity.fundingAgency}`);
-                        if (activity.type === 'Funding Proposal' && activity.fundingAgency) details.push(`Team: ${activity.fundingAgency}`);
+                        if (activity.type === 'Funding' && activity.fundingSource) details.push(`Source: ${activity.fundingSource}`);
+                        if (activity.type === 'Funding Proposal' && activity.fundingSource) details.push(`Source: ${activity.fundingSource}`);
                         if (activity.type === 'Achievement' && activity.organizer) details.push(`Organizer: ${activity.organizer}`);
                         if (activity.type === 'Training Conducted' && activity.resourcePersons) details.push(`Resource: ${activity.resourcePersons}`);
                         if (activity.type === 'Internship' && activity.centerName) details.push(`Center: ${activity.centerName}`);

@@ -118,8 +118,10 @@ const PatentsView = () => {
 
 
   useEffect(() => {
-    fetchPatents();
-  }, [showOnlyMine]);
+    if (user) {
+      fetchPatents();
+    }
+  }, [showOnlyMine, user]);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -136,13 +138,24 @@ const PatentsView = () => {
   }, [showModal, showReportModal]);
 
   const fetchPatents = async () => {
+    if (!user) {
+      console.log('User not authenticated, skipping fetch');
+      return;
+    }
+
     try {
+      console.log('Fetching patents for user:', user.email);
       const response = await axios.get(`${API_BASE_URL}/patents`, {
         params: { onlyMine: showOnlyMine }
       });
+      console.log('Patents fetched successfully:', response.data.length);
       setPatents(response.data);
     } catch (error) {
       console.error('Error fetching patents:', error);
+      if (error.response?.status === 401) {
+        console.log('Authentication failed, user may need to login again');
+        // Optionally redirect to login or show login prompt
+      }
       alert('Error fetching patents. Please try again.');
     }
   };

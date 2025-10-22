@@ -198,8 +198,10 @@ const ProjectsView = () => {
 
 
   useEffect(() => {
-    fetchProjects();
-  }, [showOnlyMine]);
+    if (user) {
+      fetchProjects();
+    }
+  }, [showOnlyMine, user]);
 
     // Keyboard shortcuts
   useEffect(() => {
@@ -215,14 +217,35 @@ const ProjectsView = () => {
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [showModal, showReportModal]);
   const fetchProjects = async () => {
+    if (!user) {
+      console.log('User not authenticated, skipping fetch');
+      return;
+    }
+
+    // Validate that user has proper authentication data
+    if (!user.id && !user._id) {
+      console.error('User object missing ID:', user);
+      alert('Authentication error. Please login again.');
+      return;
+    }
+
     try {
+      console.log('Fetching projects for user:', user.email, 'with ID:', user.id || user._id);
       const response = await axios.get(`${API_BASE_URL}/projects`, {
         params: { onlyMine: showOnlyMine }
       });
+      console.log('Projects fetched successfully:', response.data.length);
       setProjects(response.data);
     } catch (error) {
       console.error('Error fetching projects:', error);
-      alert('Error fetching projects. Please try again.');
+      if (error.response?.status === 401) {
+        console.log('Authentication failed, user may need to login again');
+        alert('Your session has expired. Please login again.');
+        // Optionally redirect to login
+        // window.location.href = '/login';
+      } else {
+        alert('Error fetching projects. Please try again.');
+      }
     }
   };
 

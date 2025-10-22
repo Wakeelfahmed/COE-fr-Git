@@ -1,6 +1,5 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Route, Routes, Navigate, useLocation } from 'react-router-dom';
-import axios from 'axios';
 import Header from './components/Header';
 import Sidebar from './components/Sidebar';
 import Login from './components/Login';
@@ -20,7 +19,6 @@ import AchievementsPage from './pages/AchievementsPage';
 import TrainingsConductedPage from './pages/TrainingsConductedPage';
 import CompetitionsPage from './pages/CompetitionsPage';
 import AccountReportsPage from './pages/AccountReportsPage';
-import AuthRedirect from './authRedirect';
 import { UserProvider, useUser } from './context/UserContext';
 import Loading from './components/Loading';
 
@@ -57,67 +55,20 @@ function TitleManager() {
 
 function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const { user, setUser } = useUser();
-  const [authChecked, setAuthChecked] = useState(false);
-  const [userDataFetched, setUserDataFetched] = useState(false);
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
 
-  const API_BASE_URL = process.env.REACT_APP_BACKEND;
-
-  
-
-  const handleAuthChecked = useCallback(() => {
-    // console.log('App: handleAuthChecked called');
-    setAuthChecked(true);
-  }, []);
-
-  useEffect(() => {
-    // Reset userDataFetched when user changes
-    if (user && userDataFetched) {
-      setUserDataFetched(false);
-    }
-  }, [user?.uid, userDataFetched]);
-
-  useEffect(() => {
-    // console.log('App: Auth check effect triggered', { authChecked, user });
-    if (authChecked && user && !userDataFetched) {
-      const fetchUserData = async () => {
-        // console.log('App: Fetching user data');
-        try {
-          const response = await axios.get(`${API_BASE_URL}/auth/profile`);
-          // console.log('App: User data fetched', response.data);
-          const currentUser = user; // Store current user before merging
-          const mergedUser = { ...currentUser, ...response.data };
-          // console.log('App: Merging user data:', { prevUser: currentUser?.email, mergedUser: mergedUser?.email, mergedRole: mergedUser?.role });
-          setUser(mergedUser);
-          // console.log('App: User after setUser:', mergedUser?.email, mergedUser?.role);
-        } catch (err) {
-          // console.error('App: Failed to fetch user data', err);
-          setError('Failed to load user data');
-        } finally {
-          setUserDataFetched(true);
-          setLoading(false);
-        }
-      };
-      fetchUserData();
-    } else if (authChecked && !user) {
-      setLoading(false);
-    }
-  }, [authChecked, user, userDataFetched, API_BASE_URL]);
-
-  // console.log('App: Rendering', { authChecked, loading, user, userDataFetched });
-
   return (
     <Router>
       <TitleManager />
-      <AuthRedirect onAuthChecked={handleAuthChecked} />
+      {/* Removed AuthRedirect - authentication is handled in Login component */}
       <div className="flex h-screen bg-gray-100">
-        {!authChecked || loading ? (
+        {loading ? (
           <Loading />
         ) : user ? (
           <>

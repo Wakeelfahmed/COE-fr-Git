@@ -48,28 +48,89 @@ const Login = () => {
     e.preventDefault();
     if (validateForm()) {
       try {
+        // Step 1: Authenticate with Firebase
         const userCredential = await signInWithEmailAndPassword(auth, formData.email, formData.password);
         const firebaseUser = userCredential.user;
-        console.log("Logged In User: ", firebaseUser.uid);
+        console.log('Firebase login successful:', firebaseUser.email);
 
-        const response = await axios.post(`${process.env.REACT_APP_BACKEND}/auth/login`, {
-          email: formData.email,
-          password: formData.password,
-        });
+        // Step 2: Authenticate with backend to get JWT token
+        console.log('Attempting backend login...');
+        let response;
+        try {
+          response = await axios.post(`${process.env.REACT_APP_BACKEND}/auth/login`, {
+            email: formData.email,
+            password: formData.password,
+          });
+          console.log('Backend login successful');
+        } catch (loginError) {
+          if (loginError.response?.status === 401 && loginError.response?.data?.error?.includes('User not found')) {
+            console.log('User not found in backend, attempting to sync Firebase user...');
 
-        // Cookie is set automatically by the backend
-        setUser({ ...firebaseUser, ...response.data.user });
+            // Try to sync Firebase user with backend
+            try {
+              response = await axios.post(`${process.env.REACT_APP_BACKEND}/auth/sync-firebase-user`, {
+                email: firebaseUser.email,
+                uid: firebaseUser.uid,
+                displayName: firebaseUser.displayName
+              });
+              console.log('Firebase user synced successfully');
+            } catch (syncError) {
+              console.error('Failed to sync Firebase user:', syncError);
+              throw new Error('User not found in system. Please contact administrator.');
+            }
+          } else {
+            throw loginError;
+          }
+        }
+
+        console.log('Backend login response:', response.data);
+
+        // Step 3: Check if we got user data from backend
+        if (!response.data || !response.data.user) {
+          throw new Error('Backend login failed - no user data returned');
+        }
+
+        console.log('Backend user data received:', response.data.user.email);
+
+        // Step 4: Merge Firebase user with backend user data
+        const completeUser = {
+          ...firebaseUser,
+          ...response.data.user,
+          // Ensure we have the MongoDB _id as id for consistency
+          id: response.data.user._id || response.data.user.id
+        };
+
+        console.log('Login successful, navigating to projects');
+        setUser(completeUser);
         navigate('/projects');
       } catch (error) {
-        console.error('Login error', error);
-        setErrors({ submit: 'Login failed. Please check your credentials.' });
+        console.error('=== LOGIN ERROR ===');
+        console.error('Error details:', error);
+
+        if (error.response) {
+          console.error('Backend error status:', error.response.status);
+          console.error('Backend error data:', error.response.data);
+          setErrors({
+            submit: `Login failed: ${error.response.data.error || 'Server error'}`
+          });
+        } else if (error.message) {
+          console.error('Firebase/Network error:', error.message);
+          setErrors({
+            submit: `Login failed: ${error.message}`
+          });
+        } else {
+          setErrors({
+            submit: 'Login failed. Please check your credentials and try again.'
+          });
+        }
       }
     }
   };
 
-  useEffect(()=>{
-    setUser(null)
-  },[])
+  // Removed: useEffect that was setting user to null on every login page visit
+  // useEffect(()=>{
+  //   setUser(null)
+  // },[])
 
   return (
     <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-r from-blue-500 to-purple-600 py-12 px-4 sm:px-6 lg:px-8">
