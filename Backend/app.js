@@ -18,6 +18,7 @@ const reportRoutes = require('./routes/reportRoutes');
 const collaborationRoutes = require('./routes/collaborationRoutes');
 const achievementRoutes = require('./routes/achievementRoutes');
 const competitionRoutes = require('./routes/competitionRoutes');
+const analyticsRoutes = require('./routes/analyticsRoutes');
 
 // Load environment variables
 dotenv.config();
@@ -60,6 +61,7 @@ app.use('/api/reports', reportRoutes);
 app.use('/api/collaborations', collaborationRoutes);
 app.use('/api/achievements', achievementRoutes);
 app.use('/api/competitions', competitionRoutes);
+app.use('/api/analytics', analyticsRoutes);
 
 // Start the server
 const PORT = process.env.PORT || 4000;

@@ -7,7 +7,7 @@ export const projectSchema = {
     date: Date,
   };
   
-  export const trainingSchema = {
+export const trainingSchema = {
     trainingTitle: String,
     instructor: String,
     startDate: Date,
@@ -15,7 +15,7 @@ export const projectSchema = {
     participants: Number,
   };
   
-  export const internshipSchema = {
+export const internshipSchema = {
     internshipTitle: String,
     company: String,
     startDate: Date,
@@ -23,7 +23,7 @@ export const projectSchema = {
     supervisor: String,
   };
   
-  export const eventSchema = {
+export const eventSchema = {
     eventName: String,
     date: Date,
     location: String,
@@ -31,7 +31,7 @@ export const projectSchema = {
     attendees: Number,
   };
   
-  export const patentSchema = {
+export const patentSchema = {
     patentTitle: String,
     inventors: String,
     filingDate: Date,
@@ -39,7 +39,7 @@ export const projectSchema = {
     status: String,
   };
   
-  export const fundingSchema = {
+export const fundingSchema = {
     projectTitle: String,
     fundingAgency: String,
     amount: Number,
@@ -47,7 +47,7 @@ export const projectSchema = {
     endDate: Date,
   };
   
-  export const publicationSchema = {
+export const publicationSchema = {
     title: String,
     authors: String,
     journal: String,
@@ -55,14 +55,14 @@ export const projectSchema = {
     doi: String,
   };
   
-  export const formSchema = {
+export const formSchema = {
     formName: String,
     category: String,
     lastUpdated: Date,
     downloadLink: String,
   };
   
-  export const reportSchema = {
+export const reportSchema = {
     reportTitle: String,
     author: String,
     date: Date,

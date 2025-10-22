@@ -27,6 +27,10 @@ const otherItems = [
   { name: 'Account Reports', path: '/account-reports' },
 ];
 
+const directorOnlyItems = [
+  { name: 'Data Analytics', path: '/analytics' },
+];
+
 const Sidebar = ({ isOpen }) => {
   const [isActivitiesOpen, setIsActivitiesOpen] = useState(true);
   const { user, setUser } = useUser();
@@ -78,6 +82,13 @@ const Sidebar = ({ isOpen }) => {
             <li key={item.name}>
               <Link to={item.path} className="block p-4 hover:bg-gray-600">
                 {item.name}
+              </Link>
+            </li>
+          ))}
+          {user?.role === 'director' && directorOnlyItems.map((item) => (
+            <li key={item.name}>
+              <Link to={item.path} className="block p-4 hover:bg-gray-600 bg-gray-800">
+                📊 {item.name}
               </Link>
             </li>
           ))}

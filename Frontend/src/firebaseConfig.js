@@ -5,13 +5,13 @@ import { getStorage } from "firebase/storage";
 
 import { getAuth } from "firebase/auth";
 const firebaseConfig = {
-    apiKey: "AIzaSyBvASPgz4stJKmkJ0rbYDuDMarQjxdsoik",
-    authDomain: "coe-management-system.firebaseapp.com",
-    projectId: "coe-management-system",
-    storageBucket: "coe-management-system.appspot.com",
-    messagingSenderId: "1092603393427",
-    appId: "1:1092603393427:web:bf8a010c1c6faa3b516466",
-    measurementId: "G-NZ4V4L7H10"
+  apiKey: "AIzaSyDZwfJd_agEK0gqL0010d93QxbGGzSuMWM",
+  authDomain: "coe-management-system-2641d.firebaseapp.com",
+  projectId: "coe-management-system-2641d",
+  storageBucket: "coe-management-system-2641d.firebasestorage.app",
+  messagingSenderId: "9208225917",
+  appId: "1:9208225917:web:dc944bc3c4814677091114",
+  measurementId: "G-B8J3C0L148"
 };
 
 // Initialize Firebase

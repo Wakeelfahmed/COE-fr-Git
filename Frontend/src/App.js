@@ -19,6 +19,7 @@ import AchievementsPage from './pages/AchievementsPage';
 import TrainingsConductedPage from './pages/TrainingsConductedPage';
 import CompetitionsPage from './pages/CompetitionsPage';
 import AccountReportsPage from './pages/AccountReportsPage';
+import AnalyticsPage from './pages/AnalyticsPage';
 import { UserProvider, useUser } from './context/UserContext';
 import Loading from './components/Loading';
 
@@ -43,6 +44,7 @@ function TitleManager() {
       '/competitions': 'Competitions - CoE AI CMS',
       '/reports': 'Reports - CoE AI CMS',
       '/account-reports': 'Account Reports - CoE AI CMS',
+      '/analytics': 'Data Analytics - CoE AI CMS',
       '/login': 'Login - CoE AI CMS',
       '/signup': 'Sign Up - CoE AI CMS'
     };
@@ -92,6 +94,7 @@ function App() {
                   <Route path="/competitions" element={<CompetitionsPage />} />
                   <Route path="/reports" element={<ReportsPage />} />
                   <Route path="/account-reports" element={<AccountReportsPage />} />
+                  <Route path="/analytics" element={<AnalyticsPage />} />
                   <Route path="/" element={<Navigate to="/projects" replace />} />
                 </Routes>
               </main>
