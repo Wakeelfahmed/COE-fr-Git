@@ -31,9 +31,7 @@ const AccountReportsPage = () => {
 
     setLoading(true);
     try {
-      const response = await axios.post(`${API_BASE_URL}/auth/reports/account`, {
-        accountId: selectedAccount
-      });
+      const response = await axios.get(`${API_BASE_URL}/auth/account-report/${selectedAccount}`);
       setReportData(response.data);
     } catch (error) {
       console.error('Error generating report:', error);
