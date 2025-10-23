@@ -1,11 +1,12 @@
 const express = require('express');
 const router = express.Router();
 const publicationController = require('../controllers/publicationController.js');
+const auth = require('../middleware/auth');
 
-router.get('/', publicationController.getAllPublications);
-router.post('/', publicationController.createPublication);
-router.get('/:id', publicationController.getPublicationById);
-router.put('/:id', publicationController.updatePublication);
-router.delete('/:id', publicationController.deletePublication);
+router.get('/', auth, publicationController.getAllPublications);
+router.post('/', auth, publicationController.createPublication);
+router.get('/:id', auth, publicationController.getPublicationById);
+router.put('/:id', auth, publicationController.updatePublication);
+router.delete('/:id', auth, publicationController.deletePublication);
 
 module.exports = router;
