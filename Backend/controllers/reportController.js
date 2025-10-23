@@ -6,7 +6,6 @@ const Funding = require('../models/Funding');
 const FundingProposal = require('../models/FundingProposal');
 const Internship = require('../models/Intership');
 const Patent = require('../models/Patent');
-const Training = require('../models/Training');
 const TrainingsConducted = require('../models/TrainingsConducted');
 const Collaboration = require('../models/Collaboration');
 const Achievement = require('../models/Achievement');

@@ -39,6 +39,11 @@ const EventsPage = () => {
   const [showReportModal, setShowReportModal] = useState(false);
   const [reportTitle, setReportTitle] = useState('');
 
+  const [showExcelModal, setShowExcelModal] = useState(false);
+  const [excelFile, setExcelFile] = useState(null);
+  const [excelData, setExcelData] = useState([]);
+  const [uploadingExcel, setUploadingExcel] = useState(false);
+
   // Helper function to format dates for display (dd-mm-year format)
   const formatDateForDisplay = (dateString) => {
     if (!dateString) return 'N/A';

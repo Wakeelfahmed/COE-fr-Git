@@ -5,13 +5,11 @@ const Patent = require('../models/Patent');
 const Publication = require('../models/Publication');
 const Event = require('../models/Event');
 const Achievement = require('../models/Achievement');
-const Competition = require('../models/Competition');
 const Collaboration = require('../models/Collaboration');
-const LocalCollaboration = require('../models/LocalCollaboration');
 const CommercializationProject = require('../models/CommercializationProject');
 const TrainingsConducted = require('../models/TrainingsConducted');
-const Training = require('../models/Training');
 const FundingProposal = require('../models/FundingProposal');
+const Competition = require('../models/Competition');
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 
@@ -36,7 +34,6 @@ const formatTableName = (tableName) => {
   const nameMap = {
     'talkTrainingConference': 'Talks/Training Conference',
     'fundingProposals': 'Funding Proposals',
-    'localCollaborations': 'Local Collaborations',
     'commercializationProjects': 'Commercialization Projects',
     'trainingsConducted': 'Trainings Conducted',
     'trainings': 'Trainings'
@@ -67,10 +64,8 @@ exports.getDataUsageAnalytics = async (req, res) => {
       achievements: Achievement,
       competitions: Competition,
       collaborations: Collaboration,
-      localCollaborations: LocalCollaboration,
       commercializationProjects: CommercializationProject,
       trainingsConducted: TrainingsConducted,
-      trainings: Training
     };
 
     const analytics = {
@@ -221,10 +216,8 @@ exports.getTableAnalytics = async (req, res) => {
       achievements: Achievement,
       competitions: Competition,
       collaborations: Collaboration,
-      localCollaborations: LocalCollaboration,
       commercializationProjects: CommercializationProject,
       trainingsConducted: TrainingsConducted,
-      trainings: Training
     };
 
     const model = models[tableName];
@@ -326,10 +319,8 @@ exports.getUserAnalytics = async (req, res) => {
       achievements: Achievement,
       competitions: Competition,
       collaborations: Collaboration,
-      localCollaborations: LocalCollaboration,
       commercializationProjects: CommercializationProject,
       trainingsConducted: TrainingsConducted,
-      trainings: Training
     };
 
     const targetUser = await User.findById(userId);
@@ -356,7 +347,7 @@ exports.getUserAnalytics = async (req, res) => {
       if (tableName === 'trainings') {
         // For Training model, count all records (not user-specific)
         userRecords = await model.find({});
-        userStat.tableBreakdown[tableName] = {
+        userAnalytics.tableBreakdown[tableName] = {
           count: userRecords.length,
           totalSize: userRecords.length > 0 ? Math.round(userRecords.reduce((sum, record) => sum + calculateObjectSize(record), 0) * 100) / 100 : 0,
           averageSize: userRecords.length > 0 ? Math.round((userRecords.reduce((sum, record) => sum + calculateObjectSize(record), 0) / userRecords.length) * 100) / 100 : 0,
@@ -364,8 +355,8 @@ exports.getUserAnalytics = async (req, res) => {
           note: 'System-wide records (not user-specific)'
         };
         if (userRecords.length > 0) {
-          userStat.totalRecords += userRecords.length;
-          userStat.totalSize += userRecords.reduce((sum, record) => sum + calculateObjectSize(record), 0);
+          userAnalytics.totalRecords += userRecords.length;
+          userAnalytics.totalSize += userRecords.reduce((sum, record) => sum + calculateObjectSize(record), 0);
         }
       } else {
         // For models with createdBy field

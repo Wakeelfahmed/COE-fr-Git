@@ -49,7 +49,7 @@ const FundingsView = () => {
   const [currentFundedProject, setCurrentFundedProject] = useState({
     projectTitle: '',
     pi: '',
-    researchTeam: '',
+    coPI: '',
     dateOfSubmission: '',
     dateOfApproval: '',
     fundingSource: '',
@@ -157,7 +157,7 @@ const FundingsView = () => {
     setCurrentFundedProject({
       projectTitle: '',
       pi: '',
-      researchTeam: '',
+      coPI: '',
       dateOfSubmission: '',
       dateOfApproval: '',
       fundingSource: '',
@@ -415,7 +415,7 @@ const FundingsView = () => {
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">#</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Project Title</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">PI</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Research Team</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Co-PI</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Submission Date</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Approval Date</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Funding Source</th>
@@ -434,7 +434,7 @@ const FundingsView = () => {
                 <td className="px-6 py-4 whitespace-nowrap">{index + 1}</td>
                 <td className="px-6 py-4 whitespace-nowrap">{fundedProject.projectTitle}</td>
                 <td className="px-6 py-4 whitespace-nowrap">{fundedProject.pi}</td>
-                <td className="px-6 py-4 whitespace-nowrap">{fundedProject.researchTeam}</td>
+                <td className="px-6 py-4 whitespace-nowrap">{fundedProject.coPI}</td>
                 <td className="px-6 py-4 whitespace-nowrap">{formatDateForDisplay(fundedProject.dateOfSubmission)}</td>
                 <td className="px-6 py-4 whitespace-nowrap">{formatDateForDisplay(fundedProject.dateOfApproval)}</td>
                 <td className="px-6 py-4 whitespace-nowrap">{fundedProject.fundingSource}</td>
@@ -523,14 +523,14 @@ const FundingsView = () => {
                     />
                   </div>
                   <div className="mb-4">
-                    <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="researchTeam">
-                      Research Team
+                    <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="coPI">
+                      Co-PI
                     </label>
                     <input
                       type="text"
-                      id="researchTeam"
-                      name="researchTeam"
-                      value={currentFundedProject.researchTeam}
+                      id="coPI"
+                      name="coPI"
+                      value={currentFundedProject.coPI}
                       onChange={handleInputChange}
                       className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                       required

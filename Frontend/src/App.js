@@ -7,10 +7,10 @@ import Signup from './components/Signup';
 import Profile from './components/Profile';
 import ProjectsPage from './pages/ProjectsPage';
 import TrainingsPage from './pages/TalkTrainingConferencePage';
-import InternshipsPage from './pages/InternshipsPage';
+import InternshipView from './pages/InternshipsPage';
 import EventsPage from './pages/EventsPage';
-import PatentsPage from './pages/PatentsPage';
-import FundingsPage from './pages/FundingsPage';
+import PatentsView from './pages/PatentsPage';
+import FundingsView from './pages/FundingsPage';
 import FundingProposalsPage from './pages/FundingProposalsPage';
 import PublicationsPage from './pages/PublicationsPage';
 import ReportsPage from './pages/ReportsPage';
@@ -82,13 +82,13 @@ function App() {
                   <Route path="/profile" element={<Profile />} />
                   <Route path="/projects" element={<ProjectsPage />} />
                   <Route path="/TalkTrainingConference" element={<TrainingsPage />} />
-                  <Route path="/internships" element={<InternshipsPage />} />
+                  <Route path="/internships" element={<InternshipView />} />
                   <Route path="/events" element={<EventsPage />} />
                   <Route path="/trainings-conducted" element={<TrainingsConductedPage />} />
                   <Route path="/collaborations" element={<CollaborationPage />} />
                   <Route path="/achievements" element={<AchievementsPage />} />
-                  <Route path="/patents" element={<PatentsPage />} />
-                  <Route path="/fundings" element={<FundingsPage />} />
+                  <Route path="/patents" element={<PatentsView />} />
+                  <Route path="/fundings" element={<FundingsView />} />
                   <Route path="/funding-proposals" element={<FundingProposalsPage />} />
                   <Route path="/publications" element={<PublicationsPage />} />
                   <Route path="/competitions" element={<CompetitionsPage />} />

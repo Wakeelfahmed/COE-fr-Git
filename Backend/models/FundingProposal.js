@@ -4,7 +4,7 @@ const fundingProposalSchema = new mongoose.Schema({
   sNo: Number,
   projectTitle: String,
   pi: String,
-  researchTeam: String,
+  coPI: String,
   dateOfSubmission: Date,
   fundingSource: String,
   pkr: Number,
