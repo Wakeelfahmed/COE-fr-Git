@@ -32,11 +32,12 @@ const getUserFromToken = (req) => {
 // Helper function to format table names for display
 const formatTableName = (tableName) => {
   const nameMap = {
-    'talkTrainingConference': 'Talks/Training Conference',
+    'talkTrainingConference': 'Talks/Training/Conference',
     'fundingProposals': 'Funding Proposals',
-    'commercializationProjects': 'Commercialization Projects',
+    'commercializationProjects': 'Industry/Commercialization Projects',
     'trainingsConducted': 'Trainings Conducted',
-    'trainings': 'Trainings'
+    'trainings': 'Trainings',
+    'fundings': 'Funded Projects',
   };
 
   return nameMap[tableName] || tableName.charAt(0).toUpperCase() + tableName.slice(1).replace(/([A-Z])/g, ' $1');

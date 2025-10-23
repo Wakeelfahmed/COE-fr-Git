@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useUser } from '../context/UserContext';
 import { storage } from '../firebaseConfig';
-import { ref, uploadBytes, getDownloadURL,deleteObject, getMetadata } from "firebase/storage";
+import { ref, uploadBytes, getDownloadURL, deleteObject, getMetadata } from "firebase/storage";
 import AccountFilter from '../components/AccountFilter';
 
 // Try to import xlsx, fallback to CDN if not available
@@ -74,7 +74,7 @@ const getPdfUrl = async (userId, fileName) => {
 const deletePdf = async (userId, fileName) => {
   try {
     const fileRef = ref(storage, `pdfs/${userId}/${fileName}`);
-    
+
     // Check if file exists before attempting to delete
     try {
       await getMetadata(fileRef);
@@ -243,11 +243,30 @@ const ProjectsView = () => {
               remarks: row['Remarks'] || row['remarks'] || ''
             };
 
-            // Handle Target SDG parsing (could be comma-separated or multiple columns)
+            // // Handle Target SDG parsing - split on 'SDG' instead of commas
+            // if (row['Target SDG'] || row['targetSDG'] || row['TargetSDG']) {
+            //   const sdgValue = row['Target SDG'] || row['targetSDG'] || row['TargetSDG'];
+            //   if (typeof sdgValue === 'string' && sdgValue.includes('SDG')) {
+            //     // Split on 'SDG' and reconstruct properly, ignoring the first empty split
+            //     const sdgParts = sdgValue.split('SDG').filter(part => part.trim());
+            //     mappedRow.targetSDG = sdgParts.map(part => 'SDG ' + part.trim());
+            //   } else {
+            //     mappedRow.targetSDG = [sdgValue];
+            //   }
+            // }
+            // Handle Target SDG parsing - supports both commas and 'SDG' separators
             if (row['Target SDG'] || row['targetSDG'] || row['TargetSDG']) {
               const sdgValue = row['Target SDG'] || row['targetSDG'] || row['TargetSDG'];
-              if (typeof sdgValue === 'string' && sdgValue.includes(',')) {
-                mappedRow.targetSDG = sdgValue.split(',').map(sdg => sdg.trim());
+
+              if (typeof sdgValue === 'string') {
+                // Split on commas or occurrences of 'SDG' (case-insensitive)
+                const sdgParts = sdgValue
+                  .split(/,?\s*SDG\s*/i) // split by commas followed by SDG
+                  .map(part => part.trim()) // clean spaces
+                  .filter(part => part); // remove empty strings
+
+                // Rebuild each SDG label properly
+                mappedRow.targetSDG = sdgParts.map(part => part.startsWith('SDG') ? part : 'SDG ' + part);
               } else {
                 mappedRow.targetSDG = [sdgValue];
               }
@@ -360,7 +379,7 @@ const ProjectsView = () => {
         'Actual Date of Deployment': '2024-06-10',
         'Date of Receiving Complete Payment': '2024-07-15',
         'Tax Paid By': 'BU',
-        'Target SDG': 'SDG 3, SDG 9',
+        'Target SDG': 'SDG 3 SDG 9',
         'Remarks': 'Revolutionary AI system for early disease detection'
       },
       {
@@ -376,7 +395,7 @@ const ProjectsView = () => {
         'Actual Date of Deployment': '2024-07-28',
         'Date of Receiving Complete Payment': '2024-09-01',
         'Tax Paid By': 'Client',
-        'Target SDG': 'SDG 2, SDG 12',
+        'Target SDG': 'SDG 2 SDG 12',
         'Remarks': 'IoT-based system for precision agriculture'
       }
     ];
@@ -416,13 +435,13 @@ const ProjectsView = () => {
     }
   }, [showOnlyMine, user]);
 
-    // Keyboard shortcuts
+  // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.key === 'Escape' && showModal) {
         setShowModal(false);
-   } else if ((e.key === '~' || e.key === '`') && e.shiftKey && !showModal && !showReportModal && !showExcelModal) 
-{        handleNewProject();
+      } else if ((e.key === '~' || e.key === '`') && e.shiftKey && !showModal && !showReportModal && !showExcelModal) {
+        handleNewProject();
       } else if (e.key === 'E' && e.ctrlKey && !showModal && !showReportModal && !showExcelModal) {
         setShowExcelModal(true);
       }
@@ -499,6 +518,7 @@ const ProjectsView = () => {
     setCurrentProject({
       ...project,
       rndTeam: project.rndTeam.join(', '),
+      targetSDG: project.targetSDG || [], // Ensure targetSDG is an array for multi-select
       dateOfContractSign: formatDateForInput(project.dateOfContractSign),
       dateOfDeploymentAsPerContract: formatDateForInput(project.dateOfDeploymentAsPerContract),
       dateOfReceivingAdvancePayment: formatDateForInput(project.dateOfReceivingAdvancePayment),
@@ -648,9 +668,9 @@ const ProjectsView = () => {
     try {
       await deletePdf(user?.uid, fileName);
       await axios.put(`${API_BASE_URL}/projects/${projectId}`, { fileLink: null });
-      
-      setProjects(prevProjects => 
-        prevProjects.map(project => 
+
+      setProjects(prevProjects =>
+        prevProjects.map(project =>
           project._id === projectId ? { ...project, fileLink: null } : project
         )
       );
@@ -801,12 +821,12 @@ const ProjectsView = () => {
                     <div>
                       <a href={project.fileLink} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-900 mr-2">View File</a>
                       <button onClick={() => handleFileDelete(project._id, project.fileLink.split('/').pop())} className="text-red-600 hover:text-red-900 mr-2">Delete</button>
-                      <input 
-                        type="file" 
-                        onChange={(e) => handleFileChange(e, project._id)} 
-                        accept=".pdf" 
-                        className="hidden" 
-                        id={`fileUpdate-${project._id}`} 
+                      <input
+                        type="file"
+                        onChange={(e) => handleFileChange(e, project._id)}
+                        accept=".pdf"
+                        className="hidden"
+                        id={`fileUpdate-${project._id}`}
                       />
                       <label htmlFor={`fileUpdate-${project._id}`} className="text-green-600 hover:text-green-900 cursor-pointer">Update</label>
                       {selectedFiles[project._id] && (
@@ -815,12 +835,12 @@ const ProjectsView = () => {
                     </div>
                   ) : (
                     <div>
-                      <input 
-                        type="file" 
-                        onChange={(e) => handleFileChange(e, project._id)} 
-                        accept=".pdf" 
-                        className="hidden" 
-                        id={`fileUpload-${project._id}`} 
+                      <input
+                        type="file"
+                        onChange={(e) => handleFileChange(e, project._id)}
+                        accept=".pdf"
+                        className="hidden"
+                        id={`fileUpload-${project._id}`}
                       />
                       <label htmlFor={`fileUpload-${project._id}`} className="text-blue-600 hover:text-blue-900 cursor-pointer mr-2">Select File</label>
                       {selectedFiles[project._id] && (
@@ -1087,7 +1107,7 @@ const ProjectsView = () => {
 
 
 
-{showReportModal && (
+      {showReportModal && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full">
           <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
             <h3 className="text-lg font-medium leading-6 text-gray-900 mb-4">Generate Report</h3>
@@ -1144,27 +1164,27 @@ const ProjectsView = () => {
                   </button>
                 </div>
                 <p className="text-sm text-gray-600 mt-1">
-                  <strong>Required Excel columns (case-insensitive):</strong><br/>
-                  Project Title, Team Lead, R&D Team, Client Company, Date of Contract Sign, Date of Deployment (As Per Contract), Amount in PKR M, Advance Payment Percentage, Date of Receiving Advance Payment, Actual Date of Deployment, Date of Receiving Complete Payment, Tax Paid By<br/>
-                  <br/>
-                  <strong>Column Details:</strong><br/>
-                  • <strong>Project Title:</strong> Name of the project<br/>
-                  • <strong>Team Lead:</strong> Lead researcher/developer<br/>
-                  • <strong>R&D Team:</strong> Research team members (comma-separated)<br/>
-                  • <strong>Client Company:</strong> Client/partner company<br/>
-                  • <strong>Date of Contract Sign:</strong> Contract signing date<br/>
-                  • <strong>Date of Deployment (As Per Contract):</strong> Planned deployment date<br/>
-                  • <strong>Amount in PKR M:</strong> Contract value in millions<br/>
-                  • <strong>Advance Payment Percentage:</strong> Advance payment %<br/>
-                  • <strong>Date of Receiving Advance Payment:</strong> When advance was received<br/>
-                  • <strong>Actual Date of Deployment:</strong> Actual deployment date<br/>
-                  • <strong>Date of Receiving Complete Payment:</strong> When full payment received<br/>
-                  • <strong>Tax Paid By:</strong> Who pays tax (BU or Client)<br/>
-                  • <strong>Target SDG:</strong> UN Sustainable Development Goals (comma-separated)<br/>
-                  • <strong>Remarks:</strong> Additional notes<br/>
-                  <br/>
-                  <strong>Sample first row:</strong><br/>
-                  Project Title: AI-Powered Healthcare System, Team Lead: Dr. Sarah Johnson, R&D Team: Dr. Ahmed Hassan, Prof. Maria Rodriguez, Dr. John Smith, Client Company: HealthTech Solutions, Date of Contract Sign: 2024-01-15, Date of Deployment (As Per Contract): 2024-06-15, Amount in PKR M: 25, Advance Payment Percentage: 30, Date of Receiving Advance Payment: 2024-01-20, Actual Date of Deployment: 2024-06-10, Date of Receiving Complete Payment: 2024-07-15, Tax Paid By: BU, Target SDG: SDG 3, SDG 9, Remarks: Revolutionary AI system for early disease detection
+                  <strong>Required Excel columns (case-insensitive):</strong><br />
+                  Project Title, Team Lead, R&D Team, Client Company, Date of Contract Sign, Date of Deployment (As Per Contract), Amount in PKR M, Advance Payment Percentage, Date of Receiving Advance Payment, Actual Date of Deployment, Date of Receiving Complete Payment, Tax Paid By<br />
+                  <br />
+                  <strong>Column Details:</strong><br />
+                  • <strong>Project Title:</strong> Name of the project<br />
+                  • <strong>Team Lead:</strong> Lead researcher/developer<br />
+                  • <strong>R&D Team:</strong> Research team members (comma-separated)<br />
+                  • <strong>Client Company:</strong> Client/partner company<br />
+                  • <strong>Date of Contract Sign:</strong> Contract signing date<br />
+                  • <strong>Date of Deployment (As Per Contract):</strong> Planned deployment date<br />
+                  • <strong>Amount in PKR M:</strong> Contract value in millions<br />
+                  • <strong>Advance Payment Percentage:</strong> Advance payment %<br />
+                  • <strong>Date of Receiving Advance Payment:</strong> When advance was received<br />
+                  • <strong>Actual Date of Deployment:</strong> Actual deployment date<br />
+                  • <strong>Date of Receiving Complete Payment:</strong> When full payment received<br />
+                  • <strong>Tax Paid By:</strong> Who pays tax (BU or Client)<br />
+                  • <strong>Target SDG:</strong> UN Sustainable Development Goals (space-separated, e.g., "SDG 3 SDG 9")<br />
+                  • <strong>Remarks:</strong> Additional notes<br />
+                  <br />
+                  <strong>Sample first row:</strong><br />
+                  Project Title: AI-Powered Healthcare System, Team Lead: Dr. Sarah Johnson, R&D Team: Dr. Ahmed Hassan, Prof. Maria Rodriguez, Dr. John Smith, Client Company: HealthTech Solutions, Date of Contract Sign: 2024-01-15, Date of Deployment (As Per Contract): 2024-06-15, Amount in PKR M: 25, Advance Payment Percentage: 30, Date of Receiving Advance Payment: 2024-01-20, Actual Date of Deployment: 2024-06-10, Date of Receiving Complete Payment: 2024-07-15, Tax Paid By: BU, Target SDG: SDG 3 SDG 9, Remarks: Revolutionary AI system for early disease detection
                 </p>
               </div>
 

@@ -1,0 +1,938 @@
+[
+  {
+    "attendees": "AI and Machine Learning Fundamentals",
+    "numberOfAttendees": 45,
+    "organizer": "Computer Science Department",
+    "resourcePersons": "Dr. Sarah Johnson, Prof. Michael Chen",
+    "date": "2024-01-15T09:00:00.000Z",
+    "targetSDG": "SDG 4: Quality Education, SDG 9: Industry, Innovation and Infrastructure",
+    "totalRevenueGenerated": 15000
+  },
+  {
+    "attendees": "Data Science and Analytics Workshop",
+    "numberOfAttendees": 32,
+    "organizer": "Data Science Institute",
+    "resourcePersons": "Dr. Ahmed Hassan",
+    "date": "2024-01-22T10:00:00.000Z",
+    "targetSDG": "SDG 4: Quality Education",
+    "totalRevenueGenerated": 8500
+  },
+  {
+    "attendees": "Blockchain Technology Implementation",
+    "numberOfAttendees": 28,
+    "organizer": "FinTech Research Center",
+    "resourcePersons": "Prof. Maria Rodriguez, Dr. Robert Wilson",
+    "date": "2024-02-05T14:00:00.000Z",
+    "targetSDG": "SDG 8: Decent Work and Economic Growth, SDG 9: Industry, Innovation and Infrastructure",
+    "totalRevenueGenerated": 12000
+  },
+  {
+    "attendees": "Cybersecurity Best Practices",
+    "numberOfAttendees": 67,
+    "organizer": "National Cybersecurity Center",
+    "resourcePersons": "Dr. Fatima Khan",
+    "date": "2024-02-18T09:30:00.000Z",
+    "targetSDG": "SDG 9: Industry, Innovation and Infrastructure",
+    "totalRevenueGenerated": 22000
+  },
+  {
+    "attendees": "Cloud Computing and DevOps",
+    "numberOfAttendees": 41,
+    "organizer": "CloudTech Solutions",
+    "resourcePersons": "Eng. James Miller, Dr. Lisa Thompson",
+    "date": "2024-03-03T13:00:00.000Z",
+    "targetSDG": "SDG 4: Quality Education, SDG 8: Decent Work and Economic Growth",
+    "totalRevenueGenerated": 18500
+  },
+  {
+    "attendees": "IoT and Smart Cities Development",
+    "numberOfAttendees": 38,
+    "organizer": "Smart Cities Initiative",
+    "resourcePersons": "Prof. David Brown",
+    "date": "2024-03-17T10:00:00.000Z",
+    "targetSDG": "SDG 9: Industry, Innovation and Infrastructure, SDG 11: Sustainable Cities and Communities",
+    "totalRevenueGenerated": 14200
+  },
+  {
+    "attendees": "Digital Marketing and Social Media",
+    "numberOfAttendees": 55,
+    "organizer": "Business School",
+    "resourcePersons": "Ms. Emma Watson, Mr. Kevin Smith",
+    "date": "2024-04-01T15:00:00.000Z",
+    "targetSDG": "SDG 4: Quality Education, SDG 8: Decent Work and Economic Growth",
+    "totalRevenueGenerated": 16800
+  },
+  {
+    "attendees": "Sustainable Energy Solutions",
+    "numberOfAttendees": 33,
+    "organizer": "Green Energy Foundation",
+    "resourcePersons": "Dr. Stephen Hawking, Prof. Nancy Wilson",
+    "date": "2024-04-14T09:00:00.000Z",
+    "targetSDG": "SDG 7: Affordable and Clean Energy, SDG 13: Climate Action",
+    "totalRevenueGenerated": 12500
+  },
+  {
+    "attendees": "Mobile App Development Bootcamp",
+    "numberOfAttendees": 48,
+    "organizer": "Mobile Tech Hub",
+    "resourcePersons": "Eng. Omar Hassan, Ms. Priya Patel",
+    "date": "2024-04-28T11:00:00.000Z",
+    "targetSDG": "SDG 4: Quality Education, SDG 9: Industry, Innovation and Infrastructure",
+    "totalRevenueGenerated": 19200
+  },
+  {
+    "attendees": "Big Data Analytics Masterclass",
+    "numberOfAttendees": 42,
+    "organizer": "Data Analytics Institute",
+    "resourcePersons": "Dr. Rachel Green, Prof. Mark Johnson",
+    "date": "2024-05-12T14:30:00.000Z",
+    "targetSDG": "SDG 4: Quality Education",
+    "totalRevenueGenerated": 15700
+  },
+  {
+    "attendees": "Robotics and Automation Workshop",
+    "numberOfAttendees": 35,
+    "organizer": "Robotics Research Lab",
+    "resourcePersons": "Dr. Tony Stark, Eng. Bruce Banner",
+    "date": "2024-05-26T10:00:00.000Z",
+    "targetSDG": "SDG 9: Industry, Innovation and Infrastructure",
+    "totalRevenueGenerated": 13800
+  },
+  {
+    "attendees": "Financial Technology Innovation",
+    "numberOfAttendees": 51,
+    "organizer": "Banking Innovation Center",
+    "resourcePersons": "Ms. Oprah Winfrey, Dr. Warren Buffett",
+    "date": "2024-06-09T13:00:00.000Z",
+    "targetSDG": "SDG 8: Decent Work and Economic Growth, SDG 9: Industry, Innovation and Infrastructure",
+    "totalRevenueGenerated": 21500
+  },
+  {
+    "attendees": "Healthcare Informatics Training",
+    "numberOfAttendees": 29,
+    "organizer": "Medical Research Institute",
+    "resourcePersons": "Dr. Gregory House, Prof. Meredith Grey",
+    "date": "2024-06-23T09:30:00.000Z",
+    "targetSDG": "SDG 3: Good Health and Well-being, SDG 4: Quality Education",
+    "totalRevenueGenerated": 11200
+  },
+  {
+    "attendees": "E-commerce and Digital Business",
+    "numberOfAttendees": 47,
+    "organizer": "E-commerce Association",
+    "resourcePersons": "Mr. Jeff Bezos, Ms. Sara Blakely",
+    "date": "2024-07-07T15:00:00.000Z",
+    "targetSDG": "SDG 8: Decent Work and Economic Growth",
+    "totalRevenueGenerated": 18900
+  },
+  {
+    "attendees": "Environmental Sustainability Practices",
+    "numberOfAttendees": 36,
+    "organizer": "Environmental Protection Agency",
+    "resourcePersons": "Dr. Jane Goodall, Prof. David Attenborough",
+    "date": "2024-07-21T10:00:00.000Z",
+    "targetSDG": "SDG 12: Responsible Consumption and Production, SDG 13: Climate Action",
+    "totalRevenueGenerated": 13400
+  },
+  {
+    "attendees": "Quantum Computing Fundamentals",
+    "numberOfAttendees": 25,
+    "organizer": "Physics Advanced Research",
+    "resourcePersons": "Prof. Stephen Hawking, Dr. Michio Kaku",
+    "date": "2024-08-04T14:00:00.000Z",
+    "targetSDG": "SDG 4: Quality Education, SDG 9: Industry, Innovation and Infrastructure",
+    "totalRevenueGenerated": 9800
+  },
+  {
+    "attendees": "Supply Chain Management Optimization",
+    "numberOfAttendees": 43,
+    "organizer": "Logistics Excellence Center",
+    "resourcePersons": "Mr. Elon Musk, Dr. Supply Chain Expert",
+    "date": "2024-08-18T11:00:00.000Z",
+    "targetSDG": "SDG 8: Decent Work and Economic Growth, SDG 12: Responsible Consumption and Production",
+    "totalRevenueGenerated": 16200
+  },
+  {
+    "attendees": "Virtual Reality Development Workshop",
+    "numberOfAttendees": 31,
+    "organizer": "VR/AR Research Group",
+    "resourcePersons": "Eng. Oculus Founder, Dr. VR Specialist",
+    "date": "2024-09-01T13:30:00.000Z",
+    "targetSDG": "SDG 4: Quality Education, SDG 9: Industry, Innovation and Infrastructure",
+    "totalRevenueGenerated": 11800
+  },
+  {
+    "attendees": "Biotechnology and Genetic Engineering",
+    "numberOfAttendees": 27,
+    "organizer": "Biotech Innovation Hub",
+    "resourcePersons": "Dr. Jennifer Doudna, Prof. Francis Collins",
+    "date": "2024-09-15T09:00:00.000Z",
+    "targetSDG": "SDG 3: Good Health and Well-being, SDG 9: Industry, Innovation and Infrastructure",
+    "totalRevenueGenerated": 10500
+  },
+  {
+    "attendees": "Cryptocurrency and Digital Assets",
+    "numberOfAttendees": 49,
+    "organizer": "Digital Currency Institute",
+    "resourcePersons": "Mr. Satoshi Nakamoto, Dr. Blockchain Expert",
+    "date": "2024-09-29T16:00:00.000Z",
+    "targetSDG": "SDG 8: Decent Work and Economic Growth, SDG 9: Industry, Innovation and Infrastructure",
+    "totalRevenueGenerated": 19700
+  },
+  {
+    "attendees": "Leadership and Management Skills",
+    "numberOfAttendees": 58,
+    "organizer": "Leadership Development Academy",
+    "resourcePersons": "Dr. Simon Sinek, Ms. Indra Nooyi",
+    "date": "2024-10-13T10:00:00.000Z",
+    "targetSDG": "SDG 4: Quality Education, SDG 8: Decent Work and Economic Growth",
+    "totalRevenueGenerated": 23400
+  },
+  {
+    "attendees": "Renewable Energy Systems Design",
+    "numberOfAttendees": 34,
+    "organizer": "Renewable Energy Center",
+    "resourcePersons": "Eng. Solar Expert, Dr. Wind Energy Specialist",
+    "date": "2024-10-27T14:00:00.000Z",
+    "targetSDG": "SDG 7: Affordable and Clean Energy, SDG 13: Climate Action",
+    "totalRevenueGenerated": 12900
+  },
+  {
+    "attendees": "Natural Language Processing",
+    "numberOfAttendees": 39,
+    "organizer": "AI Language Lab",
+    "resourcePersons": "Dr. NLP Researcher, Prof. Linguistics Expert",
+    "date": "2024-11-10T11:00:00.000Z",
+    "targetSDG": "SDG 4: Quality Education, SDG 9: Industry, Innovation and Infrastructure",
+    "totalRevenueGenerated": 14600
+  },
+  {
+    "attendees": "Food Security and Agriculture Tech",
+    "numberOfAttendees": 44,
+    "organizer": "Agriculture Innovation Center",
+    "resourcePersons": "Dr. Norman Borlaug, Prof. Agriculture Tech",
+    "date": "2024-11-24T09:30:00.000Z",
+    "targetSDG": "SDG 2: Zero Hunger, SDG 9: Industry, Innovation and Infrastructure",
+    "totalRevenueGenerated": 16500
+  },
+  {
+    "attendees": "Space Technology and Applications",
+    "numberOfAttendees": 26,
+    "organizer": "Space Research Institute",
+    "resourcePersons": "Dr. Buzz Aldrin, Eng. Space Engineer",
+    "date": "2024-12-08T15:00:00.000Z",
+    "targetSDG": "SDG 4: Quality Education, SDG 9: Industry, Innovation and Infrastructure",
+    "totalRevenueGenerated": 10200
+  },
+  {
+    "attendees": "Entrepreneurship and Startup Development",
+    "numberOfAttendees": 52,
+    "organizer": "Entrepreneurship Center",
+    "resourcePersons": "Mr. Richard Branson, Ms. Startup Mentor",
+    "date": "2024-12-22T13:00:00.000Z",
+    "targetSDG": "SDG 4: Quality Education, SDG 8: Decent Work and Economic Growth",
+    "totalRevenueGenerated": 20800
+  },
+  {
+    "attendees": "Water Resource Management",
+    "numberOfAttendees": 37,
+    "organizer": "Water Conservation Society",
+    "resourcePersons": "Dr. Water Expert, Prof. Hydrology Specialist",
+    "date": "2024-01-08T10:00:00.000Z",
+    "targetSDG": "SDG 6: Clean Water and Sanitation, SDG 13: Climate Action",
+    "totalRevenueGenerated": 14100
+  },
+  {
+    "attendees": "5G Network Implementation",
+    "numberOfAttendees": 46,
+    "organizer": "Telecom Research Center",
+    "resourcePersons": "Eng. 5G Specialist, Dr. Network Engineer",
+    "date": "2024-01-29T14:00:00.000Z",
+    "targetSDG": "SDG 9: Industry, Innovation and Infrastructure",
+    "totalRevenueGenerated": 18400
+  },
+  {
+    "attendees": "Mental Health and Wellness in Tech",
+    "numberOfAttendees": 53,
+    "organizer": "Mental Health Foundation",
+    "resourcePersons": "Dr. Psychologist, Prof. Wellness Expert",
+    "date": "2024-02-12T11:00:00.000Z",
+    "targetSDG": "SDG 3: Good Health and Well-being",
+    "totalRevenueGenerated": 20100
+  },
+  {
+    "attendees": "Autonomous Vehicle Technology",
+    "numberOfAttendees": 30,
+    "organizer": "Autonomous Systems Lab",
+    "resourcePersons": "Dr. Tesla Engineer, Prof. Autonomous Tech",
+    "date": "2024-02-26T09:00:00.000Z",
+    "targetSDG": "SDG 9: Industry, Innovation and Infrastructure, SDG 11: Sustainable Cities and Communities",
+    "totalRevenueGenerated": 11500
+  },
+  {
+    "attendees": "Circular Economy and Waste Management",
+    "numberOfAttendees": 40,
+    "organizer": "Circular Economy Institute",
+    "resourcePersons": "Dr. Sustainability Expert, Prof. Waste Management",
+    "date": "2024-03-11T15:30:00.000Z",
+    "targetSDG": "SDG 12: Responsible Consumption and Production",
+    "totalRevenueGenerated": 15200
+  },
+  {
+    "attendees": "Edge Computing and IoT Integration",
+    "numberOfAttendees": 35,
+    "organizer": "Edge Computing Center",
+    "resourcePersons": "Eng. IoT Specialist, Dr. Edge Computing Expert",
+    "date": "2024-03-25T13:00:00.000Z",
+    "targetSDG": "SDG 9: Industry, Innovation and Infrastructure",
+    "totalRevenueGenerated": 13300
+  },
+  {
+    "attendees": "Biomedical Engineering Applications",
+    "numberOfAttendees": 28,
+    "organizer": "Biomedical Research Institute",
+    "resourcePersons": "Dr. Biomedical Engineer, Prof. Medical Device Expert",
+    "date": "2024-04-08T10:30:00.000Z",
+    "targetSDG": "SDG 3: Good Health and Well-being, SDG 9: Industry, Innovation and Infrastructure",
+    "totalRevenueGenerated": 10800
+  },
+  {
+    "attendees": "Smart Grid Technology Implementation",
+    "numberOfAttendees": 41,
+    "organizer": "Power Systems Research",
+    "resourcePersons": "Eng. Grid Expert, Dr. Smart Energy Specialist",
+    "date": "2024-04-22T14:00:00.000Z",
+    "targetSDG": "SDG 7: Affordable and Clean Energy, SDG 9: Industry, Innovation and Infrastructure",
+    "totalRevenueGenerated": 15600
+  },
+  {
+    "attendees": "Social Media Analytics and Strategy",
+    "numberOfAttendees": 49,
+    "organizer": "Digital Marketing Institute",
+    "resourcePersons": "Ms. Social Media Expert, Dr. Analytics Specialist",
+    "date": "2024-05-06T11:00:00.000Z",
+    "targetSDG": "SDG 4: Quality Education, SDG 8: Decent Work and Economic Growth",
+    "totalRevenueGenerated": 18700
+  },
+  {
+    "attendees": "Disaster Management and Resilience",
+    "numberOfAttendees": 44,
+    "organizer": "Disaster Management Center",
+    "resourcePersons": "Dr. Emergency Management, Prof. Resilience Expert",
+    "date": "2024-05-20T09:00:00.000Z",
+    "targetSDG": "SDG 11: Sustainable Cities and Communities, SDG 13: Climate Action",
+    "totalRevenueGenerated": 16700
+  },
+  {
+    "attendees": "Additive Manufacturing and 3D Printing",
+    "numberOfAttendees": 32,
+    "organizer": "Advanced Manufacturing Lab",
+    "resourcePersons": "Eng. 3D Printing Expert, Dr. Materials Scientist",
+    "date": "2024-06-03T15:00:00.000Z",
+    "targetSDG": "SDG 9: Industry, Innovation and Infrastructure, SDG 12: Responsible Consumption and Production",
+    "totalRevenueGenerated": 12400
+  },
+  {
+    "attendees": "Neuroscience and Brain-Computer Interfaces",
+    "numberOfAttendees": 24,
+    "organizer": "Neuroscience Research Center",
+    "resourcePersons": "Dr. Neural Engineer, Prof. Brain Research",
+    "date": "2024-06-17T10:00:00.000Z",
+    "targetSDG": "SDG 3: Good Health and Well-being, SDG 9: Industry, Innovation and Infrastructure",
+    "totalRevenueGenerated": 9500
+  },
+  {
+    "attendees": "Sustainable Fashion and Textile Innovation",
+    "numberOfAttendees": 38,
+    "organizer": "Fashion Technology Institute",
+    "resourcePersons": "Ms. Fashion Designer, Dr. Textile Engineer",
+    "date": "2024-07-01T13:30:00.000Z",
+    "targetSDG": "SDG 9: Industry, Innovation and Infrastructure, SDG 12: Responsible Consumption and Production",
+    "totalRevenueGenerated": 14400
+  },
+  {
+    "attendees": "Maritime Technology and Ocean Conservation",
+    "numberOfAttendees": 33,
+    "organizer": "Ocean Research Institute",
+    "resourcePersons": "Dr. Marine Biologist, Prof. Ocean Technology",
+    "date": "2024-07-15T14:00:00.000Z",
+    "targetSDG": "SDG 15: Life on Land, SDG 9: Industry, Innovation and Infrastructure",
+    "totalRevenueGenerated": 12700
+  },
+  {
+    "attendees": "Aerospace Engineering Fundamentals",
+    "numberOfAttendees": 29,
+    "organizer": "Aerospace Research Center",
+    "resourcePersons": "Eng. Aerospace Engineer, Dr. Aviation Expert",
+    "date": "2024-07-29T11:00:00.000Z",
+    "targetSDG": "SDG 4: Quality Education, SDG 9: Industry, Innovation and Infrastructure",
+    "totalRevenueGenerated": 11300
+  },
+  {
+    "attendees": "Public Health Data Analytics",
+    "numberOfAttendees": 47,
+    "organizer": "Public Health Institute",
+    "resourcePersons": "Dr. Epidemiologist, Prof. Health Data Scientist",
+    "date": "2024-08-12T09:00:00.000Z",
+    "targetSDG": "SDG 3: Good Health and Well-being",
+    "totalRevenueGenerated": 17900
+  },
+  {
+    "attendees": "Smart Agriculture and Precision Farming",
+    "numberOfAttendees": 42,
+    "organizer": "Agriculture Technology Center",
+    "resourcePersons": "Dr. AgriTech Expert, Prof. Precision Farming",
+    "date": "2024-08-26T15:00:00.000Z",
+    "targetSDG": "SDG 2: Zero Hunger, SDG 9: Industry, Innovation and Infrastructure",
+    "totalRevenueGenerated": 15900
+  },
+  {
+    "attendees": "Human-Computer Interaction Design",
+    "numberOfAttendees": 36,
+    "organizer": "HCI Research Lab",
+    "resourcePersons": "Dr. UX Designer, Prof. Interaction Expert",
+    "date": "2024-09-09T10:00:00.000Z",
+    "targetSDG": "SDG 4: Quality Education, SDG 9: Industry, Innovation and Infrastructure",
+    "totalRevenueGenerated": 13700
+  },
+  {
+    "attendees": "Renewable Energy Policy and Regulation",
+    "numberOfAttendees": 31,
+    "organizer": "Energy Policy Institute",
+    "resourcePersons": "Dr. Policy Expert, Prof. Regulatory Specialist",
+    "date": "2024-09-23T14:00:00.000Z",
+    "targetSDG": "SDG 7: Affordable and Clean Energy, SDG 13: Climate Action",
+    "totalRevenueGenerated": 11900
+  },
+  {
+    "attendees": "Industrial IoT and Industry 4.0",
+    "numberOfAttendees": 45,
+    "organizer": "Industry 4.0 Center",
+    "resourcePersons": "Eng. Industrial IoT Expert, Dr. Manufacturing Tech",
+    "date": "2024-10-07T11:00:00.000Z",
+    "targetSDG": "SDG 8: Decent Work and Economic Growth, SDG 9: Industry, Innovation and Infrastructure",
+    "totalRevenueGenerated": 17200
+  },
+  {
+    "attendees": "Climate Change Adaptation Strategies",
+    "numberOfAttendees": 39,
+    "organizer": "Climate Research Institute",
+    "resourcePersons": "Dr. Climate Scientist, Prof. Adaptation Expert",
+    "date": "2024-10-21T13:00:00.000Z",
+    "targetSDG": "SDG 13: Climate Action",
+    "totalRevenueGenerated": 14800
+  },
+  {
+    "attendees": "Augmented Reality Applications",
+    "numberOfAttendees": 34,
+    "organizer": "AR/VR Development Center",
+    "resourcePersons": "Eng. AR Developer, Dr. Immersive Tech Expert",
+    "date": "2024-11-04T09:30:00.000Z",
+    "targetSDG": "SDG 4: Quality Education, SDG 9: Industry, Innovation and Infrastructure",
+    "totalRevenueGenerated": 13100
+  },
+  {
+    "attendees": "Supply Chain Sustainability",
+    "numberOfAttendees": 48,
+    "organizer": "Sustainable Supply Chain Institute",
+    "resourcePersons": "Dr. Supply Chain Expert, Prof. Sustainability Specialist",
+    "date": "2024-11-18T15:00:00.000Z",
+    "targetSDG": "SDG 8: Decent Work and Economic Growth, SDG 12: Responsible Consumption and Production",
+    "totalRevenueGenerated": 18300
+  },
+  {
+    "attendees": "Bioinformatics and Genomic Data Analysis",
+    "numberOfAttendees": 26,
+    "organizer": "Genomics Research Center",
+    "resourcePersons": "Dr. Bioinformatician, Prof. Genomic Scientist",
+    "date": "2024-12-02T10:00:00.000Z",
+    "targetSDG": "SDG 3: Good Health and Well-being, SDG 9: Industry, Innovation and Infrastructure",
+    "totalRevenueGenerated": 9900
+  },
+  {
+    "attendees": "Digital Transformation in Healthcare",
+    "numberOfAttendees": 43,
+    "organizer": "Healthcare Innovation Hub",
+    "resourcePersons": "Dr. Health Tech Expert, Prof. Digital Health Specialist",
+    "date": "2024-12-16T14:00:00.000Z",
+    "targetSDG": "SDG 3: Good Health and Well-being, SDG 9: Industry, Innovation and Infrastructure",
+    "totalRevenueGenerated": 16400
+  },
+  {
+    "attendees": "Sustainable Urban Planning",
+    "numberOfAttendees": 37,
+    "organizer": "Urban Development Institute",
+    "resourcePersons": "Dr. Urban Planner, Prof. City Planning Expert",
+    "date": "2024-12-30T11:00:00.000Z",
+    "targetSDG": "SDG 11: Sustainable Cities and Communities",
+    "totalRevenueGenerated": 14200
+  },
+  {
+    "attendees": "Cryptography and Network Security",
+    "numberOfAttendees": 35,
+    "organizer": "Cybersecurity Research Lab",
+    "resourcePersons": "Dr. Cryptography Expert, Prof. Security Specialist",
+    "date": "2024-01-13T13:00:00.000Z",
+    "targetSDG": "SDG 9: Industry, Innovation and Infrastructure",
+    "totalRevenueGenerated": 13300
+  },
+  {
+    "attendees": "Machine Learning for Finance",
+    "numberOfAttendees": 41,
+    "organizer": "Financial Technology Institute",
+    "resourcePersons": "Dr. FinTech Expert, Prof. Quantitative Analyst",
+    "date": "2024-01-27T10:00:00.000Z",
+    "targetSDG": "SDG 8: Decent Work and Economic Growth, SDG 9: Industry, Innovation and Infrastructure",
+    "totalRevenueGenerated": 15600
+  },
+  {
+    "attendees": "Renewable Energy Storage Solutions",
+    "numberOfAttendees": 38,
+    "organizer": "Energy Storage Research",
+    "resourcePersons": "Eng. Battery Expert, Dr. Energy Storage Specialist",
+    "date": "2024-02-10T15:00:00.000Z",
+    "targetSDG": "SDG 7: Affordable and Clean Energy",
+    "totalRevenueGenerated": 14400
+  },
+  {
+    "attendees": "Autonomous Robotics Programming",
+    "numberOfAttendees": 32,
+    "organizer": "Robotics Programming Center",
+    "resourcePersons": "Dr. Robotics Engineer, Prof. Autonomous Systems",
+    "date": "2024-02-24T09:00:00.000Z",
+    "targetSDG": "SDG 4: Quality Education, SDG 9: Industry, Innovation and Infrastructure",
+    "totalRevenueGenerated": 12200
+  },
+  {
+    "attendees": "Sustainable Tourism Development",
+    "numberOfAttendees": 29,
+    "organizer": "Tourism Sustainability Center",
+    "resourcePersons": "Dr. Tourism Expert, Prof. Sustainable Development",
+    "date": "2024-03-09T14:00:00.000Z",
+    "targetSDG": "SDG 8: Decent Work and Economic Growth, SDG 12: Responsible Consumption and Production",
+    "totalRevenueGenerated": 11100
+  },
+  {
+    "attendees": "Computer Vision and Image Processing",
+    "numberOfAttendees": 44,
+    "organizer": "Computer Vision Lab",
+    "resourcePersons": "Dr. CV Researcher, Prof. Image Processing Expert",
+    "date": "2024-03-23T11:00:00.000Z",
+    "targetSDG": "SDG 4: Quality Education, SDG 9: Industry, Innovation and Infrastructure",
+    "totalRevenueGenerated": 16700
+  },
+  {
+    "attendees": "Green Building Design and Construction",
+    "numberOfAttendees": 36,
+    "organizer": "Sustainable Architecture Center",
+    "resourcePersons": "Eng. Green Architect, Dr. Sustainable Construction",
+    "date": "2024-04-06T10:00:00.000Z",
+    "targetSDG": "SDG 9: Industry, Innovation and Infrastructure, SDG 11: Sustainable Cities and Communities",
+    "totalRevenueGenerated": 13700
+  },
+  {
+    "attendees": "Blockchain for Supply Chain Transparency",
+    "numberOfAttendees": 40,
+    "organizer": "Supply Chain Innovation Lab",
+    "resourcePersons": "Dr. Blockchain SCM Expert, Prof. Transparency Specialist",
+    "date": "2024-04-20T13:30:00.000Z",
+    "targetSDG": "SDG 8: Decent Work and Economic Growth, SDG 12: Responsible Consumption and Production",
+    "totalRevenueGenerated": 15200
+  },
+  {
+    "attendees": "AI Ethics and Responsible AI Development",
+    "numberOfAttendees": 52,
+    "organizer": "AI Ethics Research Center",
+    "resourcePersons": "Dr. AI Ethicist, Prof. Responsible AI Expert",
+    "date": "2024-05-04T15:00:00.000Z",
+    "targetSDG": "SDG 4: Quality Education, SDG 9: Industry, Innovation and Infrastructure",
+    "totalRevenueGenerated": 19800
+  },
+  {
+    "attendees": "5G and Next-Generation Networks",
+    "numberOfAttendees": 39,
+    "organizer": "NextGen Telecom Research",
+    "resourcePersons": "Eng. 5G/6G Expert, Dr. Network Technology",
+    "date": "2024-05-18T09:00:00.000Z",
+    "targetSDG": "SDG 9: Industry, Innovation and Infrastructure",
+    "totalRevenueGenerated": 14800
+  },
+  {
+    "attendees": "Sustainable Waste Management Solutions",
+    "numberOfAttendees": 33,
+    "organizer": "Waste Management Innovation",
+    "resourcePersons": "Dr. Waste Tech Expert, Prof. Recycling Specialist",
+    "date": "2024-06-01T14:00:00.000Z",
+    "targetSDG": "SDG 12: Responsible Consumption and Production",
+    "totalRevenueGenerated": 12600
+  },
+  {
+    "attendees": "Deep Learning and Neural Networks",
+    "numberOfAttendees": 46,
+    "organizer": "Deep Learning Research Group",
+    "resourcePersons": "Dr. Neural Network Expert, Prof. Deep Learning Specialist",
+    "date": "2024-06-15T11:00:00.000Z",
+    "targetSDG": "SDG 4: Quality Education, SDG 9: Industry, Innovation and Infrastructure",
+    "totalRevenueGenerated": 17500
+  },
+  {
+    "attendees": "Food Technology and Nutrition Science",
+    "numberOfAttendees": 35,
+    "organizer": "Food Science Institute",
+    "resourcePersons": "Dr. Nutrition Scientist, Prof. Food Technology Expert",
+    "date": "2024-06-29T10:00:00.000Z",
+    "targetSDG": "SDG 2: Zero Hunger, SDG 3: Good Health and Well-being",
+    "totalRevenueGenerated": 13300
+  },
+  {
+    "attendees": "Quantum Cryptography and Security",
+    "numberOfAttendees": 27,
+    "organizer": "Quantum Security Research",
+    "resourcePersons": "Dr. Quantum Cryptographer, Prof. Security Expert",
+    "date": "2024-07-13T13:00:00.000Z",
+    "targetSDG": "SDG 9: Industry, Innovation and Infrastructure",
+    "totalRevenueGenerated": 10400
+  },
+  {
+    "attendees": "Smart Transportation Systems",
+    "numberOfAttendees": 42,
+    "organizer": "Intelligent Transportation Lab",
+    "resourcePersons": "Eng. Smart Mobility Expert, Dr. Transportation Tech",
+    "date": "2024-07-27T15:00:00.000Z",
+    "targetSDG": "SDG 9: Industry, Innovation and Infrastructure, SDG 11: Sustainable Cities and Communities",
+    "totalRevenueGenerated": 15900
+  },
+  {
+    "attendees": "Biodegradable Materials Engineering",
+    "numberOfAttendees": 31,
+    "organizer": "Sustainable Materials Center",
+    "resourcePersons": "Dr. Biomaterials Expert, Prof. Green Chemistry",
+    "date": "2024-08-10T09:30:00.000Z",
+    "targetSDG": "SDG 9: Industry, Innovation and Infrastructure, SDG 12: Responsible Consumption and Production",
+    "totalRevenueGenerated": 11800
+  },
+  {
+    "attendees": "Edge AI and Federated Learning",
+    "numberOfAttendees": 38,
+    "organizer": "Edge AI Research Center",
+    "resourcePersons": "Dr. Edge Computing Expert, Prof. Federated Learning Specialist",
+    "date": "2024-08-24T14:00:00.000Z",
+    "targetSDG": "SDG 4: Quality Education, SDG 9: Industry, Innovation and Infrastructure",
+    "totalRevenueGenerated": 14400
+  },
+  {
+    "attendees": "Climate Modeling and Prediction",
+    "numberOfAttendees": 34,
+    "organizer": "Climate Modeling Institute",
+    "resourcePersons": "Dr. Climate Modeler, Prof. Environmental Data Scientist",
+    "date": "2024-09-07T11:00:00.000Z",
+    "targetSDG": "SDG 13: Climate Action",
+    "totalRevenueGenerated": 12900
+  },
+  {
+    "attendees": "Nanotechnology Applications",
+    "numberOfAttendees": 29,
+    "organizer": "Nanotech Research Lab",
+    "resourcePersons": "Dr. Nanotech Engineer, Prof. Materials Science Expert",
+    "date": "2024-09-21T10:00:00.000Z",
+    "targetSDG": "SDG 3: Good Health and Well-being, SDG 9: Industry, Innovation and Infrastructure",
+    "totalRevenueGenerated": 11200
+  },
+  {
+    "attendees": "Digital Forensics and Investigation",
+    "numberOfAttendees": 37,
+    "organizer": "Digital Forensics Center",
+    "resourcePersons": "Dr. Forensic Expert, Prof. Cyber Investigation",
+    "date": "2024-10-05T13:00:00.000Z",
+    "targetSDG": "SDG 9: Industry, Innovation and Infrastructure",
+    "totalRevenueGenerated": 14100
+  },
+  {
+    "attendees": "Sustainable Mining Practices",
+    "numberOfAttendees": 32,
+    "organizer": "Mining Sustainability Institute",
+    "resourcePersons": "Eng. Mining Engineer, Dr. Environmental Mining Expert",
+    "date": "2024-10-19T15:00:00.000Z",
+    "targetSDG": "SDG 12: Responsible Consumption and Production",
+    "totalRevenueGenerated": 12200
+  },
+  {
+    "attendees": "Exoskeleton Technology and Rehabilitation",
+    "numberOfAttendees": 26,
+    "organizer": "Rehabilitation Technology Center",
+    "resourcePersons": "Dr. Biomedical Engineer, Prof. Rehabilitation Specialist",
+    "date": "2024-11-02T09:00:00.000Z",
+    "targetSDG": "SDG 3: Good Health and Well-being",
+    "totalRevenueGenerated": 9900
+  },
+  {
+    "attendees": "Autonomous Drone Technology",
+    "numberOfAttendees": 41,
+    "organizer": "Drone Technology Institute",
+    "resourcePersons": "Eng. Drone Engineer, Dr. Autonomous Systems Expert",
+    "date": "2024-11-16T14:00:00.000Z",
+    "targetSDG": "SDG 9: Industry, Innovation and Infrastructure",
+    "totalRevenueGenerated": 15600
+  },
+  {
+    "attendees": "Carbon Capture and Storage",
+    "numberOfAttendees": 35,
+    "organizer": "Carbon Management Center",
+    "resourcePersons": "Dr. CCS Engineer, Prof. Climate Technology Expert",
+    "date": "2024-11-30T11:00:00.000Z",
+    "targetSDG": "SDG 13: Climate Action",
+    "totalRevenueGenerated": 13300
+  },
+  {
+    "attendees": "Precision Medicine and Personalized Healthcare",
+    "numberOfAttendees": 39,
+    "organizer": "Precision Medicine Institute",
+    "resourcePersons": "Dr. Genomics Expert, Prof. Personalized Medicine",
+    "date": "2024-12-14T10:00:00.000Z",
+    "targetSDG": "SDG 3: Good Health and Well-being",
+    "totalRevenueGenerated": 14800
+  },
+  {
+    "attendees": "Vertical Farming and Urban Agriculture",
+    "numberOfAttendees": 43,
+    "organizer": "Urban Agriculture Center",
+    "resourcePersons": "Dr. AgriTech Specialist, Prof. Vertical Farming Expert",
+    "date": "2024-12-28T13:00:00.000Z",
+    "targetSDG": "SDG 2: Zero Hunger, SDG 11: Sustainable Cities and Communities",
+    "totalRevenueGenerated": 16400
+  },
+  {
+    "attendees": "Hydrogen Energy Systems",
+    "numberOfAttendees": 30,
+    "organizer": "Hydrogen Research Institute",
+    "resourcePersons": "Eng. Hydrogen Engineer, Dr. Clean Energy Specialist",
+    "date": "2024-01-11T15:00:00.000Z",
+    "targetSDG": "SDG 7: Affordable and Clean Energy",
+    "totalRevenueGenerated": 11500
+  },
+  {
+    "attendees": "Neuromorphic Computing",
+    "numberOfAttendees": 28,
+    "organizer": "Neuromorphic Research Lab",
+    "resourcePersons": "Dr. Brain-Inspired Computing Expert, Prof. Neuromorphic Engineer",
+    "date": "2024-01-25T10:00:00.000Z",
+    "targetSDG": "SDG 4: Quality Education, SDG 9: Industry, Innovation and Infrastructure",
+    "totalRevenueGenerated": 10800
+  },
+  {
+    "attendees": "Sustainable Fisheries Management",
+    "numberOfAttendees": 36,
+    "organizer": "Fisheries Sustainability Center",
+    "resourcePersons": "Dr. Marine Biologist, Prof. Fisheries Management Expert",
+    "date": "2024-02-08T14:00:00.000Z",
+    "targetSDG": "SDG 14: Life Below Water",
+    "totalRevenueGenerated": 13700
+  },
+  {
+    "attendees": "Advanced Materials Science",
+    "numberOfAttendees": 34,
+    "organizer": "Materials Science Institute",
+    "resourcePersons": "Dr. Materials Scientist, Prof. Advanced Materials Expert",
+    "date": "2024-02-22T11:00:00.000Z",
+    "targetSDG": "SDG 9: Industry, Innovation and Infrastructure",
+    "totalRevenueGenerated": 12900
+  },
+  {
+    "attendees": "Telemedicine and Remote Healthcare",
+    "numberOfAttendees": 47,
+    "organizer": "Telehealth Innovation Center",
+    "resourcePersons": "Dr. Telemedicine Expert, Prof. Remote Health Specialist",
+    "date": "2024-03-07T09:00:00.000Z",
+    "targetSDG": "SDG 3: Good Health and Well-being",
+    "totalRevenueGenerated": 17900
+  },
+  {
+    "attendees": "Green Chemistry and Sustainable Processes",
+    "numberOfAttendees": 31,
+    "organizer": "Green Chemistry Lab",
+    "resourcePersons": "Dr. Green Chemist, Prof. Sustainable Process Engineer",
+    "date": "2024-03-21T15:00:00.000Z",
+    "targetSDG": "SDG 9: Industry, Innovation and Infrastructure, SDG 12: Responsible Consumption and Production",
+    "totalRevenueGenerated": 11800
+  },
+  {
+    "attendees": "Swarm Robotics and Collective Intelligence",
+    "numberOfAttendees": 33,
+    "organizer": "Swarm Robotics Research",
+    "resourcePersons": "Dr. Swarm Robotics Expert, Prof. Collective AI Specialist",
+    "date": "2024-04-04T10:00:00.000Z",
+    "targetSDG": "SDG 4: Quality Education, SDG 9: Industry, Innovation and Infrastructure",
+    "totalRevenueGenerated": 12600
+  },
+  {
+    "attendees": "Ocean Energy Harvesting",
+    "numberOfAttendees": 29,
+    "organizer": "Ocean Energy Institute",
+    "resourcePersons": "Eng. Wave Energy Expert, Dr. Tidal Power Specialist",
+    "date": "2024-04-18T13:00:00.000Z",
+    "targetSDG": "SDG 7: Affordable and Clean Energy, SDG 14: Life Below Water",
+    "totalRevenueGenerated": 11200
+  },
+  {
+    "attendees": "Biomimicry and Nature-Inspired Design",
+    "numberOfAttendees": 37,
+    "organizer": "Biomimicry Research Center",
+    "resourcePersons": "Dr. Biomimicry Expert, Prof. Nature-Inspired Engineer",
+    "date": "2024-05-02T14:00:00.000Z",
+    "targetSDG": "SDG 9: Industry, Innovation and Infrastructure, SDG 15: Life on Land",
+    "totalRevenueGenerated": 14100
+  },
+  {
+    "attendees": "Exascale Computing and HPC",
+    "numberOfAttendees": 25,
+    "organizer": "High Performance Computing Center",
+    "resourcePersons": "Dr. HPC Expert, Prof. Supercomputing Specialist",
+    "date": "2024-05-16T11:00:00.000Z",
+    "targetSDG": "SDG 4: Quality Education, SDG 9: Industry, Innovation and Infrastructure",
+    "totalRevenueGenerated": 9600
+  },
+  {
+    "attendees": "Sustainable Packaging Innovation",
+    "numberOfAttendees": 40,
+    "organizer": "Packaging Sustainability Institute",
+    "resourcePersons": "Dr. Packaging Engineer, Prof. Materials Innovation Expert",
+    "date": "2024-05-30T09:00:00.000Z",
+    "targetSDG": "SDG 9: Industry, Innovation and Infrastructure, SDG 12: Responsible Consumption and Production",
+    "totalRevenueGenerated": 15200
+  },
+  {
+    "attendees": "CRISPR Gene Editing Technology",
+    "numberOfAttendees": 32,
+    "organizer": "Gene Editing Research Center",
+    "resourcePersons": "Dr. CRISPR Scientist, Prof. Genetic Engineering Expert",
+    "date": "2024-06-13T15:00:00.000Z",
+    "targetSDG": "SDG 3: Good Health and Well-being",
+    "totalRevenueGenerated": 12200
+  },
+  {
+    "attendees": "Autonomous Underwater Vehicles",
+    "numberOfAttendees": 28,
+    "organizer": "Underwater Robotics Lab",
+    "resourcePersons": "Eng. AUV Engineer, Dr. Marine Technology Expert",
+    "date": "2024-06-27T10:00:00.000Z",
+    "targetSDG": "SDG 9: Industry, Innovation and Infrastructure, SDG 14: Life Below Water",
+    "totalRevenueGenerated": 10800
+  },
+  {
+    "attendees": "Carbon Neutral Building Design",
+    "numberOfAttendees": 39,
+    "organizer": "Carbon Neutral Architecture Center",
+    "resourcePersons": "Eng. Sustainable Architect, Dr. Zero Carbon Expert",
+    "date": "2024-07-11T13:00:00.000Z",
+    "targetSDG": "SDG 9: Industry, Innovation and Infrastructure, SDG 13: Climate Action",
+    "totalRevenueGenerated": 14800
+  },
+  {
+    "attendees": "Satellite Communication Systems",
+    "numberOfAttendees": 35,
+    "organizer": "Satellite Technology Institute",
+    "resourcePersons": "Eng. Satellite Engineer, Dr. Communication Systems Expert",
+    "date": "2024-07-25T14:00:00.000Z",
+    "targetSDG": "SDG 4: Quality Education, SDG 9: Industry, Innovation and Infrastructure",
+    "totalRevenueGenerated": 13300
+  },
+  {
+    "attendees": "Microbiome Research and Applications",
+    "numberOfAttendees": 31,
+    "organizer": "Microbiome Research Center",
+    "resourcePersons": "Dr. Microbiologist, Prof. Gut Health Expert",
+    "date": "2024-08-08T11:00:00.000Z",
+    "targetSDG": "SDG 3: Good Health and Well-being",
+    "totalRevenueGenerated": 11800
+  },
+  {
+    "attendees": "Smart Grid Cybersecurity",
+    "numberOfAttendees": 44,
+    "organizer": "Smart Grid Security Center",
+    "resourcePersons": "Dr. Grid Security Expert, Prof. Energy Cybersecurity",
+    "date": "2024-08-22T09:00:00.000Z",
+    "targetSDG": "SDG 7: Affordable and Clean Energy, SDG 9: Industry, Innovation and Infrastructure",
+    "totalRevenueGenerated": 16700
+  },
+  {
+    "attendees": "Tissue Engineering and Regenerative Medicine",
+    "numberOfAttendees": 27,
+    "organizer": "Regenerative Medicine Institute",
+    "resourcePersons": "Dr. Tissue Engineer, Prof. Stem Cell Researcher",
+    "date": "2024-09-05T15:00:00.000Z",
+    "targetSDG": "SDG 3: Good Health and Well-being",
+    "totalRevenueGenerated": 10400
+  },
+  {
+    "attendees": "Hypersonics and Advanced Propulsion",
+    "numberOfAttendees": 24,
+    "organizer": "Advanced Propulsion Research",
+    "resourcePersons": "Eng. Hypersonics Engineer, Dr. Propulsion Technology Expert",
+    "date": "2024-09-19T10:00:00.000Z",
+    "targetSDG": "SDG 4: Quality Education, SDG 9: Industry, Innovation and Infrastructure",
+    "totalRevenueGenerated": 9200
+  },
+  {
+    "attendees": "Circular Fashion and Textile Recycling",
+    "numberOfAttendees": 38,
+    "organizer": "Circular Fashion Institute",
+    "resourcePersons": "Dr. Fashion Sustainability Expert, Prof. Textile Recycling",
+    "date": "2024-10-03T14:00:00.000Z",
+    "targetSDG": "SDG 9: Industry, Innovation and Infrastructure, SDG 12: Responsible Consumption and Production",
+    "totalRevenueGenerated": 14400
+  },
+  {
+    "attendees": "Quantum Sensors and Metrology",
+    "numberOfAttendees": 26,
+    "organizer": "Quantum Sensing Lab",
+    "resourcePersons": "Dr. Quantum Physicist, Prof. Precision Measurement Expert",
+    "date": "2024-10-17T11:00:00.000Z",
+    "targetSDG": "SDG 4: Quality Education, SDG 9: Industry, Innovation and Infrastructure",
+    "totalRevenueGenerated": 9900
+  },
+  {
+    "attendees": "Blue Economy and Marine Biotechnology",
+    "numberOfAttendees": 33,
+    "organizer": "Marine Biotechnology Center",
+    "resourcePersons": "Dr. Marine Biotechnologist, Prof. Ocean Resources Expert",
+    "date": "2024-10-31T13:00:00.000Z",
+    "targetSDG": "SDG 14: Life Below Water",
+    "totalRevenueGenerated": 12600
+  },
+  {
+    "attendees": "Advanced Driver Assistance Systems",
+    "numberOfAttendees": 41,
+    "organizer": "ADAS Research Institute",
+    "resourcePersons": "Eng. Automotive Engineer, Dr. Vehicle Safety Expert",
+    "date": "2024-11-14T09:00:00.000Z",
+    "targetSDG": "SDG 9: Industry, Innovation and Infrastructure",
+    "totalRevenueGenerated": 15600
+  },
+  {
+    "attendees": "Perovskite Solar Cell Technology",
+    "numberOfAttendees": 30,
+    "organizer": "NextGen Solar Research",
+    "resourcePersons": "Dr. Materials Scientist, Prof. Photovoltaics Expert",
+    "date": "2024-11-28T15:00:00.000Z",
+    "targetSDG": "SDG 7: Affordable and Clean Energy",
+    "totalRevenueGenerated": 11500
+  },
+  {
+    "attendees": "Synthetic Biology and Bioengineering",
+    "numberOfAttendees": 35,
+    "organizer": "Synthetic Biology Lab",
+    "resourcePersons": "Dr. Synthetic Biologist, Prof. Genetic Engineering Expert",
+    "date": "2024-12-12T10:00:00.000Z",
+    "targetSDG": "SDG 3: Good Health and Well-being, SDG 9: Industry, Innovation and Infrastructure",
+    "totalRevenueGenerated": 13300
+  },
+  {
+    "attendees": "Zero-Waste Manufacturing Processes",
+    "numberOfAttendees": 37,
+    "organizer": "Zero Waste Institute",
+    "resourcePersons": "Eng. Process Engineer, Dr. Industrial Ecology Expert",
+    "date": "2024-12-26T14:00:00.000Z",
+    "targetSDG": "SDG 9: Industry, Innovation and Infrastructure, SDG 12: Responsible Consumption and Production",
+    "totalRevenueGenerated": 14100
+  }
+]

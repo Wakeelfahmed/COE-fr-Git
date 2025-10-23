@@ -702,6 +702,8 @@ const CollaborationPage = () => {
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Duration</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Key Outcomes</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Outcome Details</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
             </tr>
           </thead>
@@ -731,6 +733,8 @@ const CollaborationPage = () => {
                   {new Date(collab.durationStart).toLocaleDateString()} - {collab.durationEnd ? new Date(collab.durationEnd).toLocaleDateString() : 'Ongoing'}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">{collab.currentStatus}</td>
+                <td className="px-6 py-4 whitespace-nowrap">{collab.keyOutcomes || 'N/A'}</td>
+                <td className="px-6 py-4 whitespace-nowrap max-w-xs truncate" title={collab.detailsOfOutcome}>{collab.detailsOfOutcome || 'N/A'}</td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <button onClick={() => handleEditCollaboration(collab)} className="text-blue-600 hover:text-blue-900 mr-2">Edit</button>
                   <button onClick={() => handleDeleteCollaboration(collab._id)} className="text-red-600 hover:text-red-900">Delete</button>
@@ -1090,6 +1094,8 @@ const CollaborationPage = () => {
                           <th className="px-4 py-2 text-left">Country</th>
                           <th className="px-4 py-2 text-left">Type</th>
                           <th className="px-4 py-2 text-left">Status</th>
+                          <th className="px-4 py-2 text-left">Key Outcomes</th>
+                          <th className="px-4 py-2 text-left">Outcome Details</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -1102,11 +1108,13 @@ const CollaborationPage = () => {
                             <td className="px-4 py-2">{row.collaboratingCountry}</td>
                             <td className="px-4 py-2">{row.typeOfCollaboration}</td>
                             <td className="px-4 py-2">{row.currentStatus}</td>
+                            <td className="px-4 py-2">{row.keyOutcomes}</td>
+                            <td className="px-4 py-2 max-w-xs truncate" title={row.detailsOfOutcome}>{row.detailsOfOutcome}</td>
                           </tr>
                         ))}
                         {excelData.length > 10 && (
                           <tr>
-                            <td colSpan="7" className="px-4 py-2 text-center text-gray-600">
+                            <td colSpan="9" className="px-4 py-2 text-center text-gray-600">
                               ... and {excelData.length - 10} more records
                             </td>
                           </tr>
