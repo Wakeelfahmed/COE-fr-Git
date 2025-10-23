@@ -46,6 +46,11 @@ const eventSchema = new mongoose.Schema({
     required: true,
     default: Date.now
   },
+  fileLink: {
+    type: String,
+    required: false,
+    trim: true
+  },
   createdBy: {
     id: {
       type: mongoose.Schema.Types.ObjectId,

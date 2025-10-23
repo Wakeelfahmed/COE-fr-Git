@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useUser } from '../context/UserContext';
-import { storage } from '../firebaseConfig';
-import { ref, uploadBytes, getDownloadURL, deleteObject, getMetadata } from "firebase/storage";
 import AccountFilter from '../components/AccountFilter';
 
 // Try to import xlsx, fallback to CDN if not available
@@ -18,36 +16,35 @@ try {
 axios.defaults.withCredentials = true;
 const API_BASE_URL = process.env.REACT_APP_BACKEND;
 
-const uploadPdf = async (file, userId) => {
+// API-based file upload function
+const uploadFile = async (file) => {
   if (!file) return;
+
   try {
-    const fileRef = ref(storage, `pdfs/${userId}/${file.name}`);
-    await uploadBytes(fileRef, file);
-    const downloadURL = await getDownloadURL(fileRef);
-    console.log("File uploaded successfully. Download URL:", downloadURL);
-    return downloadURL;
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const response = await axios.post(`${API_BASE_URL}/files/upload`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
+
+    console.log('File uploaded successfully:', response.data.file.url);
+    return response.data.file.url;
   } catch (error) {
-    console.error("Error uploading file:", error);
+    console.error('Upload error:', error);
     throw error;
   }
 };
 
-const deletePdf = async (userId, fileName) => {
+// API-based file delete function
+const deleteFile = async (filename) => {
   try {
-    const fileRef = ref(storage, `pdfs/${userId}/${fileName}`);
-    try {
-      await getMetadata(fileRef);
-    } catch (error) {
-      if (error.code === 'storage/object-not-found') {
-        console.log("File doesn't exist, skipping delete operation");
-        return;
-      }
-      throw error;
-    }
-    await deleteObject(fileRef);
-    console.log("File deleted successfully.");
+    await axios.delete(`${API_BASE_URL}/files/${filename}`);
+    console.log('File deleted successfully:', filename);
   } catch (error) {
-    console.error("Error deleting file:", error);
+    console.error('Delete error:', error);
     throw error;
   }
 };
@@ -458,8 +455,13 @@ const FundingProposalsView = () => {
       return;
     }
     try {
-      const fileUrl = await uploadPdf(file, user?.id);
+      console.log('Uploading file to local storage...');
+      const fileUrl = await uploadFile(file);
+      console.log('File URL received:', fileUrl);
+
+      console.log('Updating funding proposal with file URL...');
       await axios.put(`${API_BASE_URL}/funding-proposals/${fundingProposalId}`, { fileLink: fileUrl });
+      console.log('Funding proposal updated successfully');
 
       setFundingProposals(prevFundingProposals =>
         prevFundingProposals.map(fundingProposal =>
@@ -472,22 +474,36 @@ const FundingProposalsView = () => {
         delete newState[fundingProposalId];
         return newState;
       });
+
+      console.log('File upload completed successfully');
     } catch (error) {
-      console.error('Error uploading file:', error);
+      console.error('=== FILE UPLOAD ERROR ===');
+      console.error('Error in handleFileUpload:', error);
+      console.error('Error name:', error.name);
+      console.error('Error message:', error.message);
+      console.error('Error status:', error.response?.status);
+      console.error('Error response data:', error.response?.data);
+      console.error('Error stack:', error.stack);
       alert('Error uploading file. Please try again.');
     }
   };
 
   const handleFileDelete = async (fundingProposalId, fileName) => {
     try {
-      await deletePdf(user?.id, fileName);
+      console.log('Deleting file:', fileName);
+      await deleteFile(fileName);
+      console.log('File deleted from storage');
+
       await axios.put(`${API_BASE_URL}/funding-proposals/${fundingProposalId}`, { fileLink: null });
+      console.log('Funding proposal updated - file link removed');
 
       setFundingProposals(prevFundingProposals =>
         prevFundingProposals.map(fundingProposal =>
           fundingProposal._id === fundingProposalId ? { ...fundingProposal, fileLink: null } : fundingProposal
         )
       );
+
+      console.log('File deletion completed successfully');
     } catch (error) {
       console.error('Error deleting file:', error);
       alert('Error deleting file. Please try again.');

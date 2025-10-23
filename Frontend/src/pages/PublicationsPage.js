@@ -123,11 +123,11 @@ const PublicationsView = () => {
     }
 
     try {
-      console.log('Fetching publications for user:', user.email);
+      // console.log('Fetching publications for user:', user.email);
       const response = await axios.get(`${API_BASE_URL}/publications`, {
         params: { onlyMine: showOnlyMine }
       });
-      console.log('Publications fetched successfully:', response.data.length);
+      // console.log('Publications fetched successfully:', response.data.length);
       setPublications(response.data);
     } catch (error) {
       console.error('Error fetching publications:', error);

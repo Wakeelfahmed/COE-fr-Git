@@ -1,8 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { useUser } from '../context/UserContext';
-import { storage } from '../firebaseConfig';
-import { ref, uploadBytes, getDownloadURL, deleteObject, getMetadata } from "firebase/storage";
 import AccountFilter from '../components/AccountFilter';
 
 // Try to import xlsx, fallback to CDN if not available
@@ -18,36 +16,35 @@ try {
 axios.defaults.withCredentials = true;
 const API_BASE_URL = process.env.REACT_APP_BACKEND;
 
-const uploadPdf = async (file, userId) => {
+// API-based file upload function
+const uploadFile = async (file) => {
   if (!file) return;
+
   try {
-    const fileRef = ref(storage, `pdfs/${userId}/${file.name}`);
-    await uploadBytes(fileRef, file);
-    const downloadURL = await getDownloadURL(fileRef);
-    console.log("File uploaded successfully. Download URL:", downloadURL);
-    return downloadURL;
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const response = await axios.post(`${API_BASE_URL}/files/upload`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
+
+    console.log('File uploaded successfully:', response.data.file.url);
+    return response.data.file.url;
   } catch (error) {
-    console.error("Error uploading file:", error);
+    console.error('Upload error:', error);
     throw error;
   }
 };
 
-const deletePdf = async (userId, fileName) => {
+// API-based file delete function
+const deleteFile = async (filename) => {
   try {
-    const fileRef = ref(storage, `pdfs/${userId}/${fileName}`);
-    try {
-      await getMetadata(fileRef);
-    } catch (error) {
-      if (error.code === 'storage/object-not-found') {
-        console.log("File doesn't exist, skipping delete operation");
-        return;
-      }
-      throw error;
-    }
-    await deleteObject(fileRef);
-    console.log("File deleted successfully.");
+    await axios.delete(`${API_BASE_URL}/files/${filename}`);
+    console.log('File deleted successfully:', filename);
   } catch (error) {
-    console.error("Error deleting file:", error);
+    console.error('Delete error:', error);
     throw error;
   }
 };
@@ -302,6 +299,12 @@ const InternshipView = () => {
     }
   }, [showOnlyMine]);
 
+  const handleCloseExcelModal = () => {
+    setShowExcelModal(false);
+    setExcelFile(null);
+    setExcelData([]);
+  };
+
   useEffect(() => {
     fetchInternships();
   }, [fetchInternships]);
@@ -415,36 +418,55 @@ const InternshipView = () => {
       return;
     }
     try {
-      const fileUrl = await uploadPdf(file, user?.id);
+      console.log('Uploading file to local storage...');
+      const fileUrl = await uploadFile(file);
+      console.log('File URL received:', fileUrl);
+
+      console.log('Updating internship with file URL...');
       await axios.put(`${API_BASE_URL}/internships/${internshipId}`, { fileLink: fileUrl });
-      
-      setInternships(prevInternships => 
-        prevInternships.map(internship => 
+      console.log('Internship updated successfully');
+
+      setInternships(prevInternships =>
+        prevInternships.map(internship =>
           internship._id === internshipId ? { ...internship, fileLink: fileUrl } : internship
         )
       );
-      
+
       setSelectedFiles(prev => {
         const newState = { ...prev };
         delete newState[internshipId];
         return newState;
       });
+
+      console.log('File upload completed successfully');
     } catch (error) {
-      console.error('Error uploading file:', error);
+      console.error('=== FILE UPLOAD ERROR ===');
+      console.error('Error in handleFileUpload:', error);
+      console.error('Error name:', error.name);
+      console.error('Error message:', error.message);
+      console.error('Error status:', error.response?.status);
+      console.error('Error response data:', error.response?.data);
+      console.error('Error stack:', error.stack);
       alert('Error uploading file. Please try again.');
     }
   };
 
   const handleFileDelete = async (internshipId, fileName) => {
     try {
-      await deletePdf(user?.id, fileName);
+      console.log('Deleting file:', fileName);
+      await deleteFile(fileName);
+      console.log('File deleted from storage');
+
       await axios.put(`${API_BASE_URL}/internships/${internshipId}`, { fileLink: null });
-      
-      setInternships(prevInternships => 
-        prevInternships.map(internship => 
+      console.log('Internship updated - file link removed');
+
+      setInternships(prevInternships =>
+        prevInternships.map(internship =>
           internship._id === internshipId ? { ...internship, fileLink: null } : internship
         )
       );
+
+      console.log('File deletion completed successfully');
     } catch (error) {
       console.error('Error deleting file:', error);
       alert('Error deleting file. Please try again.');
@@ -473,8 +495,8 @@ const InternshipView = () => {
             Upload from Excel
           </button>
           {user?.role === 'director' && (
-            <button 
-              onClick={() => setShowOnlyMine(!showOnlyMine)} 
+            <button
+              onClick={() => setShowOnlyMine(!showOnlyMine)}
               className="bg-green-600 text-white px-4 py-2 rounded mr-2"
             >
               {showOnlyMine ? 'All Internships' : 'My Internships'}
@@ -573,12 +595,12 @@ const InternshipView = () => {
                     <div>
                       <a href={internship.fileLink} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-900 mr-2">View File</a>
                       <button onClick={() => handleFileDelete(internship._id, internship.fileLink.split('/').pop())} className="text-red-600 hover:text-red-900 mr-2">Delete</button>
-                      <input 
-                        type="file" 
-                        onChange={(e) => handleFileChange(e, internship._id)} 
-                        accept=".pdf" 
-                        className="hidden" 
-                        id={`fileUpdate-${internship._id}`} 
+                      <input
+                        type="file"
+                        onChange={(e) => handleFileChange(e, internship._id)}
+                        accept=".pdf"
+                        className="hidden"
+                        id={`fileUpdate-${internship._id}`}
                       />
                       <label htmlFor={`fileUpdate-${internship._id}`} className="text-green-600 hover:text-green-900 cursor-pointer">Update</label>
                       {selectedFiles[internship._id] && (
@@ -587,12 +609,12 @@ const InternshipView = () => {
                     </div>
                   ) : (
                     <div>
-                      <input 
-                        type="file" 
-                        onChange={(e) => handleFileChange(e, internship._id)} 
-                        accept=".pdf" 
-                        className="hidden" 
-                        id={`fileUpload-${internship._id}`} 
+                      <input
+                        type="file"
+                        onChange={(e) => handleFileChange(e, internship._id)}
+                        accept=".pdf"
+                        className="hidden"
+                        id={`fileUpload-${internship._id}`}
                       />
                       <label htmlFor={`fileUpload-${internship._id}`} className="text-blue-600 hover:text-blue-900 cursor-pointer mr-2">Select File</label>
                       {selectedFiles[internship._id] && (
@@ -838,22 +860,22 @@ const InternshipView = () => {
                   </button>
                 </div>
                 <p className="text-sm text-gray-600 mt-1">
-                  <strong>Required Excel columns (case-insensitive):</strong><br/>
-                  Year, Duration, Certificate Number, Applicant Name, Official Email, Contact Number, Affiliation, Center Name, Supervisor, Tasks Completed<br/>
-                  <br/>
-                  <strong>Column Details:</strong><br/>
-                  • <strong>Year:</strong> Year of internship (number)<br/>
-                  • <strong>Duration:</strong> Internship duration (e.g., "6 months", "3 months")<br/>
-                  • <strong>Certificate Number:</strong> Certificate ID number<br/>
-                  • <strong>Applicant Name:</strong> Full name of the intern<br/>
-                  • <strong>Official Email:</strong> Email address of the intern<br/>
-                  • <strong>Contact Number:</strong> Phone number of the intern<br/>
-                  • <strong>Affiliation:</strong> University, company, or organization<br/>
-                  • <strong>Center Name:</strong> Name of the center where internship took place<br/>
-                  • <strong>Supervisor:</strong> Name of the supervisor<br/>
-                  • <strong>Tasks Completed:</strong> Description of work completed<br/>
-                  <br/>
-                  <strong>Sample first row:</strong><br/>
+                  <strong>Required Excel columns (case-insensitive):</strong><br />
+                  Year, Duration, Certificate Number, Applicant Name, Official Email, Contact Number, Affiliation, Center Name, Supervisor, Tasks Completed<br />
+                  <br />
+                  <strong>Column Details:</strong><br />
+                  • <strong>Year:</strong> Year of internship (number)<br />
+                  • <strong>Duration:</strong> Internship duration (e.g., "6 months", "3 months")<br />
+                  • <strong>Certificate Number:</strong> Certificate ID number<br />
+                  • <strong>Applicant Name:</strong> Full name of the intern<br />
+                  • <strong>Official Email:</strong> Email address of the intern<br />
+                  • <strong>Contact Number:</strong> Phone number of the intern<br />
+                  • <strong>Affiliation:</strong> University, company, or organization<br />
+                  • <strong>Center Name:</strong> Name of the center where internship took place<br />
+                  • <strong>Supervisor:</strong> Name of the supervisor<br />
+                  • <strong>Tasks Completed:</strong> Description of work completed<br />
+                  <br />
+                  <strong>Sample first row:</strong><br />
                   Year: 2024, Duration: 6 months, Certificate Number: CERT-2024-001, Applicant Name: John Doe, Official Email: john.doe@university.edu, Contact Number: +1-234-567-8900, Affiliation: University of Technology, Center Name: AI Research Center, Supervisor: Dr. Sarah Johnson, Tasks Completed: Developed machine learning models for data analysis
                 </p>
               </div>

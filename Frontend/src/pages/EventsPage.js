@@ -17,6 +17,39 @@ try {
 axios.defaults.withCredentials = true;
 const API_BASE_URL = process.env.REACT_APP_BACKEND;
 
+// API-based file upload function
+const uploadFile = async (file) => {
+  if (!file) return;
+
+  try {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const response = await axios.post(`${API_BASE_URL}/files/upload`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
+
+    console.log('File uploaded successfully:', response.data.file.url);
+    return response.data.file.url;
+  } catch (error) {
+    console.error('Upload error:', error);
+    throw error;
+  }
+};
+
+// API-based file delete function
+const deleteFile = async (filename) => {
+  try {
+    await axios.delete(`${API_BASE_URL}/files/${filename}`);
+    console.log('File deleted successfully:', filename);
+  } catch (error) {
+    console.error('Delete error:', error);
+    throw error;
+  }
+};
+
 const EventsPage = () => {
   const [events, setEvents] = useState([]);
   const [showModal, setShowModal] = useState(false);
@@ -30,7 +63,8 @@ const EventsPage = () => {
     type: '',
     participantsOfEvent: '',
     nameOfAttendee: '',
-    date: ''
+    date: '',
+    fileLink: ''
   });
   const [isEditMode, setIsEditMode] = useState(false);
   const [filterCriteria, setFilterCriteria] = useState({
@@ -53,6 +87,7 @@ const EventsPage = () => {
   const [excelFile, setExcelFile] = useState(null);
   const [excelData, setExcelData] = useState([]);
   const [uploadingExcel, setUploadingExcel] = useState(false);
+  const [selectedFiles, setSelectedFiles] = useState({});
 
   // Helper function to format dates for display (dd-mm-year format)
   const formatDateForDisplay = (dateString) => {
@@ -100,11 +135,11 @@ const EventsPage = () => {
     }
 
     try {
-      console.log('Fetching events for user:', user.email);
+      // console.log('Fetching events for user:', user.email);
       const response = await axios.get(`${API_BASE_URL}/events`, {
         params: { onlyMine: showOnlyMine }
       });
-      console.log('Events fetched successfully:', response.data.length);
+      // console.log('Events fetched successfully:', response.data.length);
       setEvents(response.data);
     } catch (error) {
       console.error('Error fetching events:', error);
@@ -127,7 +162,8 @@ const EventsPage = () => {
       type: '',
       participantsOfEvent: '',
       nameOfAttendee: '',
-      date: ''
+      date: '',
+      fileLink: ''
     });
     setShowModal(true);
   };
@@ -561,6 +597,78 @@ const EventsPage = () => {
     setExcelData([]);
   };
 
+  const handleFileChange = (event, eventId) => {
+    const file = event.target.files[0];
+    if (file && file.type === 'application/pdf') {
+      setSelectedFiles(prev => ({ ...prev, [eventId]: file }));
+    } else {
+      alert('Please select a PDF file');
+      event.target.value = null;
+    }
+  };
+
+  const handleFileUpload = async (eventId) => {
+    const file = selectedFiles[eventId];
+    if (!file) {
+      alert('Please select a file first');
+      return;
+    }
+    try {
+      console.log('Uploading file to local storage...');
+      const fileUrl = await uploadFile(file);
+      console.log('File URL received:', fileUrl);
+
+      console.log('Updating event with file URL...');
+      await axios.put(`${API_BASE_URL}/events/${eventId}`, { fileLink: fileUrl });
+      console.log('Event updated successfully');
+
+      setEvents(prevEvents =>
+        prevEvents.map(event =>
+          event._id === eventId ? { ...event, fileLink: fileUrl } : event
+        )
+      );
+
+      setSelectedFiles(prev => {
+        const newState = { ...prev };
+        delete newState[eventId];
+        return newState;
+      });
+
+      console.log('File upload completed successfully');
+    } catch (error) {
+      console.error('=== FILE UPLOAD ERROR ===');
+      console.error('Error in handleFileUpload:', error);
+      console.error('Error name:', error.name);
+      console.error('Error message:', error.message);
+      console.error('Error status:', error.response?.status);
+      console.error('Error response data:', error.response?.data);
+      console.error('Error stack:', error.stack);
+      alert('Error uploading file. Please try again.');
+    }
+  };
+
+  const handleFileDelete = async (eventId, fileName) => {
+    try {
+      console.log('Deleting file:', fileName);
+      await deleteFile(fileName);
+      console.log('File deleted from storage');
+
+      await axios.put(`${API_BASE_URL}/events/${eventId}`, { fileLink: null });
+      console.log('Event updated - file link removed');
+
+      setEvents(prevEvents =>
+        prevEvents.map(event =>
+          event._id === eventId ? { ...event, fileLink: null } : event
+        )
+      );
+
+      console.log('File deletion completed successfully');
+    } catch (error) {
+      console.error('Error deleting file:', error);
+      alert('Error deleting file. Please try again.');
+    }
+  };
+
   const filteredEvents = events.filter(event => {
     const eventDate = new Date(event.date);
     const fromDate = filterCriteria.dateFrom ? new Date(filterCriteria.dateFrom) : null;
@@ -694,6 +802,7 @@ const EventsPage = () => {
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Participants</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">File</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
             </tr>
           </thead>
@@ -710,6 +819,44 @@ const EventsPage = () => {
                 <td className="px-6 py-4 whitespace-nowrap">{event.type}</td>
                 <td className="px-6 py-4 whitespace-nowrap">{event.participantsOfEvent}</td>
                 <td className="px-6 py-4 whitespace-nowrap">{formatDateForDisplay(event.date)}</td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  {event.fileLink ? (
+                    <div>
+                      <button
+                        onClick={() => window.open(event.fileLink, '_blank', 'noopener,noreferrer')}
+                        className="text-blue-600 hover:text-blue-900 mr-2"
+                      >
+                        View File
+                      </button>
+                      <button onClick={() => handleFileDelete(event._id, event.fileLink.split('/').pop())} className="text-red-600 hover:text-red-900 mr-2">Delete</button>
+                      <input
+                        type="file"
+                        onChange={(e) => handleFileChange(e, event._id)}
+                        accept=".pdf"
+                        className="hidden"
+                        id={`fileUpdate-${event._id}`}
+                      />
+                      <label htmlFor={`fileUpdate-${event._id}`} className="text-green-600 hover:text-green-900 cursor-pointer">Update</label>
+                      {selectedFiles[event._id] && (
+                        <button onClick={() => handleFileUpload(event._id)} className="text-blue-600 hover:text-blue-900 ml-2">Confirm Update</button>
+                      )}
+                    </div>
+                  ) : (
+                    <div>
+                      <input
+                        type="file"
+                        onChange={(e) => handleFileChange(e, event._id)}
+                        accept=".pdf"
+                        className="hidden"
+                        id={`fileUpload-${event._id}`}
+                      />
+                      <label htmlFor={`fileUpload-${event._id}`} className="text-blue-600 hover:text-blue-900 cursor-pointer mr-2">Select File</label>
+                      {selectedFiles[event._id] && (
+                        <button onClick={() => handleFileUpload(event._id)} className="text-green-600 hover:text-green-900">Upload</button>
+                      )}
+                    </div>
+                  )}
+                </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <button onClick={() => handleEditEvent(event)} className="text-blue-600 hover:text-blue-900 mr-2">Edit</button>
                   <button onClick={() => handleDeleteEvent(event._id)} className="text-red-600 hover:text-red-900">Delete</button>
