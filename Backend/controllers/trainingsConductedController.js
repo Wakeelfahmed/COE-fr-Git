@@ -23,18 +23,18 @@ exports.getAllTrainingsConducted = async (req, res) => {
   const user = getUserFromToken(req);
   if (!user) return res.status(401).json({ message: 'Unauthorized' });
 
-  console.log('=== GET ALL TRAININGS CONDUCTED ===');
-  console.log('User ID:', user._id);
-  console.log('User Role:', user.role);
-  console.log('Only Mine:', req.query.onlyMine);
+  // console.log('=== GET ALL TRAININGS CONDUCTED ===');
+  // console.log('User ID:', user._id);
+  // console.log('User Role:', user.role);
+  // console.log('Only Mine:', req.query.onlyMine);
 
   try {
     let trainings;
     if (user.role === 'director' && req.query.onlyMine !== 'true') {
-      console.log('Fetching all trainings conducted (director mode)');
+      // console.log('Fetching all trainings conducted (director mode)');
       trainings = await TrainingsConducted.find();
     } else {
-      console.log('Fetching only user trainings conducted');
+      // console.log('Fetching only user trainings conducted');
       // Handle both old (simple ID) and new (object with id) createdBy structures
       trainings = await TrainingsConducted.find({
         $or: [
@@ -43,8 +43,8 @@ exports.getAllTrainingsConducted = async (req, res) => {
         ]
       });
     }
-    console.log('Trainings conducted found:', trainings.length);
-    console.log('Trainings conducted:', trainings);
+    // console.log('Trainings conducted found:', trainings.length);
+    // console.log('Trainings conducted:', trainings);
     res.json(trainings);
   } catch (error) {
     console.error('Error fetching trainings conducted:', error);
@@ -56,9 +56,9 @@ exports.createTrainingsConducted = async (req, res) => {
   const user = getUserFromToken(req);
   if (!user) return res.status(401).json({ message: 'Unauthorized' });
 
-  console.log('=== CREATING TRAININGS CONDUCTED ===');
-  console.log('Training Data:', req.body);
-  console.log('User ID:', user._id);
+  // console.log('=== CREATING TRAININGS CONDUCTED ===');
+  // console.log('Training Data:', req.body);
+  // console.log('User ID:', user._id);
 
   try {
     // Get full user information including name

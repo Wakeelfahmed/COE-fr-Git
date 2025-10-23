@@ -50,11 +50,6 @@ exports.createCollaboration = async (req, res) => {
 exports.getAllCollaborations = async (req, res) => {
   const user = getUserFromToken(req);
   if (!user) return res.status(401).json({ message: 'Unauthorized' });
-  
-  console.log('=== GET ALL Collaborations ===');
-  console.log('User ID:', user._id);
-  console.log('User Role:', user.role);
-  console.log('Only Mine:', req.query.onlyMine);
 
   try {
     let collaborations;
@@ -69,8 +64,74 @@ exports.getAllCollaborations = async (req, res) => {
         ]
       });
     }
-    console.log('Collaborations found:', collaborations.length);
-    console.log('Collaborations:', collaborations);
+
+    // Apply filters if provided
+    const {
+      memberOfCoE,
+      collaboratingForeignResearcher,
+      collaboratingCountry,
+      currentStatus,
+      collaborationScope,
+      accountFilter,
+      dateFrom,
+      dateTo
+    } = req.query;
+
+    // Apply text filters
+    if (memberOfCoE) {
+      collaborations = collaborations.filter(collab =>
+        (collab.memberOfCoE || '').toLowerCase().includes(memberOfCoE.toLowerCase())
+      );
+    }
+
+    if (collaboratingForeignResearcher) {
+      collaborations = collaborations.filter(collab =>
+        (collab.collaboratingForeignResearcher || '').toLowerCase().includes(collaboratingForeignResearcher.toLowerCase())
+      );
+    }
+
+    if (currentStatus) {
+      collaborations = collaborations.filter(collab =>
+        (collab.currentStatus || '').toLowerCase().includes(currentStatus.toLowerCase())
+      );
+    }
+
+    // Apply scope filter
+    if (collaborationScope) {
+      collaborations = collaborations.filter(collab =>
+        (collab.collaborationScope || 'foreign') === collaborationScope
+      );
+    }
+
+    // Apply country filter (only for foreign collaborations)
+    if (collaboratingCountry) {
+      collaborations = collaborations.filter(collab =>
+        (collab.collaboratingCountry || '').toLowerCase().includes(collaboratingCountry.toLowerCase())
+      );
+    }
+
+    // Apply account filter (director only)
+    if (accountFilter && user.role === 'director') {
+      collaborations = collaborations.filter(collab =>
+        collab.createdBy?.id === accountFilter
+      );
+    }
+
+    // Apply date filters
+    if (dateFrom || dateTo) {
+      collaborations = collaborations.filter(collab => {
+        const collabDate = collab.durationStart ? new Date(collab.durationStart) : null;
+        if (!collabDate) return false;
+
+        const fromDate = dateFrom ? new Date(dateFrom) : null;
+        const toDate = dateTo ? new Date(dateTo) : null;
+
+        if (fromDate && collabDate < fromDate) return false;
+        if (toDate && collabDate > toDate) return false;
+
+        return true;
+      });
+    }
 
     res.json(collaborations);
   } catch (error) {

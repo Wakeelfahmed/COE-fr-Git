@@ -148,10 +148,10 @@ const EventsPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('=== EVENT SUBMIT DEBUG ===');
-    console.log('Is Edit Mode:', isEditMode);
-    console.log('Event Data:', currentEvent);
-    console.log('API URL:', `${API_BASE_URL}/events${isEditMode ? '/' + currentEvent._id : ''}`);
+    // console.log('=== EVENT SUBMIT DEBUG ===');
+    // console.log('Is Edit Mode:', isEditMode);
+    // console.log('Event Data:', currentEvent);
+    // console.log('API URL:', `${API_BASE_URL}/events${isEditMode ? '/' + currentEvent._id : ''}`);
 
     try {
       let response;

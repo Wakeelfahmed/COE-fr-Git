@@ -56,9 +56,9 @@ exports.signup = async (req, res) => {
 
 exports.login = async (req, res) => {
   try {
-    console.log('=== BACKEND LOGIN DEBUG ===');
-    console.log('Login attempt for email:', req.body.email);
-    console.log('JWT_SECRET available:', !!process.env.JWT_SECRET);
+    // console.log('=== BACKEND LOGIN DEBUG ===');
+    // console.log('Login attempt for email:', req.body.email);
+    // console.log('JWT_SECRET available:', !!process.env.JWT_SECRET);
 
     const { email, password } = req.body;
     let user = await User.findOne({ email });
@@ -74,9 +74,9 @@ exports.login = async (req, res) => {
       return res.status(401).send({ error: 'Invalid login credentials' });
     }
 
-    console.log('User found:', user.email, 'with role:', user.role);
+    // console.log('User found:', user.email, 'with role:', user.role);
     const token = jwt.sign({ _id: user._id, role:user.role  }, process.env.JWT_SECRET);
-    console.log('JWT token created successfully');
+    // console.log('JWT token created successfully');
 
     // Set the token as an HTTP-only cookie
     res.cookie('token', token, {
@@ -118,7 +118,7 @@ exports.checkAuth = async (req, res) => {
 // Sync Firebase user with backend database
 exports.syncFirebaseUser = async (req, res) => {
   try {
-    console.log('=== SYNC FIREBASE USER ===');
+    // console.log('=== SYNC FIREBASE USER ===');
     const { email, uid, displayName } = req.body;
 
     if (!email || !uid) {
@@ -129,7 +129,7 @@ exports.syncFirebaseUser = async (req, res) => {
     let user = await User.findOne({ $or: [{ email }, { uid }] });
 
     if (user) {
-      console.log('User already exists in backend:', user.email);
+      // console.log('User already exists in backend:', user.email);
       const token = jwt.sign({ _id: user._id, role: user.role }, process.env.JWT_SECRET);
 
       res.cookie('token', token, {

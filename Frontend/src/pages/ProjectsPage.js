@@ -21,18 +21,18 @@ const API_BASE_URL = process.env.REACT_APP_BACKEND;
 const uploadPdf = async (file, userId) => {
   if (!file) return;
 
-  console.log('=== UPLOAD PDF DEBUG ===');
-  console.log('File:', file);
-  console.log('File name:', file.name);
-  console.log('File size:', file.size);
-  console.log('File type:', file.type);
-  console.log('User ID:', userId);
-  console.log('Storage bucket:', storage.app.options.storageBucket);
+  // console.log('=== UPLOAD PDF DEBUG ===');
+  // console.log('File:', file);
+  // console.log('File name:', file.name);
+  // console.log('File size:', file.size);
+  // console.log('File type:', file.type);
+  // console.log('User ID:', userId);
+  // console.log('Storage bucket:', storage.app.options.storageBucket);
 
   try {
     // Create a reference to the file location in storage
     const fileRef = ref(storage, `pdfs/${userId}/${file.name}`);
-    console.log('File reference path:', fileRef.fullPath);
+    // console.log('File reference path:', fileRef.fullPath);
 
     // Upload the file
     console.log('Starting upload...');

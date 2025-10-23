@@ -72,15 +72,15 @@ const TrainingsConductedPage = () => {
   }, [showModal, showReportModal, showExcelModal]);
 
   const fetchTrainings = async () => {
-    console.log('=== FETCHING TRAININGS CONDUCTED ===');
-    console.log('Show Only Mine:', showOnlyMine);
-    console.log('API URL:', `${API_BASE_URL}/trainings-conducted`);
+    // console.log('=== FETCHING TRAININGS CONDUCTED ===');
+    // console.log('Show Only Mine:', showOnlyMine);
+    // console.log('API URL:', `${API_BASE_URL}/trainings-conducted`);
     try {
       const response = await axios.get(`${API_BASE_URL}/trainings-conducted`, {
         params: { onlyMine: showOnlyMine }
       });
-      console.log('Trainings conducted fetched:', response.data.length, 'records');
-      console.log('Trainings conducted data:', response.data);
+      // console.log('Trainings conducted fetched:', response.data.length, 'records');
+      // console.log('Trainings conducted data:', response.data);
       setTrainings(response.data);
     } catch (error) {
       console.error('=== ERROR FETCHING TRAININGS CONDUCTED ===');
@@ -134,10 +134,10 @@ const TrainingsConductedPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('=== TRAINING CONDUCTED SUBMIT DEBUG ===');
-    console.log('Is Edit Mode:', isEditMode);
-    console.log('Training Data:', currentTraining);
-    console.log('API URL:', `${API_BASE_URL}/trainings-conducted${isEditMode ? '/' + currentTraining._id : ''}`);
+    // console.log('=== TRAINING CONDUCTED SUBMIT DEBUG ===');
+    // console.log('Is Edit Mode:', isEditMode);
+    // console.log('Training Data:', currentTraining);
+    // console.log('API URL:', `${API_BASE_URL}/trainings-conducted${isEditMode ? '/' + currentTraining._id : ''}`);
 
     try {
       let response;

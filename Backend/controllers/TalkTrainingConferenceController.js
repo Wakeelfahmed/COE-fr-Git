@@ -23,18 +23,18 @@ exports.getAllEvents = async (req, res) => {
   const user = getUserFromToken(req);
   if (!user) return res.status(401).json({ message: 'Unauthorized' });
 
-  console.log('=== GET ALL TALK/TRAINING/CONFERENCE ===');
-  console.log('User ID:', user._id);
-  console.log('User Role:', user.role);
-  console.log('Only Mine:', req.query.onlyMine);
+  // console.log('=== GET ALL TALK/TRAINING/CONFERENCE ===');
+  // console.log('User ID:', user._id);
+  // console.log('User Role:', user.role);
+  // console.log('Only Mine:', req.query.onlyMine);
 
   try {
     let events;
     if (user.role === 'director' && req.query.onlyMine !== 'true') {
-      console.log('Fetching all events (director mode)');
+      // console.log('Fetching all events (director mode)');
       events = await TalkTrainingConference.find();
     } else {
-      console.log('Fetching only user events');
+      // console.log('Fetching only user events');
       // Handle both old (simple ID) and new (object with id) createdBy structures
       events = await TalkTrainingConference.find({
         $or: [
@@ -43,8 +43,8 @@ exports.getAllEvents = async (req, res) => {
         ]
       });
     }
-    console.log('Events found:', events.length);
-    console.log('Events:', events);
+    // console.log('Events found:', events.length);
+    // console.log('Events:', events);
     res.json(events);
   } catch (error) {
     console.error('Error fetching events:', error);

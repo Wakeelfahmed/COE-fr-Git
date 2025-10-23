@@ -214,7 +214,9 @@ const CollaborationPage = () => {
     collaboratingCountry: '', // Changed from 'country'
     currentStatus: '', // Changed from 'status'
     collaborationScope: '',
-    accountFilter: '' // Add account filter
+    accountFilter: '', // Add account filter
+    dateFrom: '',
+    dateTo: ''
   });
 
   const [showExcelModal, setShowExcelModal] = useState(false);
@@ -224,7 +226,7 @@ const CollaborationPage = () => {
 
   useEffect(() => {
     fetchCollaborations();
-  }, [showOnlyMine]);
+  }, [showOnlyMine, filterCriteria]);
 
   useEffect(() => {
     fetchAccounts();
@@ -246,9 +248,19 @@ const CollaborationPage = () => {
   }, [showModal, showReportModal, showExcelModal]);
   const fetchCollaborations = async () => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/collaborations`, {
-        params: { onlyMine: showOnlyMine }
-      });
+      const params = { onlyMine: showOnlyMine };
+
+      // Add filter parameters if they have values
+      if (filterCriteria.memberOfCoE) params.memberOfCoE = filterCriteria.memberOfCoE;
+      if (filterCriteria.collaboratingForeignResearcher) params.collaboratingForeignResearcher = filterCriteria.collaboratingForeignResearcher;
+      if (filterCriteria.collaboratingCountry) params.collaboratingCountry = filterCriteria.collaboratingCountry;
+      if (filterCriteria.currentStatus) params.currentStatus = filterCriteria.currentStatus;
+      if (filterCriteria.collaborationScope) params.collaborationScope = filterCriteria.collaborationScope;
+      if (filterCriteria.accountFilter) params.accountFilter = filterCriteria.accountFilter;
+      if (filterCriteria.dateFrom) params.dateFrom = filterCriteria.dateFrom;
+      if (filterCriteria.dateTo) params.dateTo = filterCriteria.dateTo;
+
+      const response = await axios.get(`${API_BASE_URL}/collaborations`, { params });
       setCollaborations(response.data);
     } catch (error) {
       console.error('Error fetching collaborations:', error);
@@ -366,7 +378,9 @@ const CollaborationPage = () => {
       collaboratingCountry: '',
       currentStatus: '',
       collaborationScope: '',
-      accountFilter: ''
+      accountFilter: '',
+      dateFrom: '',
+      dateTo: ''
     });
   };
 
@@ -588,38 +602,7 @@ const CollaborationPage = () => {
     setExcelData([]);
   };
 
-  const filteredCollaborations = collaborations.filter(collab => {
-    // Text filters
-    const passTextFilters =
-      (collab.memberOfCoE || '').toLowerCase().includes((filterCriteria.memberOfCoE || '').toLowerCase()) &&
-      (collab.collaboratingForeignResearcher || '').toLowerCase().includes((filterCriteria.collaboratingForeignResearcher || '').toLowerCase()) &&
-      (collab.currentStatus || '').toLowerCase().includes((filterCriteria.currentStatus || '').toLowerCase());
-
-    // Scope filter
-    const passScopeFilter = filterCriteria.collaborationScope === '' ||
-      (collab.collaborationScope || 'foreign') === filterCriteria.collaborationScope;
-
-    // Country filter - only apply when scope is foreign
-    const passCountryFilter = filterCriteria.collaborationScope !== 'foreign' ||
-      filterCriteria.collaboratingCountry === '' ||
-      (collab.collaboratingCountry || '').toLowerCase().includes((filterCriteria.collaboratingCountry || '').toLowerCase());
-
-    // Account filter - filter by creator
-    const passAccountFilter = filterCriteria.accountFilter === '' ||
-      (collab.createdBy?.id === filterCriteria.accountFilter);
-
-    // Date filters (handle undefined dates safely)
-    const hasFrom = !!filterCriteria.dateFrom;
-    const hasTo = !!filterCriteria.dateTo;
-    const collabDate = collab.durationStart ? new Date(collab.durationStart) : null;
-    const fromDate = hasFrom ? new Date(filterCriteria.dateFrom) : null;
-    const toDate = hasTo ? new Date(filterCriteria.dateTo) : null;
-
-    const passFrom = !hasFrom || (collabDate && collabDate >= fromDate);
-    const passTo = !hasTo || (collabDate && collabDate <= toDate);
-
-    return passTextFilters && passScopeFilter && passCountryFilter && passAccountFilter && passFrom && passTo;
-  });
+  const filteredCollaborations = collaborations;
 
   return (
     <div className="p-6">
@@ -665,6 +648,27 @@ const CollaborationPage = () => {
               onChange={handleFilterChange}
               className="border rounded px-2 py-1"
             />
+            <select
+              name="collaborationScope"
+              value={filterCriteria.collaborationScope}
+              onChange={handleFilterChange}
+              className="border rounded px-2 py-1"
+            >
+              <option value="">All Scopes</option>
+              <option value="local">Local</option>
+              <option value="foreign">Foreign</option>
+            </select>
+            <Select
+              name="collaboratingCountry"
+              value={countries.find(c => c.value === filterCriteria.collaboratingCountry)}
+              onChange={(selectedOption) => handleFilterChange({ target: { name: 'collaboratingCountry', value: selectedOption ? selectedOption.value : '' } })}
+              options={countries}
+              isSearchable={true}
+              placeholder="All Countries"
+              className="react-select-container"
+              classNamePrefix="react-select"
+              isClearable
+            />
             <input
               type="text"
               placeholder="Filter by Status"
@@ -679,6 +683,24 @@ const CollaborationPage = () => {
                 onChange={handleFilterChange}
               />
             )}
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 mb-2">
+            <input
+              type="date"
+              placeholder="From Date"
+              name="dateFrom"
+              value={filterCriteria.dateFrom}
+              onChange={handleFilterChange}
+              className="border rounded px-2 py-1"
+            />
+            <input
+              type="date"
+              placeholder="To Date"
+              name="dateTo"
+              value={filterCriteria.dateTo}
+              onChange={handleFilterChange}
+              className="border rounded px-2 py-1"
+            />
           </div>
           <button onClick={clearFilters} className="bg-gray-300 text-gray-700 px-4 py-2 rounded">
             Clear Filters

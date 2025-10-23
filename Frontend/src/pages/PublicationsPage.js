@@ -182,10 +182,10 @@ const PublicationsView = () => {
       lastKnownImpactFactor: parseFloat(currentPublication.lastKnownImpactFactor)
     };
 
-    console.log('=== PUBLICATION SUBMIT DEBUG ===');
-    console.log('Is Edit Mode:', isEditMode);
-    console.log('Publication Data:', publicationData);
-    console.log('API URL:', `${API_BASE_URL}/publications${isEditMode ? '/' + currentPublication._id : ''}`);
+    // console.log('=== PUBLICATION SUBMIT DEBUG ===');
+    // console.log('Is Edit Mode:', isEditMode);
+    // console.log('Publication Data:', publicationData);
+    // console.log('API URL:', `${API_BASE_URL}/publications${isEditMode ? '/' + currentPublication._id : ''}`);
 
     try {
       let response;

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Route, Routes, Navigate, useLocation } from 'react-router-dom';
 import Header from './components/Header';
 import Sidebar from './components/Sidebar';
+import Loading from './components/Loading';
 import Login from './components/Login';
 import Signup from './components/Signup';
 import Profile from './components/Profile';
@@ -21,7 +22,7 @@ import CompetitionsPage from './pages/CompetitionsPage';
 import AccountReportsPage from './pages/AccountReportsPage';
 import AnalyticsPage from './pages/AnalyticsPage';
 import { UserProvider, useUser } from './context/UserContext';
-import Loading from './components/Loading';
+import AuthRedirect from './authRedirect';
 
 function TitleManager() {
   const location = useLocation();
@@ -59,20 +60,25 @@ function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [authChecked, setAuthChecked] = useState(false);
   const { user, setUser } = useUser();
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
 
+  const handleAuthChecked = () => {
+    setAuthChecked(true);
+  };
+
   return (
     <Router>
       <TitleManager />
-      {/* Removed AuthRedirect - authentication is handled in Login component */}
+      <AuthRedirect onAuthChecked={handleAuthChecked} />
       <div className="flex h-screen bg-gray-100">
         {loading ? (
           <Loading />
-        ) : user ? (
+        ) : authChecked && user ? (
           <>
             <Sidebar isOpen={isSidebarOpen} />
             <div className="flex-1 flex flex-col min-w-0">
@@ -100,12 +106,14 @@ function App() {
               </main>
             </div>
           </>
-        ) : (
+        ) : authChecked ? (
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="*" element={<Navigate to="/login" replace />} />
           </Routes>
+        ) : (
+          <Loading />
         )}
       </div>
     </Router>

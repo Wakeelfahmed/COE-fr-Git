@@ -23,18 +23,18 @@ exports.getAllPublications = async (req, res) => {
   const user = getUserFromToken(req);
   if (!user) return res.status(401).json({ message: 'Unauthorized' });
 
-  console.log('=== GET ALL PUBLICATIONS ===');
-  console.log('User ID:', user._id);
-  console.log('User Role:', user.role);
-  console.log('Only Mine:', req.query.onlyMine);
+  // console.log('=== GET ALL PUBLICATIONS ===');
+  // console.log('User ID:', user._id);
+  // console.log('User Role:', user.role);
+  // console.log('Only Mine:', req.query.onlyMine);
 
   try {
     let publications;
     if (user.role === 'director' && req.query.onlyMine !== 'true') {
-      console.log('Fetching all publications (director mode)');
+      // console.log('Fetching all publications (director mode)');
       publications = await Publication.find();
     } else {
-      console.log('Fetching only user publications');
+      // console.log('Fetching only user publications');
       // Handle both old (simple ID) and new (object with id) createdBy structures
       publications = await Publication.find({
         $or: [
@@ -43,8 +43,8 @@ exports.getAllPublications = async (req, res) => {
         ]
       });
     }
-    console.log('Publications found:', publications.length);
-    console.log('Publications:', publications);
+    // console.log('Publications found:', publications.length);
+    // console.log('Publications:', publications);
     res.json(publications);
   } catch (error) {
     console.error('Error fetching publications:', error);
