@@ -5,6 +5,16 @@ import { storage } from '../firebaseConfig';
 import { ref, uploadBytes, getDownloadURL, deleteObject, getMetadata } from "firebase/storage";
 import AccountFilter from '../components/AccountFilter';
 
+// Try to import xlsx, fallback to CDN if not available
+let XLSX;
+try {
+  XLSX = require('xlsx');
+} catch (e) {
+  // Fallback: use CDN version
+  console.warn('xlsx library not installed. Please run: npm install xlsx');
+  console.warn('Or ensure the CDN version is loaded in your HTML');
+}
+
 axios.defaults.withCredentials = true;
 const API_BASE_URL = process.env.REACT_APP_BACKEND;
 
@@ -80,6 +90,11 @@ const PatentsView = () => {
   const [showReportModal, setShowReportModal] = useState(false);
   const [reportTitle, setReportTitle] = useState('');
 
+  const [showExcelModal, setShowExcelModal] = useState(false);
+  const [excelFile, setExcelFile] = useState(null);
+  const [excelData, setExcelData] = useState([]);
+  const [uploadingExcel, setUploadingExcel] = useState(false);
+
   const handleGenerateReport = () => {
     setShowReportModal(true);
   };
@@ -99,6 +114,196 @@ const PatentsView = () => {
       console.error('Error saving report:', error);
       // Optionally, show an error message to the user
     }
+  };
+
+  const handleExcelFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file && (file.type.includes('excel') || file.type.includes('spreadsheet') || file.name.endsWith('.xlsx') || file.name.endsWith('.xls'))) {
+      setExcelFile(file);
+    } else {
+      alert('Please select an Excel file (.xlsx or .xls)');
+      e.target.value = null;
+    }
+  };
+
+  const parseExcelFile = (file) => {
+    return new Promise((resolve, reject) => {
+      if (!XLSX) {
+        reject(new Error('XLSX library not available. Please install xlsx package: npm install xlsx'));
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const data = new Uint8Array(e.target.result);
+          const workbook = XLSX.read(data, { type: 'array' });
+          const sheetName = workbook.SheetNames[0];
+          const worksheet = workbook.Sheets[sheetName];
+          const jsonData = XLSX.utils.sheet_to_json(worksheet);
+
+          // Map Excel columns to database fields
+          const mappedData = jsonData.map((row, index) => {
+            const mappedRow = {
+              title: row['Title'] || row['title'] || '',
+              inventor: row['Inventor'] || row['inventor'] || '',
+              coInventor: row['Co-Inventor'] || row['coInventor'] || '',
+              patentOrg: row['Patent Org'] || row['patentOrg'] || '',
+              affiliationOfCoInventor: row['Co-Inventor Affiliation'] || row['affiliationOfCoInventor'] || '',
+              dateOfSubmission: row['Date of Submission'] || row['dateOfSubmission'] || '',
+              scope: row['Scope'] || row['scope'] || '',
+              directoryNumber: row['Directory Number'] || row['directoryNumber'] || '',
+              patentNumber: row['Patent Number'] || row['patentNumber'] || '',
+              dateOfApproval: row['Date of Approval'] || row['dateOfApproval'] || '',
+              targetSDG: [],
+              fileLink: ''
+            };
+
+            // Handle Target SDG parsing (could be comma-separated or multiple columns)
+            if (row['Target SDG'] || row['targetSDG'] || row['TargetSDG']) {
+              const sdgValue = row['Target SDG'] || row['targetSDG'] || row['TargetSDG'];
+              if (typeof sdgValue === 'string' && sdgValue.includes(',')) {
+                mappedRow.targetSDG = sdgValue.split(',').map(sdg => sdg.trim());
+              } else {
+                mappedRow.targetSDG = [sdgValue];
+              }
+            }
+
+            // Validate required fields
+            if (!mappedRow.title || !mappedRow.inventor) {
+              console.warn(`Row ${index + 1} missing required fields:`, row);
+            }
+
+            return mappedRow;
+          });
+
+          resolve(mappedData);
+        } catch (error) {
+          reject(error);
+        }
+      };
+      reader.onerror = () => reject(new Error('Failed to read file'));
+      reader.readAsArrayBuffer(file);
+    });
+  };
+
+  const handleExcelPreview = async () => {
+    if (!excelFile) {
+      alert('Please select an Excel file first');
+      return;
+    }
+
+    try {
+      const parsedData = await parseExcelFile(excelFile);
+      setExcelData(parsedData);
+    } catch (error) {
+      console.error('Error parsing Excel file:', error);
+      alert('Error parsing Excel file. Please make sure the file format is correct.');
+    }
+  };
+
+  const handleExcelUpload = async () => {
+    if (excelData.length === 0) {
+      alert('No data to upload. Please preview the Excel file first.');
+      return;
+    }
+
+    setUploadingExcel(true);
+    try {
+      let successCount = 0;
+      let errorCount = 0;
+      const errors = [];
+
+      for (let i = 0; i < excelData.length; i++) {
+        const row = excelData[i];
+
+        // Skip rows with missing required fields
+        if (!row.title || !row.inventor) {
+          errorCount++;
+          errors.push(`Row ${i + 1}: Missing required fields (Title or Inventor)`);
+          continue;
+        }
+
+        try {
+          await axios.post(`${API_BASE_URL}/patents`, row);
+          successCount++;
+        } catch (error) {
+          errorCount++;
+          errors.push(`Row ${i + 1}: ${error.response?.data?.error || error.message}`);
+        }
+      }
+
+      // Show results
+      let message = `Upload completed!\nSuccessful: ${successCount}\nFailed: ${errorCount}`;
+      if (errors.length > 0) {
+        message += `\n\nErrors:\n${errors.slice(0, 10).join('\n')}`;
+        if (errors.length > 10) {
+          message += `\n... and ${errors.length - 10} more errors`;
+        }
+      }
+
+      alert(message);
+      setShowExcelModal(false);
+      setExcelFile(null);
+      setExcelData([]);
+      fetchPatents(); // Refresh the data
+    } catch (error) {
+      console.error('Error uploading Excel data:', error);
+      alert('Error uploading data. Please try again.');
+    } finally {
+      setUploadingExcel(false);
+    }
+  };
+
+  const downloadSampleExcel = () => {
+    if (!XLSX) {
+      alert('XLSX library not available. Please install xlsx package first: npm install xlsx');
+      return;
+    }
+
+    // Create sample data
+    const sampleData = [
+      {
+        'Title': 'AI-Powered Medical Diagnostic System',
+        'Inventor': 'Dr. Sarah Johnson',
+        'Co-Inventor': 'Dr. Ahmed Hassan, Prof. Maria Rodriguez',
+        'Patent Org': 'Pakistan Patent Office',
+        'Co-Inventor Affiliation': 'MIT AI Lab, University of Barcelona',
+        'Date of Submission': '2024-01-15',
+        'Scope': 'International',
+        'Directory Number': 'AI/ML/2024/001',
+        'Patent Number': 'PK-2024-001',
+        'Date of Approval': '2024-06-15',
+        'Target SDG': 'SDG 3, SDG 9'
+      },
+      {
+        'Title': 'Smart Agriculture Monitoring Device',
+        'Inventor': 'Prof. Michael Chen',
+        'Co-Inventor': 'Dr. Fatima Khan',
+        'Patent Org': 'Pakistan Patent Office',
+        'Co-Inventor Affiliation': 'AgriTech Solutions',
+        'Date of Submission': '2024-02-01',
+        'Scope': 'National',
+        'Directory Number': 'IOT/2024/002',
+        'Patent Number': 'PK-2024-002',
+        'Date of Approval': '2024-07-01',
+        'Target SDG': 'SDG 2, SDG 12'
+      }
+    ];
+
+    // Create workbook and worksheet
+    const ws = XLSX.utils.json_to_sheet(sampleData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Patents');
+
+    // Generate and download file
+    XLSX.writeFile(wb, 'sample_patents.xlsx');
+  };
+
+  const handleCloseExcelModal = () => {
+    setShowExcelModal(false);
+    setExcelFile(null);
+    setExcelData([]);
   };
 
   // Helper function to format dates for display (dd-mm-year format)
@@ -128,14 +333,16 @@ const PatentsView = () => {
     const handleKeyDown = (e) => {
       if (e.key === 'Escape' && showModal) {
         setShowModal(false);
-   } else if ((e.key === '~' || e.key === '`') && e.shiftKey && !showModal && !showReportModal) 
+   } else if ((e.key === '~' || e.key === '`') && e.shiftKey && !showModal && !showReportModal && !showExcelModal) 
 {        handleNewPatent();
+      } else if (e.key === 'E' && e.ctrlKey && !showModal && !showReportModal && !showExcelModal) {
+        setShowExcelModal(true);
       }
     };
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [showModal, showReportModal]);
+  }, [showModal, showReportModal, showExcelModal]);
 
   const fetchPatents = async () => {
     if (!user) {
@@ -333,6 +540,9 @@ const PatentsView = () => {
         <div>
           <button onClick={handleNewPatent} className="bg-blue-600 text-white px-4 py-2 rounded mr-2">
             New Patent
+          </button>
+          <button onClick={() => setShowExcelModal(true)} className="bg-green-600 text-white px-4 py-2 rounded mr-2">
+            Upload from Excel
           </button>
           {user?.role === 'director' && (
             <button 
@@ -724,10 +934,141 @@ const PatentsView = () => {
         </div>
       )}
 
+      {showExcelModal && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full">
+          <div className="relative top-20 mx-auto p-5 border w-11/12 max-w-6xl shadow-lg rounded-md bg-white">
+            <h3 className="text-lg font-medium leading-6 text-gray-900 mb-4">
+              Upload Patents from Excel
+            </h3>
 
+            <div className="mb-4">
+              <div className="mb-4">
+                <label className="block text-gray-700 text-sm font-bold mb-2">
+                  Select Excel File (.xlsx, .xls)
+                </label>
+                <input
+                  type="file"
+                  accept=".xlsx,.xls"
+                  onChange={handleExcelFileChange}
+                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                />
+                <div className="mt-2 flex gap-2">
+                  <button
+                    type="button"
+                    onClick={downloadSampleExcel}
+                    className="bg-purple-500 text-white px-3 py-1 rounded text-sm hover:bg-purple-600"
+                  >
+                    📥 Download Sample Excel
+                  </button>
+                </div>
+                <p className="text-sm text-gray-600 mt-1">
+                  <strong>Required Excel columns (case-insensitive):</strong><br/>
+                  Title, Inventor, Co-Inventor, Patent Org, Date of Submission, Scope<br/>
+                  <br/>
+                  <strong>Column Details:</strong><br/>
+                  • <strong>Title:</strong> Patent title/name<br/>
+                  • <strong>Inventor:</strong> Primary inventor name<br/>
+                  • <strong>Co-Inventor:</strong> Co-inventors (comma-separated)<br/>
+                  • <strong>Patent Org:</strong> Patent organization/office<br/>
+                  • <strong>Co-Inventor Affiliation:</strong> Affiliation of co-inventors<br/>
+                  • <strong>Date of Submission:</strong> Patent submission date<br/>
+                  • <strong>Scope:</strong> National or International<br/>
+                  • <strong>Directory Number:</strong> Internal directory number<br/>
+                  • <strong>Patent Number:</strong> Official patent number (if approved)<br/>
+                  • <strong>Date of Approval:</strong> Approval date (if applicable)<br/>
+                  • <strong>Target SDG:</strong> UN Sustainable Development Goals (comma-separated)<br/>
+                  <br/>
+                  <strong>Sample first row:</strong><br/>
+                  Title: AI-Powered Medical Diagnostic System, Inventor: Dr. Sarah Johnson, Co-Inventor: Dr. Ahmed Hassan, Prof. Maria Rodriguez, Patent Org: Pakistan Patent Office, Co-Inventor Affiliation: MIT AI Lab, University of Barcelona, Date of Submission: 2024-01-15, Scope: International, Directory Number: AI/ML/2024/001, Patent Number: PK-2024-001, Date of Approval: 2024-06-15, Target SDG: SDG 3, SDG 9
+                </p>
+              </div>
 
-      </div>
-    );
-  };
-  
-  export default PatentsView;
+              {excelFile && (
+                <div className="mb-4">
+                  <button
+                    onClick={handleExcelPreview}
+                    className="bg-blue-500 text-white px-4 py-2 rounded mr-2"
+                  >
+                    Preview Data
+                  </button>
+                </div>
+              )}
+
+              {excelData.length > 0 && (
+                <div className="mb-4">
+                  <h4 className="text-md font-medium mb-2">Preview Data ({excelData.length} records)</h4>
+                  <div className="max-h-64 overflow-y-auto border rounded">
+                    <table className="min-w-full bg-white">
+                      <thead className="bg-gray-100">
+                        <tr>
+                          <th className="px-4 py-2 text-left">Title</th>
+                          <th className="px-4 py-2 text-left">Inventor</th>
+                          <th className="px-4 py-2 text-left">Patent Org</th>
+                          <th className="px-4 py-2 text-left">Scope</th>
+                          <th className="px-4 py-2 text-left">Submission Date</th>
+                          <th className="px-4 py-2 text-left">Target SDG</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {excelData.slice(0, 10).map((row, index) => (
+                          <tr key={index} className="border-t">
+                            <td className="px-4 py-2">{row.title}</td>
+                            <td className="px-4 py-2">{row.inventor}</td>
+                            <td className="px-4 py-2">{row.patentOrg}</td>
+                            <td className="px-4 py-2">{row.scope}</td>
+                            <td className="px-4 py-2">{row.dateOfSubmission}</td>
+                            <td className="px-4 py-2">{row.targetSDG.join(', ')}</td>
+                          </tr>
+                        ))}
+                        {excelData.length > 10 && (
+                          <tr>
+                            <td colSpan="6" className="px-4 py-2 text-center text-gray-600">
+                              ... and {excelData.length - 10} more records
+                            </td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  <div className="mt-4 flex justify-between items-center">
+                    <div className="text-sm text-gray-600">
+                      Ready to upload {excelData.length} records
+                    </div>
+                    <div>
+                      <button
+                        onClick={handleExcelUpload}
+                        disabled={uploadingExcel}
+                        className="bg-green-500 text-white px-4 py-2 rounded mr-2 disabled:bg-gray-400"
+                      >
+                        {uploadingExcel ? 'Uploading...' : 'Upload All Records'}
+                      </button>
+                      <button
+                        onClick={handleCloseExcelModal}
+                        className="bg-gray-300 text-gray-700 px-4 py-2 rounded"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="flex items-center justify-end">
+              <button
+                onClick={handleCloseExcelModal}
+                className="bg-gray-300 text-gray-700 px-4 py-2 rounded"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+    </div>
+  );
+};
+
+export default PatentsView;

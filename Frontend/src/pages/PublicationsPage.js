@@ -5,6 +5,16 @@ import { storage } from '../firebaseConfig';
 import { ref, uploadBytes, getDownloadURL, deleteObject, getMetadata } from "firebase/storage";
 import AccountFilter from '../components/AccountFilter';
 
+// Try to import xlsx, fallback to CDN if not available
+let XLSX;
+try {
+  XLSX = require('xlsx');
+} catch (e) {
+  // Fallback: use CDN version
+  console.warn('xlsx library not installed. Please run: npm install xlsx');
+  console.warn('Or ensure the CDN version is loaded in your HTML');
+}
+
 axios.defaults.withCredentials = true;
 const API_BASE_URL = process.env.REACT_APP_BACKEND;
 
@@ -72,6 +82,11 @@ const PublicationsView = () => {
   const [showReportModal, setShowReportModal] = useState(false);
   const [reportTitle, setReportTitle] = useState('');
 
+  const [showExcelModal, setShowExcelModal] = useState(false);
+  const [excelFile, setExcelFile] = useState(null);
+  const [excelData, setExcelData] = useState([]);
+  const [uploadingExcel, setUploadingExcel] = useState(false);
+
   const handleGenerateReport = () => {
     setShowReportModal(true);
   };
@@ -90,14 +105,16 @@ const PublicationsView = () => {
     const handleKeyDown = (e) => {
       if (e.key === 'Escape' && showModal) {
         setShowModal(false);
-   } else if ((e.key === '~' || e.key === '`') && e.shiftKey && !showModal && !showReportModal) 
+   } else if ((e.key === '~' || e.key === '`') && e.shiftKey && !showModal && !showReportModal && !showExcelModal) 
 {        handleNewPublication();
+      } else if (e.key === 'E' && e.ctrlKey && !showModal && !showReportModal && !showExcelModal) {
+        setShowExcelModal(true);
       }
     };
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [showModal, showReportModal]);
+  }, [showModal, showReportModal, showExcelModal]);
 
   const fetchPublications = async () => {
     if (!user) {
@@ -311,6 +328,179 @@ const PublicationsView = () => {
     }
   };
 
+  const handleExcelFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file && (file.type.includes('excel') || file.type.includes('spreadsheet') || file.name.endsWith('.xlsx') || file.name.endsWith('.xls'))) {
+      setExcelFile(file);
+    } else {
+      alert('Please select an Excel file (.xlsx or .xls)');
+      e.target.value = null;
+    }
+  };
+
+  const parseExcelFile = (file) => {
+    return new Promise((resolve, reject) => {
+      if (!XLSX) {
+        reject(new Error('XLSX library not available. Please install xlsx package: npm install xlsx'));
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const data = new Uint8Array(e.target.result);
+          const workbook = XLSX.read(data, { type: 'array' });
+          const sheetName = workbook.SheetNames[0];
+          const worksheet = workbook.Sheets[sheetName];
+          const jsonData = XLSX.utils.sheet_to_json(worksheet);
+
+          // Map Excel columns to database fields
+          const mappedData = jsonData.map((row, index) => {
+            const mappedRow = {
+              author: row['Author'] || row['author'] || '',
+              publicationDetails: row['Publication Details'] || row['publicationDetails'] || '',
+              typeOfPublication: row['Type of Publication'] || row['typeOfPublication'] || '',
+              lastKnownImpactFactor: row['Last Known Impact Factor'] || row['lastKnownImpactFactor'] || '',
+              dateOfPublication: row['Date of Publication'] || row['dateOfPublication'] || '',
+              hecCategory: row['HEC Category'] || row['hecCategory'] || '',
+              fileLink: ''
+            };
+
+            // Validate required fields
+            if (!mappedRow.author || !mappedRow.publicationDetails || !mappedRow.typeOfPublication) {
+              console.warn(`Row ${index + 1} missing required fields:`, row);
+            }
+
+            return mappedRow;
+          });
+
+          resolve(mappedData);
+        } catch (error) {
+          reject(error);
+        }
+      };
+      reader.onerror = () => reject(new Error('Failed to read file'));
+      reader.readAsArrayBuffer(file);
+    });
+  };
+
+  const handleExcelPreview = async () => {
+    if (!excelFile) {
+      alert('Please select an Excel file first');
+      return;
+    }
+
+    try {
+      const parsedData = await parseExcelFile(excelFile);
+      setExcelData(parsedData);
+    } catch (error) {
+      console.error('Error parsing Excel file:', error);
+      alert('Error parsing Excel file. Please make sure the file format is correct.');
+    }
+  };
+
+  const handleExcelUpload = async () => {
+    if (excelData.length === 0) {
+      alert('No data to upload. Please preview the Excel file first.');
+      return;
+    }
+
+    setUploadingExcel(true);
+    try {
+      let successCount = 0;
+      let errorCount = 0;
+      const errors = [];
+
+      for (let i = 0; i < excelData.length; i++) {
+        const row = excelData[i];
+
+        // Skip rows with missing required fields
+        if (!row.author || !row.publicationDetails || !row.typeOfPublication) {
+          errorCount++;
+          errors.push(`Row ${i + 1}: Missing required fields (Author, Publication Details, or Type of Publication)`);
+          continue;
+        }
+
+        try {
+          await axios.post(`${API_BASE_URL}/publications`, row);
+          successCount++;
+        } catch (error) {
+          errorCount++;
+          errors.push(`Row ${i + 1}: ${error.response?.data?.error || error.message}`);
+        }
+      }
+
+      // Show results
+      let message = `Upload completed!\nSuccessful: ${successCount}\nFailed: ${errorCount}`;
+      if (errors.length > 0) {
+        message += `\n\nErrors:\n${errors.slice(0, 10).join('\n')}`;
+        if (errors.length > 10) {
+          message += `\n... and ${errors.length - 10} more errors`;
+        }
+      }
+
+      alert(message);
+      setShowExcelModal(false);
+      setExcelFile(null);
+      setExcelData([]);
+      fetchPublications(); // Refresh the data
+    } catch (error) {
+      console.error('Error uploading Excel data:', error);
+      alert('Error uploading data. Please try again.');
+    } finally {
+      setUploadingExcel(false);
+    }
+  };
+
+  const downloadSampleExcel = () => {
+    if (!XLSX) {
+      alert('XLSX library not available. Please install xlsx package first: npm install xlsx');
+      return;
+    }
+
+    // Create sample data
+    const sampleData = [
+      {
+        'Author': 'Dr. Sarah Johnson',
+        'Publication Details': 'Johnson, S., Hassan, A., & Rodriguez, M. (2024). AI Applications in Healthcare: A Comprehensive Review. Journal of Medical AI, 15(3), 245-267.',
+        'Type of Publication': 'Journal',
+        'Last Known Impact Factor': 3.2,
+        'Date of Publication': '2024-03-15',
+        'HEC Category': 'W'
+      },
+      {
+        'Author': 'Prof. Ahmed Hassan',
+        'Publication Details': 'Hassan, A., Chen, M., & Khan, F. (2024). Machine Learning for Sustainable Agriculture. In Proceedings of the International Conference on AI and Sustainability (pp. 123-135). IEEE.',
+        'Type of Publication': 'Conference',
+        'Last Known Impact Factor': 2.8,
+        'Date of Publication': '2024-02-20',
+        'HEC Category': 'X'
+      },
+      {
+        'Author': 'Dr. Maria Rodriguez',
+        'Publication Details': 'Rodriguez, M., Wilson, R., & Thompson, L. (2024). Deep Learning Models for Natural Language Processing. Nature Machine Intelligence, 6(2), 145-158.',
+        'Type of Publication': 'Journal',
+        'Last Known Impact Factor': 4.5,
+        'Date of Publication': '2024-01-10',
+        'HEC Category': 'W'
+      }
+    ];
+
+    // Create workbook and worksheet
+    const ws = XLSX.utils.json_to_sheet(sampleData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Publications');
+
+    // Generate and download file
+    XLSX.writeFile(wb, 'sample_publications.xlsx');
+  };
+
+  const handleCloseExcelModal = () => {
+    setShowExcelModal(false);
+    setExcelFile(null);
+    setExcelData([]);
+  };
+
   // Helper function to format dates for display (dd-mm-year format)
   const formatDateForDisplay = (dateString) => {
     if (!dateString) return 'N/A';
@@ -331,6 +521,9 @@ const PublicationsView = () => {
         <div>
           <button onClick={handleNewPublication} className="bg-blue-600 text-white px-4 py-2 rounded mr-2">
             New Publication
+          </button>
+          <button onClick={() => setShowExcelModal(true)} className="bg-green-600 text-white px-4 py-2 rounded mr-2">
+            Upload from Excel
           </button>
           {user?.role === 'director' && (
             <button 
@@ -620,9 +813,131 @@ const PublicationsView = () => {
         </div>
       )}
 
+      {showExcelModal && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full">
+          <div className="relative top-20 mx-auto p-5 border w-11/12 max-w-6xl shadow-lg rounded-md bg-white">
+            <h3 className="text-lg font-medium leading-6 text-gray-900 mb-4">
+              Upload Publications from Excel
+            </h3>
 
+            <div className="mb-4">
+              <div className="mb-4">
+                <label className="block text-gray-700 text-sm font-bold mb-2">
+                  Select Excel File (.xlsx, .xls)
+                </label>
+                <input
+                  type="file"
+                  accept=".xlsx,.xls"
+                  onChange={handleExcelFileChange}
+                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                />
+                <div className="mt-2 flex gap-2">
+                  <button
+                    type="button"
+                    onClick={downloadSampleExcel}
+                    className="bg-purple-500 text-white px-3 py-1 rounded text-sm hover:bg-purple-600"
+                  >
+                    📥 Download Sample Excel
+                  </button>
+                </div>
+                <p className="text-sm text-gray-600 mt-1">
+                  <strong>Required Excel columns (case-insensitive):</strong><br/>
+                  Author, Publication Details, Type of Publication, Last Known Impact Factor, Date of Publication, HEC Category<br/>
+                  <br/>
+                  <strong>Column Details:</strong><br/>
+                  • <strong>Author:</strong> Name of the primary author<br/>
+                  • <strong>Publication Details:</strong> Full publication details in APA format<br/>
+                  • <strong>Type of Publication:</strong> Journal or Conference<br/>
+                  • <strong>Last Known Impact Factor:</strong> Impact factor of the journal/conference<br/>
+                  • <strong>Date of Publication:</strong> Publication date<br/>
+                  • <strong>HEC Category:</strong> HEC category (W, X, Y, or Not Available)<br/>
+                  <br/>
+                  <strong>Sample first row:</strong><br/>
+                  Author: Dr. Sarah Johnson, Publication Details: Johnson, S., Hassan, A., & Rodriguez, M. (2024). AI Applications in Healthcare: A Comprehensive Review. Journal of Medical AI, 15(3), 245-267., Type of Publication: Journal, Last Known Impact Factor: 3.2, Date of Publication: 2024-03-15, HEC Category: W
+                </p>
+              </div>
 
+              {excelFile && (
+                <div className="mb-4">
+                  <button
+                    onClick={handleExcelPreview}
+                    className="bg-blue-500 text-white px-4 py-2 rounded mr-2"
+                  >
+                    Preview Data
+                  </button>
+                </div>
+              )}
 
+              {excelData.length > 0 && (
+                <div className="mb-4">
+                  <h4 className="text-md font-medium mb-2">Preview Data ({excelData.length} records)</h4>
+                  <div className="max-h-64 overflow-y-auto border rounded">
+                    <table className="min-w-full bg-white">
+                      <thead className="bg-gray-100">
+                        <tr>
+                          <th className="px-4 py-2 text-left">Author</th>
+                          <th className="px-4 py-2 text-left">Type</th>
+                          <th className="px-4 py-2 text-left">Impact Factor</th>
+                          <th className="px-4 py-2 text-left">Date</th>
+                          <th className="px-4 py-2 text-left">HEC Category</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {excelData.slice(0, 10).map((row, index) => (
+                          <tr key={index} className="border-t">
+                            <td className="px-4 py-2">{row.author}</td>
+                            <td className="px-4 py-2">{row.typeOfPublication}</td>
+                            <td className="px-4 py-2">{row.lastKnownImpactFactor}</td>
+                            <td className="px-4 py-2">{row.dateOfPublication}</td>
+                            <td className="px-4 py-2">{row.hecCategory}</td>
+                          </tr>
+                        ))}
+                        {excelData.length > 10 && (
+                          <tr>
+                            <td colSpan="5" className="px-4 py-2 text-center text-gray-600">
+                              ... and {excelData.length - 10} more records
+                            </td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  <div className="mt-4 flex justify-between items-center">
+                    <div className="text-sm text-gray-600">
+                      Ready to upload {excelData.length} records
+                    </div>
+                    <div>
+                      <button
+                        onClick={handleExcelUpload}
+                        disabled={uploadingExcel}
+                        className="bg-green-500 text-white px-4 py-2 rounded mr-2 disabled:bg-gray-400"
+                      >
+                        {uploadingExcel ? 'Uploading...' : 'Upload All Records'}
+                      </button>
+                      <button
+                        onClick={handleCloseExcelModal}
+                        className="bg-gray-300 text-gray-700 px-4 py-2 rounded"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="flex items-center justify-end">
+              <button
+                onClick={handleCloseExcelModal}
+                className="bg-gray-300 text-gray-700 px-4 py-2 rounded"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );

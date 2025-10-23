@@ -5,6 +5,16 @@ import { FaInfoCircle } from 'react-icons/fa';
 import Select from 'react-select';
 import AccountFilter from '../components/AccountFilter';
 
+// Try to import xlsx, fallback to CDN if not available
+let XLSX;
+try {
+  XLSX = require('xlsx');
+} catch (e) {
+  // Fallback: use CDN version
+  console.warn('xlsx library not installed. Please run: npm install xlsx');
+  console.warn('Or ensure the CDN version is loaded in your HTML');
+}
+
 axios.defaults.withCredentials = true;
 const API_BASE_URL = process.env.REACT_APP_BACKEND;
 
@@ -207,6 +217,11 @@ const CollaborationPage = () => {
     accountFilter: '' // Add account filter
   });
 
+  const [showExcelModal, setShowExcelModal] = useState(false);
+  const [excelFile, setExcelFile] = useState(null);
+  const [excelData, setExcelData] = useState([]);
+  const [uploadingExcel, setUploadingExcel] = useState(false);
+
   useEffect(() => {
     fetchCollaborations();
   }, [showOnlyMine]);
@@ -219,14 +234,16 @@ const CollaborationPage = () => {
     const handleKeyDown = (e) => {
       if (e.key === 'Escape' && showModal) {
         setShowModal(false);
-   } else if ((e.key === '~' || e.key === '`') && e.shiftKey && !showModal && !showReportModal) 
+   } else if ((e.key === '~' || e.key === '`') && e.shiftKey && !showModal && !showReportModal && !showExcelModal) 
 {        handleNewCollaboration();
+      } else if (e.key === 'E' && e.ctrlKey && !showModal && !showReportModal && !showExcelModal) {
+        setShowExcelModal(true);
       }
     };
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [showModal, showReportModal]);
+  }, [showModal, showReportModal, showExcelModal]);
   const fetchCollaborations = async () => {
     try {
       const response = await axios.get(`${API_BASE_URL}/collaborations`, {
@@ -378,6 +395,199 @@ const CollaborationPage = () => {
     }
   };
 
+  const handleExcelFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file && (file.type.includes('excel') || file.type.includes('spreadsheet') || file.name.endsWith('.xlsx') || file.name.endsWith('.xls'))) {
+      setExcelFile(file);
+    } else {
+      alert('Please select an Excel file (.xlsx or .xls)');
+      e.target.value = null;
+    }
+  };
+
+  const parseExcelFile = (file) => {
+    return new Promise((resolve, reject) => {
+      if (!XLSX) {
+        reject(new Error('XLSX library not available. Please install xlsx package: npm install xlsx'));
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const data = new Uint8Array(e.target.result);
+          const workbook = XLSX.read(data, { type: 'array' });
+          const sheetName = workbook.SheetNames[0];
+          const worksheet = workbook.Sheets[sheetName];
+          const jsonData = XLSX.utils.sheet_to_json(worksheet);
+
+          // Map Excel columns to database fields
+          const mappedData = jsonData.map((row, index) => {
+            const mappedRow = {
+              memberOfCoE: row['Member of CoE-AI'] || row['memberOfCoE'] || '',
+              collaboratingForeignResearcher: row['Collaborating Researcher'] || row['collaboratingForeignResearcher'] || '',
+              foreignCollaboratingInstitute: row['Collaborating Institute'] || row['foreignCollaboratingInstitute'] || '',
+              collaboratingCountry: row['Collaborating Country'] || row['collaboratingCountry'] || '',
+              collaborationScope: row['Collaboration Scope'] || row['collaborationScope'] || 'foreign',
+              typeOfCollaboration: row['Type of Collaboration'] || row['typeOfCollaboration'] || '',
+              otherTypeDescription: row['Other Type Description'] || row['otherTypeDescription'] || '',
+              durationStart: row['Duration Start Date'] || row['durationStart'] || '',
+              durationEnd: row['Duration End Date'] || row['durationEnd'] || '',
+              currentStatus: row['Current Status'] || row['currentStatus'] || '',
+              keyOutcomes: row['Key Outcomes'] || row['keyOutcomes'] || '',
+              detailsOfOutcome: row['Details of Outcome'] || row['detailsOfOutcome'] || ''
+            };
+
+            // Validate required fields
+            if (!mappedRow.memberOfCoE || !mappedRow.collaboratingForeignResearcher || !mappedRow.foreignCollaboratingInstitute) {
+              console.warn(`Row ${index + 1} missing required fields:`, row);
+            }
+
+            return mappedRow;
+          });
+
+          resolve(mappedData);
+        } catch (error) {
+          reject(error);
+        }
+      };
+      reader.onerror = () => reject(new Error('Failed to read file'));
+      reader.readAsArrayBuffer(file);
+    });
+  };
+
+  const handleExcelPreview = async () => {
+    if (!excelFile) {
+      alert('Please select an Excel file first');
+      return;
+    }
+
+    try {
+      const parsedData = await parseExcelFile(excelFile);
+      setExcelData(parsedData);
+    } catch (error) {
+      console.error('Error parsing Excel file:', error);
+      alert('Error parsing Excel file. Please make sure the file format is correct.');
+    }
+  };
+
+  const handleExcelUpload = async () => {
+    if (excelData.length === 0) {
+      alert('No data to upload. Please preview the Excel file first.');
+      return;
+    }
+
+    setUploadingExcel(true);
+    try {
+      let successCount = 0;
+      let errorCount = 0;
+      const errors = [];
+
+      for (let i = 0; i < excelData.length; i++) {
+        const row = excelData[i];
+
+        // Skip rows with missing required fields
+        if (!row.memberOfCoE || !row.collaboratingForeignResearcher || !row.foreignCollaboratingInstitute) {
+          errorCount++;
+          errors.push(`Row ${i + 1}: Missing required fields (Member of CoE-AI, Collaborating Researcher, or Collaborating Institute)`);
+          continue;
+        }
+
+        try {
+          await axios.post(`${API_BASE_URL}/collaborations`, row);
+          successCount++;
+        } catch (error) {
+          errorCount++;
+          errors.push(`Row ${i + 1}: ${error.response?.data?.error || error.message}`);
+        }
+      }
+
+      // Show results
+      let message = `Upload completed!\nSuccessful: ${successCount}\nFailed: ${errorCount}`;
+      if (errors.length > 0) {
+        message += `\n\nErrors:\n${errors.slice(0, 10).join('\n')}`;
+        if (errors.length > 10) {
+          message += `\n... and ${errors.length - 10} more errors`;
+        }
+      }
+
+      alert(message);
+      setShowExcelModal(false);
+      setExcelFile(null);
+      setExcelData([]);
+      fetchCollaborations(); // Refresh the data
+    } catch (error) {
+      console.error('Error uploading Excel data:', error);
+      alert('Error uploading data. Please try again.');
+    } finally {
+      setUploadingExcel(false);
+    }
+  };
+
+  const downloadSampleExcel = () => {
+    if (!XLSX) {
+      alert('XLSX library not available. Please install xlsx package first: npm install xlsx');
+      return;
+    }
+
+    // Create sample data
+    const sampleData = [
+      {
+        'Member of CoE-AI': 'Dr. Sarah Johnson',
+        'Collaborating Researcher': 'Prof. Michael Chen',
+        'Collaborating Institute': 'MIT AI Lab',
+        'Collaboration Scope': 'foreign',
+        'Collaborating Country': 'United States',
+        'Type of Collaboration': 'Joint Publication',
+        'Duration Start Date': '2024-01-15',
+        'Duration End Date': '2024-12-15',
+        'Current Status': 'Ongoing',
+        'Key Outcomes': 'Joint research paper on machine learning algorithms',
+        'Details of Outcome': 'Published in Nature AI journal, cited 50+ times'
+      },
+      {
+        'Member of CoE-AI': 'Dr. Ahmed Hassan',
+        'Collaborating Researcher': 'Dr. Maria Rodriguez',
+        'Collaborating Institute': 'University of Barcelona',
+        'Collaboration Scope': 'foreign',
+        'Collaborating Country': 'Spain',
+        'Type of Collaboration': 'Research Grant Proposal',
+        'Duration Start Date': '2024-02-01',
+        'Duration End Date': '2024-08-01',
+        'Current Status': 'Under Review',
+        'Key Outcomes': 'Submitted EU Horizon 2024 grant proposal',
+        'Details of Outcome': 'Proposal for sustainable AI development in agriculture'
+      },
+      {
+        'Member of CoE-AI': 'Dr. Fatima Khan',
+        'Collaborating Researcher': 'Dr. John Smith',
+        'Collaborating Institute': 'Stanford University',
+        'Collaboration Scope': 'foreign',
+        'Collaborating Country': 'United States',
+        'Type of Collaboration': 'Technology Development / Prototype',
+        'Duration Start Date': '2024-03-01',
+        'Duration End Date': '',
+        'Current Status': 'Ongoing',
+        'Key Outcomes': 'Developing AI-powered healthcare diagnostic tool',
+        'Details of Outcome': 'Prototype in development, expected completion Q4 2024'
+      }
+    ];
+
+    // Create workbook and worksheet
+    const ws = XLSX.utils.json_to_sheet(sampleData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Collaborations');
+
+    // Generate and download file
+    XLSX.writeFile(wb, 'sample_collaborations.xlsx');
+  };
+
+  const handleCloseExcelModal = () => {
+    setShowExcelModal(false);
+    setExcelFile(null);
+    setExcelData([]);
+  };
+
   const filteredCollaborations = collaborations.filter(collab => {
     // Text filters
     const passTextFilters =
@@ -418,6 +628,9 @@ const CollaborationPage = () => {
         <div>
           <button onClick={handleNewCollaboration} className="bg-blue-600 text-white px-4 py-2 rounded mr-2">
             New Collaboration
+          </button>
+          <button onClick={() => setShowExcelModal(true)} className="bg-green-600 text-white px-4 py-2 rounded mr-2">
+            Upload from Excel
           </button>
           {user?.role === 'director' && (
             <button 
@@ -802,6 +1015,142 @@ const CollaborationPage = () => {
           </div>
         </div>
       )}
+
+      {showExcelModal && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full">
+          <div className="relative top-20 mx-auto p-5 border w-11/12 max-w-6xl shadow-lg rounded-md bg-white">
+            <h3 className="text-lg font-medium leading-6 text-gray-900 mb-4">
+              Upload Collaborations from Excel
+            </h3>
+
+            <div className="mb-4">
+              <div className="mb-4">
+                <label className="block text-gray-700 text-sm font-bold mb-2">
+                  Select Excel File (.xlsx, .xls)
+                </label>
+                <input
+                  type="file"
+                  accept=".xlsx,.xls"
+                  onChange={handleExcelFileChange}
+                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                />
+                <div className="mt-2 flex gap-2">
+                  <button
+                    type="button"
+                    onClick={downloadSampleExcel}
+                    className="bg-purple-500 text-white px-3 py-1 rounded text-sm hover:bg-purple-600"
+                  >
+                    📥 Download Sample Excel
+                  </button>
+                </div>
+                <p className="text-sm text-gray-600 mt-1">
+                  <strong>Required Excel columns (case-insensitive):</strong><br/>
+                  Member of CoE-AI, Collaborating Researcher, Collaborating Institute, Collaboration Scope, Collaborating Country, Type of Collaboration, Duration Start Date, Duration End Date, Current Status, Key Outcomes, Details of Outcome<br/>
+                  <br/>
+                  <strong>Column Details:</strong><br/>
+                  • <strong>Member of CoE-AI:</strong> Name of CoE-AI member<br/>
+                  • <strong>Collaborating Researcher:</strong> Name of collaborating researcher<br/>
+                  • <strong>Collaborating Institute:</strong> Institute/organization of collaborator<br/>
+                  • <strong>Collaboration Scope:</strong> foreign or local<br/>
+                  • <strong>Collaborating Country:</strong> Country (required for foreign scope)<br/>
+                  • <strong>Type of Collaboration:</strong> Joint Publication, Funded Research, etc.<br/>
+                  • <strong>Duration Start Date:</strong> Start date of collaboration<br/>
+                  • <strong>Duration End Date:</strong> End date (optional for ongoing)<br/>
+                  • <strong>Current Status:</strong> Ongoing, Completed, Submitted, Under Review<br/>
+                  • <strong>Key Outcomes:</strong> Brief description of outcomes<br/>
+                  • <strong>Details of Outcome:</strong> Detailed outcome description<br/>
+                  <br/>
+                  <strong>Sample first row:</strong><br/>
+                  Member of CoE-AI: Dr. Sarah Johnson, Collaborating Researcher: Prof. Michael Chen, Collaborating Institute: MIT AI Lab, Collaboration Scope: foreign, Collaborating Country: United States, Type of Collaboration: Joint Publication, Duration Start Date: 2024-01-15, Duration End Date: 2024-12-15, Current Status: Ongoing, Key Outcomes: Joint research paper on machine learning algorithms, Details of Outcome: Published in Nature AI journal, cited 50+ times
+                </p>
+              </div>
+
+              {excelFile && (
+                <div className="mb-4">
+                  <button
+                    onClick={handleExcelPreview}
+                    className="bg-blue-500 text-white px-4 py-2 rounded mr-2"
+                  >
+                    Preview Data
+                  </button>
+                </div>
+              )}
+
+              {excelData.length > 0 && (
+                <div className="mb-4">
+                  <h4 className="text-md font-medium mb-2">Preview Data ({excelData.length} records)</h4>
+                  <div className="max-h-64 overflow-y-auto border rounded">
+                    <table className="min-w-full bg-white">
+                      <thead className="bg-gray-100">
+                        <tr>
+                          <th className="px-4 py-2 text-left">Member of CoE-AI</th>
+                          <th className="px-4 py-2 text-left">Collaborating Researcher</th>
+                          <th className="px-4 py-2 text-left">Institute</th>
+                          <th className="px-4 py-2 text-left">Scope</th>
+                          <th className="px-4 py-2 text-left">Country</th>
+                          <th className="px-4 py-2 text-left">Type</th>
+                          <th className="px-4 py-2 text-left">Status</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {excelData.slice(0, 10).map((row, index) => (
+                          <tr key={index} className="border-t">
+                            <td className="px-4 py-2">{row.memberOfCoE}</td>
+                            <td className="px-4 py-2">{row.collaboratingForeignResearcher}</td>
+                            <td className="px-4 py-2">{row.foreignCollaboratingInstitute}</td>
+                            <td className="px-4 py-2">{row.collaborationScope}</td>
+                            <td className="px-4 py-2">{row.collaboratingCountry}</td>
+                            <td className="px-4 py-2">{row.typeOfCollaboration}</td>
+                            <td className="px-4 py-2">{row.currentStatus}</td>
+                          </tr>
+                        ))}
+                        {excelData.length > 10 && (
+                          <tr>
+                            <td colSpan="7" className="px-4 py-2 text-center text-gray-600">
+                              ... and {excelData.length - 10} more records
+                            </td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  <div className="mt-4 flex justify-between items-center">
+                    <div className="text-sm text-gray-600">
+                      Ready to upload {excelData.length} records
+                    </div>
+                    <div>
+                      <button
+                        onClick={handleExcelUpload}
+                        disabled={uploadingExcel}
+                        className="bg-green-500 text-white px-4 py-2 rounded mr-2 disabled:bg-gray-400"
+                      >
+                        {uploadingExcel ? 'Uploading...' : 'Upload All Records'}
+                      </button>
+                      <button
+                        onClick={handleCloseExcelModal}
+                        className="bg-gray-300 text-gray-700 px-4 py-2 rounded"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="flex items-center justify-end">
+              <button
+                onClick={handleCloseExcelModal}
+                className="bg-gray-300 text-gray-700 px-4 py-2 rounded"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 };

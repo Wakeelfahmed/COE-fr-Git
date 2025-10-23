@@ -4,6 +4,16 @@ import axios from 'axios';
 import { useUser } from '../context/UserContext';
 import AccountFilter from '../components/AccountFilter';
 
+// Try to import xlsx, fallback to CDN if not available
+let XLSX;
+try {
+  XLSX = require('xlsx');
+} catch (e) {
+  // Fallback: use CDN version
+  console.warn('xlsx library not installed. Please run: npm install xlsx');
+  console.warn('Or ensure the CDN version is loaded in your HTML');
+}
+
 axios.defaults.withCredentials = true;
 const API_BASE_URL = process.env.REACT_APP_BACKEND;
 
@@ -72,14 +82,16 @@ const EventsPage = () => {
     const handleKeyDown = (e) => {
       if (e.key === 'Escape' && showModal) {
         setShowModal(false);
-      } else if ((e.key === '~' || e.key === '`') && e.shiftKey && !showModal && !showReportModal) {
+      } else if ((e.key === '~' || e.key === '`') && e.shiftKey && !showModal && !showReportModal && !showExcelModal) {
         handleNewEvent();
+      } else if (e.key === 'E' && e.ctrlKey && !showModal && !showReportModal && !showExcelModal) {
+        setShowExcelModal(true);
       }
     };
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [showModal, showReportModal]);
+  }, [showModal, showReportModal, showExcelModal]);
 
   const fetchEvents = async () => {
     if (!user) {
@@ -223,6 +235,332 @@ const EventsPage = () => {
     }
   };
 
+  const handleExcelFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file && (file.type.includes('excel') || file.type.includes('spreadsheet') || file.name.endsWith('.xlsx') || file.name.endsWith('.xls'))) {
+      setExcelFile(file);
+    } else {
+      alert('Please select an Excel file (.xlsx or .xls)');
+      e.target.value = null;
+    }
+  };
+
+  const parseExcelFile = (file) => {
+    return new Promise((resolve, reject) => {
+      if (!XLSX) {
+        reject(new Error('XLSX library not available. Please install xlsx package: npm install xlsx'));
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const data = new Uint8Array(e.target.result);
+          const workbook = XLSX.read(data, { type: 'array' });
+          const sheetName = workbook.SheetNames[0];
+          const worksheet = workbook.Sheets[sheetName];
+          const jsonData = XLSX.utils.sheet_to_json(worksheet);
+
+          // Map Excel columns to database fields
+          const mappedData = jsonData.map((row, index) => {
+            // Handle role field with special parsing for "Other: xyz role" format
+            let role = row['Role'] || row['role'] || '';
+            let otherRole = row['Other Role'] || row['otherRole'] || row['OtherRole'] || '';
+
+            // If role contains "Other:" format, extract the role name and set otherRole
+            if (typeof role === 'string' && role.toLowerCase().includes('other:')) {
+              const roleParts = role.split(':');
+              if (roleParts.length > 1) {
+                otherRole = roleParts[1].trim();
+                role = 'other';
+              }
+            }
+
+            const mappedRow = {
+              activity: row['Activity'] || row['activity'] || '',
+              organizer: row['Organizer'] || row['organizer'] || '',
+              resourcePerson: row['Resource Person'] || row['resourcePerson'] || row['ResourcePerson'] || '',
+              role: role,
+              otherRole: otherRole,
+              type: row['Type'] || row['type'] || '',
+              participantsOfEvent: row['Participants of Event'] || row['participantsOfEvent'] || row['ParticipantsOfEvent'] || '',
+              nameOfAttendee: row['Name of Attendee'] || row['nameOfAttendee'] || row['NameOfAttendee'] || '',
+              date: row['Date'] || row['date'] || ''
+            };
+
+            // Validate required fields
+            if (!mappedRow.activity || !mappedRow.organizer) {
+              console.warn(`Row ${index + 1} missing required fields:`, row);
+            }
+
+            return mappedRow;
+          });
+
+          resolve(mappedData);
+        } catch (error) {
+          reject(error);
+        }
+      };
+      reader.onerror = () => reject(new Error('Failed to read file'));
+      reader.readAsArrayBuffer(file);
+    });
+  };
+
+  const handleExcelPreview = async () => {
+    if (!excelFile) {
+      alert('Please select an Excel file first');
+      return;
+    }
+
+    try {
+      const parsedData = await parseExcelFile(excelFile);
+      setExcelData(parsedData);
+    } catch (error) {
+      console.error('Error parsing Excel file:', error);
+      alert('Error parsing Excel file. Please make sure the file format is correct.');
+    }
+  };
+
+  const handleExcelUpload = async () => {
+    if (excelData.length === 0) {
+      alert('No data to upload. Please preview the Excel file first.');
+      return;
+    }
+
+    setUploadingExcel(true);
+    try {
+      let successCount = 0;
+      let errorCount = 0;
+      const errors = [];
+
+      for (let i = 0; i < excelData.length; i++) {
+        const row = excelData[i];
+
+        // Skip rows with missing required fields
+        if (!row.activity || !row.organizer) {
+          errorCount++;
+          errors.push(`Row ${i + 1}: Missing required fields (Activity or Organizer)`);
+          continue;
+        }
+
+        try {
+          await axios.post(`${API_BASE_URL}/events`, row);
+          successCount++;
+        } catch (error) {
+          errorCount++;
+          errors.push(`Row ${i + 1}: ${error.response?.data?.error || error.message}`);
+        }
+      }
+
+      // Show results
+      let message = `Upload completed!\nSuccessful: ${successCount}\nFailed: ${errorCount}`;
+      if (errors.length > 0) {
+        message += `\n\nErrors:\n${errors.slice(0, 10).join('\n')}`;
+        if (errors.length > 10) {
+          message += `\n... and ${errors.length - 10} more errors`;
+        }
+      }
+
+      alert(message);
+      setShowExcelModal(false);
+      setExcelFile(null);
+      setExcelData([]);
+      fetchEvents(); // Refresh the data
+    } catch (error) {
+      console.error('Error uploading Excel data:', error);
+      alert('Error uploading data. Please try again.');
+    } finally {
+      setUploadingExcel(false);
+    }
+  };
+
+  const downloadSampleExcel = () => {
+    if (!XLSX) {
+      alert('XLSX library not available. Please install xlsx package first: npm install xlsx');
+      return;
+    }
+
+    // Create sample data
+    const sampleData = [
+      {
+        'Activity': 'AI Conference 2024',
+        'Organizer': 'Tech University',
+        'Resource Person': 'Dr. Sarah Johnson',
+        'Role': 'participant',
+        'Type': 'Conference',
+        'Participants of Event': 'Students, Faculty',
+        'Date': '2024-01-15',
+        'Name of Attendee': 'John Doe'
+      },
+      {
+        'Activity': 'Machine Learning Workshop',
+        'Organizer': 'AI Research Center',
+        'Resource Person': 'Prof. Michael Chen',
+        'Role': 'attendee',
+        'Type': 'Workshop',
+        'Participants of Event': 'Graduate Students',
+        'Date': '2024-02-20',
+        'Name of Attendee': 'Jane Smith'
+      },
+      {
+        'Activity': 'Data Science Competition',
+        'Organizer': 'Computer Science Department',
+        'Resource Person': 'Dr. Ahmed Hassan',
+        'Role': 'judge',
+        'Type': 'Competition',
+        'Participants of Event': 'Undergraduate Students',
+        'Date': '2024-03-10',
+        'Name of Attendee': 'Bob Wilson'
+      },
+      {
+        'Activity': 'Blockchain Technology Seminar',
+        'Organizer': 'FinTech Institute',
+        'Resource Person': 'Prof. Maria Rodriguez',
+        'Role': 'Other: Keynote Speaker',
+        'Type': 'Seminar',
+        'Participants of Event': 'Industry Professionals',
+        'Date': '2024-04-05',
+        'Name of Attendee': 'Alice Brown'
+      },
+      {
+        'Activity': 'Cybersecurity Training Program',
+        'Organizer': 'National Security Agency',
+        'Resource Person': 'Dr. Robert Wilson',
+        'Role': 'other',
+        'Other Role': 'Security Consultant',
+        'Type': 'Training',
+        'Participants of Event': 'Government Officials',
+        'Date': '2024-05-12',
+        'Name of Attendee': 'Charlie Davis'
+      },
+      {
+        'Activity': 'IoT Innovation Expo',
+        'Organizer': 'Tech Expo Center',
+        'Resource Person': 'Eng. Fatima Khan',
+        'Role': 'participant',
+        'Type': 'Exhibition',
+        'Participants of Event': 'Researchers, Industry',
+        'Date': '2024-06-18',
+        'Name of Attendee': 'Diana Prince'
+      },
+      {
+        'Activity': 'Cloud Computing Symposium',
+        'Organizer': 'CloudTech Solutions',
+        'Resource Person': 'Dr. James Miller',
+        'Role': 'Other: Panel Moderator',
+        'Type': 'Symposium',
+        'Participants of Event': 'IT Professionals',
+        'Date': '2024-07-25',
+        'Name of Attendee': 'Eve Johnson'
+      },
+      {
+        'Activity': 'Robotics Competition 2024',
+        'Organizer': 'Engineering College',
+        'Resource Person': 'Prof. David Brown',
+        'Role': 'judge',
+        'Type': 'Competition',
+        'Participants of Event': 'Engineering Students',
+        'Date': '2024-08-30',
+        'Name of Attendee': 'Frank Castle'
+      },
+      {
+        'Activity': 'Digital Marketing Workshop',
+        'Organizer': 'Business School',
+        'Resource Person': 'Ms. Lisa Thompson',
+        'Role': 'attendee',
+        'Type': 'Workshop',
+        'Participants of Event': 'Marketing Students',
+        'Date': '2024-09-14',
+        'Name of Attendee': 'Grace Lee'
+      },
+      {
+        'Activity': 'AI Ethics Conference',
+        'Organizer': 'Ethics Research Institute',
+        'Resource Person': 'Dr. Kevin Smith',
+        'Role': 'Other: Session Chair',
+        'Type': 'Conference',
+        'Participants of Event': 'Researchers, Policy Makers',
+        'Date': '2024-10-22',
+        'Name of Attendee': 'Henry Ford'
+      },
+      {
+        'Activity': 'Big Data Analytics Training',
+        'Organizer': 'Data Science Academy',
+        'Resource Person': 'Prof. Nancy Wilson',
+        'Role': 'participant',
+        'Type': 'Training',
+        'Participants of Event': 'Data Scientists',
+        'Date': '2024-11-08',
+        'Name of Attendee': 'Iris West'
+      },
+      {
+        'Activity': 'Mobile App Development Seminar',
+        'Organizer': 'Mobile Tech Hub',
+        'Resource Person': 'Eng. Omar Hassan',
+        'Role': 'other',
+        'Other Role': 'Technical Advisor',
+        'Type': 'Seminar',
+        'Participants of Event': 'App Developers',
+        'Date': '2024-12-01',
+        'Name of Attendee': 'Jack Ryan'
+      },
+      {
+        'Activity': 'Sustainable Technology Expo',
+        'Organizer': 'Green Tech Foundation',
+        'Resource Person': 'Dr. Emma Watson',
+        'Role': 'Other: Guest Speaker',
+        'Type': 'Exhibition',
+        'Participants of Event': 'Environmental Scientists',
+        'Date': '2024-12-15',
+        'Name of Attendee': 'Kelly Clarkson'
+      },
+      {
+        'Activity': 'Quantum Computing Workshop',
+        'Organizer': 'Physics Research Lab',
+        'Resource Person': 'Prof. Stephen Hawking',
+        'Role': 'attendee',
+        'Type': 'Workshop',
+        'Participants of Event': 'Physics Researchers',
+        'Date': '2024-12-28',
+        'Name of Attendee': 'Luna Lovegood'
+      },
+      {
+        'Activity': 'Startup Pitch Competition',
+        'Organizer': 'Entrepreneurship Center',
+        'Resource Person': 'Ms. Oprah Winfrey',
+        'Role': 'judge',
+        'Type': 'Competition',
+        'Participants of Event': 'Startup Founders',
+        'Date': '2024-12-31',
+        'Name of Attendee': 'Mike Ross'
+      },
+      {
+        'Activity': 'Web Development Bootcamp',
+        'Organizer': 'Coding Academy',
+        'Resource Person': 'Eng. Mark Zuckerberg',
+        'Role': 'Other: Lead Instructor',
+        'Type': 'Training',
+        'Participants of Event': 'Web Developers',
+        'Date': '2024-12-20',
+        'Name of Attendee': 'Nina Dobrev'
+      }
+    ];
+
+    // Create workbook and worksheet
+    const ws = XLSX.utils.json_to_sheet(sampleData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Events');
+
+    // Generate and download file
+    XLSX.writeFile(wb, 'sample_events.xlsx');
+  };
+
+  const handleCloseExcelModal = () => {
+    setShowExcelModal(false);
+    setExcelFile(null);
+    setExcelData([]);
+  };
+
   const filteredEvents = events.filter(event => {
     const eventDate = new Date(event.date);
     const fromDate = filterCriteria.dateFrom ? new Date(filterCriteria.dateFrom) : null;
@@ -245,6 +583,9 @@ const EventsPage = () => {
         <div>
           <button onClick={handleNewEvent} className="bg-blue-600 text-white px-4 py-2 rounded mr-2">
             New Event
+          </button>
+          <button onClick={() => setShowExcelModal(true)} className="bg-green-600 text-white px-4 py-2 rounded mr-2">
+            Upload from Excel
           </button>
           {user?.role === 'director' && (
             <button
@@ -577,6 +918,141 @@ const EventsPage = () => {
           </div>
         </div>
       )}
+
+      {showExcelModal && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full">
+          <div className="relative top-20 mx-auto p-5 border w-11/12 max-w-6xl shadow-lg rounded-md bg-white">
+            <h3 className="text-lg font-medium leading-6 text-gray-900 mb-4">
+              Upload Events from Excel
+            </h3>
+
+            <div className="mb-4">
+              <div className="mb-4">
+                <label className="block text-gray-700 text-sm font-bold mb-2">
+                  Select Excel File (.xlsx, .xls)
+                </label>
+                <input
+                  type="file"
+                  accept=".xlsx,.xls"
+                  onChange={handleExcelFileChange}
+                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                />
+                <div className="mt-2 flex gap-2">
+                  <button
+                    type="button"
+                    onClick={downloadSampleExcel}
+                    className="bg-purple-500 text-white px-3 py-1 rounded text-sm hover:bg-purple-600"
+                  >
+                    📥 Download Sample Excel
+                  </button>
+                </div>
+                <p className="text-sm text-gray-600 mt-1">
+                  <strong>Required Excel columns (case-insensitive):</strong><br/>
+                  Activity, Organizer, Resource Person, Role, Type, Participants of Event, Date, Name of Attendee<br/>
+                  <br/>
+                  <strong>Column Details:</strong><br/>
+                  • <strong>Activity:</strong> Name/description of the event activity<br/>
+                  • <strong>Organizer:</strong> Organization hosting the event<br/>
+                  • <strong>Resource Person:</strong> Speaker or main person<br/>
+                  • <strong>Role:</strong> Your role (attendee, judge, participant, other)<br/>
+                  • <strong>Type:</strong> Event type (Conference, Workshop, Seminar, etc.)<br/>
+                  • <strong>Participants of Event:</strong> Who attended (Student, Faculty, etc.)<br/>
+                  • <strong>Date:</strong> Event date (YYYY-MM-DD or readable format)<br/>
+                  • <strong>Name of Attendee:</strong> Your name as attendee<br/>
+                  <br/>
+                  <strong>Sample first row:</strong><br/>
+                  Activity: AI Conference 2024, Organizer: Tech University, Resource Person: Dr. Sarah Johnson, Role: participant, Type: Conference, Participants of Event: Students, Faculty, Date: 2024-01-15, Name of Attendee: John Doe
+                </p>
+              </div>
+
+              {excelFile && (
+                <div className="mb-4">
+                  <button
+                    onClick={handleExcelPreview}
+                    className="bg-blue-500 text-white px-4 py-2 rounded mr-2"
+                  >
+                    Preview Data
+                  </button>
+                </div>
+              )}
+
+              {excelData.length > 0 && (
+                <div className="mb-4">
+                  <h4 className="text-md font-medium mb-2">Preview Data ({excelData.length} records)</h4>
+                  <div className="max-h-64 overflow-y-auto border rounded">
+                    <table className="min-w-full bg-white">
+                      <thead className="bg-gray-100">
+                        <tr>
+                          <th className="px-4 py-2 text-left">Activity</th>
+                          <th className="px-4 py-2 text-left">Organizer</th>
+                          <th className="px-4 py-2 text-left">Resource Person</th>
+                          <th className="px-4 py-2 text-left">Role</th>
+                          <th className="px-4 py-2 text-left">Type</th>
+                          <th className="px-4 py-2 text-left">Participants</th>
+                          <th className="px-4 py-2 text-left">Date</th>
+                          <th className="px-4 py-2 text-left">Attendee</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {excelData.slice(0, 10).map((row, index) => (
+                          <tr key={index} className="border-t">
+                            <td className="px-4 py-2">{row.activity}</td>
+                            <td className="px-4 py-2">{row.organizer}</td>
+                            <td className="px-4 py-2">{row.resourcePerson}</td>
+                            <td className="px-4 py-2">{row.role}</td>
+                            <td className="px-4 py-2">{row.type}</td>
+                            <td className="px-4 py-2">{row.participantsOfEvent}</td>
+                            <td className="px-4 py-2">{row.date}</td>
+                            <td className="px-4 py-2">{row.nameOfAttendee}</td>
+                          </tr>
+                        ))}
+                        {excelData.length > 10 && (
+                          <tr>
+                            <td colSpan="8" className="px-4 py-2 text-center text-gray-600">
+                              ... and {excelData.length - 10} more records
+                            </td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  <div className="mt-4 flex justify-between items-center">
+                    <div className="text-sm text-gray-600">
+                      Ready to upload {excelData.length} records
+                    </div>
+                    <div>
+                      <button
+                        onClick={handleExcelUpload}
+                        disabled={uploadingExcel}
+                        className="bg-green-500 text-white px-4 py-2 rounded mr-2 disabled:bg-gray-400"
+                      >
+                        {uploadingExcel ? 'Uploading...' : 'Upload All Records'}
+                      </button>
+                      <button
+                        onClick={handleCloseExcelModal}
+                        className="bg-gray-300 text-gray-700 px-4 py-2 rounded"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="flex items-center justify-end">
+              <button
+                onClick={handleCloseExcelModal}
+                className="bg-gray-300 text-gray-700 px-4 py-2 rounded"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 };

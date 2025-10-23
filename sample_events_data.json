@@ -1,0 +1,164 @@
+[
+  {
+    "Activity": "AI Conference 2024",
+    "Organizer": "Tech University",
+    "Resource Person": "Dr. Sarah Johnson",
+    "Role": "participant",
+    "Type": "Conference",
+    "Participants of Event": "Students, Faculty",
+    "Date": "2024-01-15",
+    "Name of Attendee": "John Doe"
+  },
+  {
+    "Activity": "Machine Learning Workshop",
+    "Organizer": "AI Research Center",
+    "Resource Person": "Prof. Michael Chen",
+    "Role": "attendee",
+    "Type": "Workshop",
+    "Participants of Event": "Graduate Students",
+    "Date": "2024-02-20",
+    "Name of Attendee": "Jane Smith"
+  },
+  {
+    "Activity": "Data Science Competition",
+    "Organizer": "Computer Science Department",
+    "Resource Person": "Dr. Ahmed Hassan",
+    "Role": "judge",
+    "Type": "Competition",
+    "Participants of Event": "Undergraduate Students",
+    "Date": "2024-03-10",
+    "Name of Attendee": "Bob Wilson"
+  },
+  {
+    "Activity": "Blockchain Technology Seminar",
+    "Organizer": "FinTech Institute",
+    "Resource Person": "Prof. Maria Rodriguez",
+    "Role": "Other: Keynote Speaker",
+    "Type": "Seminar",
+    "Participants of Event": "Industry Professionals",
+    "Date": "2024-04-05",
+    "Name of Attendee": "Alice Brown"
+  },
+  {
+    "Activity": "Cybersecurity Training Program",
+    "Organizer": "National Security Agency",
+    "Resource Person": "Dr. Robert Wilson",
+    "Role": "other",
+    "Other Role": "Security Consultant",
+    "Type": "Training",
+    "Participants of Event": "Government Officials",
+    "Date": "2024-05-12",
+    "Name of Attendee": "Charlie Davis"
+  },
+  {
+    "Activity": "IoT Innovation Expo",
+    "Organizer": "Tech Expo Center",
+    "Resource Person": "Eng. Fatima Khan",
+    "Role": "participant",
+    "Type": "Exhibition",
+    "Participants of Event": "Researchers, Industry",
+    "Date": "2024-06-18",
+    "Name of Attendee": "Diana Prince"
+  },
+  {
+    "Activity": "Cloud Computing Symposium",
+    "Organizer": "CloudTech Solutions",
+    "Resource Person": "Dr. James Miller",
+    "Role": "Other: Panel Moderator",
+    "Type": "Symposium",
+    "Participants of Event": "IT Professionals",
+    "Date": "2024-07-25",
+    "Name of Attendee": "Eve Johnson"
+  },
+  {
+    "Activity": "Robotics Competition 2024",
+    "Organizer": "Engineering College",
+    "Resource Person": "Prof. David Brown",
+    "Role": "judge",
+    "Type": "Competition",
+    "Participants of Event": "Engineering Students",
+    "Date": "2024-08-30",
+    "Name of Attendee": "Frank Castle"
+  },
+  {
+    "Activity": "Digital Marketing Workshop",
+    "Organizer": "Business School",
+    "Resource Person": "Ms. Lisa Thompson",
+    "Role": "attendee",
+    "Type": "Workshop",
+    "Participants of Event": "Marketing Students",
+    "Date": "2024-09-14",
+    "Name of Attendee": "Grace Lee"
+  },
+  {
+    "Activity": "AI Ethics Conference",
+    "Organizer": "Ethics Research Institute",
+    "Resource Person": "Dr. Kevin Smith",
+    "Role": "Other: Session Chair",
+    "Type": "Conference",
+    "Participants of Event": "Researchers, Policy Makers",
+    "Date": "2024-10-22",
+    "Name of Attendee": "Henry Ford"
+  },
+  {
+    "Activity": "Big Data Analytics Training",
+    "Organizer": "Data Science Academy",
+    "Resource Person": "Prof. Nancy Wilson",
+    "Role": "participant",
+    "Type": "Training",
+    "Participants of Event": "Data Scientists",
+    "Date": "2024-11-08",
+    "Name of Attendee": "Iris West"
+  },
+  {
+    "Activity": "Mobile App Development Seminar",
+    "Organizer": "Mobile Tech Hub",
+    "Resource Person": "Eng. Omar Hassan",
+    "Role": "other",
+    "Other Role": "Technical Advisor",
+    "Type": "Seminar",
+    "Participants of Event": "App Developers",
+    "Date": "2024-12-01",
+    "Name of Attendee": "Jack Ryan"
+  },
+  {
+    "Activity": "Sustainable Technology Expo",
+    "Organizer": "Green Tech Foundation",
+    "Resource Person": "Dr. Emma Watson",
+    "Role": "Other: Guest Speaker",
+    "Type": "Exhibition",
+    "Participants of Event": "Environmental Scientists",
+    "Date": "2024-12-15",
+    "Name of Attendee": "Kelly Clarkson"
+  },
+  {
+    "Activity": "Quantum Computing Workshop",
+    "Organizer": "Physics Research Lab",
+    "Resource Person": "Prof. Stephen Hawking",
+    "Role": "attendee",
+    "Type": "Workshop",
+    "Participants of Event": "Physics Researchers",
+    "Date": "2024-12-28",
+    "Name of Attendee": "Luna Lovegood"
+  },
+  {
+    "Activity": "Startup Pitch Competition",
+    "Organizer": "Entrepreneurship Center",
+    "Resource Person": "Ms. Oprah Winfrey",
+    "Role": "judge",
+    "Type": "Competition",
+    "Participants of Event": "Startup Founders",
+    "Date": "2024-12-31",
+    "Name of Attendee": "Mike Ross"
+  },
+  {
+    "Activity": "Web Development Bootcamp",
+    "Organizer": "Coding Academy",
+    "Resource Person": "Eng. Mark Zuckerberg",
+    "Role": "Other: Lead Instructor",
+    "Type": "Training",
+    "Participants of Event": "Web Developers",
+    "Date": "2024-12-20",
+    "Name of Attendee": "Nina Dobrev"
+  }
+]
