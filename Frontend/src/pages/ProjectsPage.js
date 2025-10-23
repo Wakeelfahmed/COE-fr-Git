@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useUser } from '../context/UserContext';
-import { storage } from '../firebaseConfig';
-import { ref, uploadBytes, getDownloadURL, deleteObject, getMetadata } from "firebase/storage";
 import AccountFilter from '../components/AccountFilter';
 
 // Try to import xlsx, fallback to CDN if not available
@@ -18,106 +16,36 @@ try {
 axios.defaults.withCredentials = true;
 const API_BASE_URL = process.env.REACT_APP_BACKEND;
 
-const uploadPdf = async (file, userId) => {
+// API-based file upload function
+const uploadFile = async (file) => {
   if (!file) return;
 
-  // console.log('=== UPLOAD PDF DEBUG ===');
-  // console.log('File:', file);
-  // console.log('File name:', file.name);
-  // console.log('File size:', file.size);
-  // console.log('File type:', file.type);
-  // console.log('User ID:', userId);
-  // console.log('Storage bucket:', storage.app.options.storageBucket);
-
   try {
-    // Create a reference to the file location in storage
-    const fileRef = ref(storage, `pdfs/${userId}/${file.name}`);
-    // console.log('File reference path:', fileRef.fullPath);
+    const formData = new FormData();
+    formData.append('file', file);
 
-    // Upload the file
-    console.log('Starting upload...');
-    await uploadBytes(fileRef, file);
-
-    // Get the file's download URL
-    console.log('Getting download URL...');
-    const downloadURL = await getDownloadURL(fileRef);
-    console.log('Upload successful!');
-    console.log("File uploaded successfully. Download URL:", downloadURL);
-    return downloadURL; // Return the URL for use (e.g., saving in the database)
-  } catch (error) {
-    console.error("=== UPLOAD ERROR DETAILS ===");
-    console.error("Error name:", error.name);
-    console.error("Error code:", error.code);
-    console.error("Error message:", error.message);
-    console.error("Error stack:", error.stack);
-    console.error("Full error object:", error);
-    throw error; // Handle error appropriately in your app
-  }
-};
-
-const getPdfUrl = async (userId, fileName) => {
-  try {
-    // Create a reference to the file
-    const fileRef = ref(storage, `pdfs/${userId}/${fileName}`);
-
-    // Get the file's download URL
-    const downloadURL = await getDownloadURL(fileRef);
-
-    console.log("Retrieved file URL:", downloadURL);
-    return downloadURL;
-  } catch (error) {
-    console.error("Error retrieving file:", error);
-    throw error; // Handle error appropriately in your app
-  }
-};
-
-const deletePdf = async (userId, fileName) => {
-  try {
-    const fileRef = ref(storage, `pdfs/${userId}/${fileName}`);
-
-    // Check if file exists before attempting to delete
-    try {
-      await getMetadata(fileRef);
-    } catch (error) {
-      if (error.code === 'storage/object-not-found') {
-        console.log("File doesn't exist, skipping delete operation");
-        return; // Exit function if file doesn't exist
+    const response = await axios.post(`${API_BASE_URL}/files/upload`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
       }
-      throw error; // Rethrow if it's a different error
-    }
+    });
 
-    await deleteObject(fileRef);
-    console.log("File deleted successfully.");
+    console.log('File uploaded successfully:', response.data.file.url);
+    return response.data.file.url;
   } catch (error) {
-    console.error("Error deleting file:", error);
-    // Handle different types of errors here
+    console.error('Upload error:', error);
+    throw error;
   }
 };
 
-const updatePdf = async (file, userId, oldFileName) => {
-  if (!file) return;
-
+// API-based file delete function
+const deleteFile = async (filename) => {
   try {
-    // Delete the old file if necessary
-    if (oldFileName) {
-      const oldFileRef = ref(storage, `pdfs/${userId}/${oldFileName}`);
-      await deleteObject(oldFileRef);
-    }
-
-    // Create a reference for the new file
-    const newFileRef = ref(storage, `pdfs/${userId}/${file.name}`);
-
-    // Upload the new file
-    await uploadBytes(newFileRef, file);
-
-    // Get the new file's download URL
-    const downloadURL = await getDownloadURL(newFileRef);
-
-    console.log("File updated successfully. New download URL:", downloadURL);
-    return downloadURL; // Return the URL for use (e.g., saving in the database)
+    await axios.delete(`${API_BASE_URL}/files/${filename}`);
+    console.log('File deleted successfully:', filename);
   } catch (error) {
-    console.error("Error updating file:", error);
-    throw error; // Handle error appropriately in your app
+    console.error('Delete error:', error);
+    throw error;
   }
 };
 
@@ -156,13 +84,6 @@ const ProjectsView = () => {
 
   const { user } = useUser();
   const [showOnlyMine, setShowOnlyMine] = useState(false);
-
-  console.log('=== FIREBASE DEBUG ===');
-  console.log('Firebase storage initialized:', !!storage);
-  console.log('Storage bucket:', storage?.app?.options?.storageBucket);
-  console.log('User object:', user);
-  console.log('User ID:', user?.id);
-  console.log('User email:', user?.email);
 
 
 
@@ -464,16 +385,16 @@ const ProjectsView = () => {
     }
 
     try {
-      console.log('Fetching projects for user:', user.email, 'with ID:', user.id || user._id);
+      // console.log('Fetching projects for user:', user.email, 'with ID:', user.id || user._id);
       const response = await axios.get(`${API_BASE_URL}/projects`, {
         params: { onlyMine: showOnlyMine }
       });
-      console.log('Projects fetched successfully:', response.data.length);
+      // console.log('Projects fetched successfully:', response.data.length);
       setProjects(response.data);
     } catch (error) {
-      console.error('Error fetching projects:', error);
+      // console.error('Error fetching projects:', error);
       if (error.response?.status === 401) {
-        console.log('Authentication failed, user may need to login again');
+        // console.log('Authentication failed, user may need to login again');
         alert('Your session has expired. Please login again.');
         // Optionally redirect to login
         // window.location.href = '/login';
@@ -627,12 +548,12 @@ const ProjectsView = () => {
     console.log('Selected file:', file);
     console.log('File name:', file.name);
     console.log('File size:', file.size);
-    console.log('User ID:', user?.uid);
+    console.log('User ID:', user?.id || user?._id);
     console.log('User object:', user);
 
     try {
-      console.log('Calling uploadPdf...');
-      const fileUrl = await uploadPdf(file, user?.uid);
+      console.log('Uploading file to local storage...');
+      const fileUrl = await uploadFile(file);
       console.log('File URL received:', fileUrl);
 
       console.log('Updating project with file URL...');
@@ -666,14 +587,20 @@ const ProjectsView = () => {
 
   const handleFileDelete = async (projectId, fileName) => {
     try {
-      await deletePdf(user?.uid, fileName);
+      console.log('Deleting file:', fileName);
+      await deleteFile(fileName);
+      console.log('File deleted from storage');
+
       await axios.put(`${API_BASE_URL}/projects/${projectId}`, { fileLink: null });
+      console.log('Project updated - file link removed');
 
       setProjects(prevProjects =>
         prevProjects.map(project =>
           project._id === projectId ? { ...project, fileLink: null } : project
         )
       );
+
+      console.log('File deletion completed successfully');
     } catch (error) {
       console.error('Error deleting file:', error);
       alert('Error deleting file. Please try again.');
@@ -819,7 +746,12 @@ const ProjectsView = () => {
                 <td className="px-6 py-4 whitespace-nowrap">
                   {project.fileLink ? (
                     <div>
-                      <a href={project.fileLink} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-900 mr-2">View File</a>
+                      <button
+                        onClick={() => window.open(project.fileLink, '_blank', 'noopener,noreferrer')}
+                        className="text-blue-600 hover:text-blue-900 mr-2"
+                      >
+                        View File
+                      </button>
                       <button onClick={() => handleFileDelete(project._id, project.fileLink.split('/').pop())} className="text-red-600 hover:text-red-900 mr-2">Delete</button>
                       <input
                         type="file"

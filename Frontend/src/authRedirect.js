@@ -12,16 +12,16 @@ function AuthRedirect({ onAuthChecked }) {
   const location = useLocation();
   const { user, setUser } = useUser();
 
-  console.log('AuthRedirect: Component rendered, starting auth listener');
+  // console.log('AuthRedirect: Component rendered, starting auth listener');
 
   useEffect(() => {
-    console.log('AuthRedirect: useEffect running, setting up auth listener');
+    // console.log('AuthRedirect: useEffect running, setting up auth listener');
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      console.log('AuthRedirect: Auth state changed', firebaseUser ? 'User logged in' : 'User not logged in');
+      // console.log('AuthRedirect: Auth state changed', firebaseUser ? 'User logged in' : 'User not logged in');
 
       try {
         if (firebaseUser) {
-          console.log('AuthRedirect: Firebase user detected:', firebaseUser.email);
+          // console.log('AuthRedirect: Firebase user detected:', firebaseUser.email);
 
           // Check if we need to sync with backend
           let backendUser = null;
@@ -30,7 +30,7 @@ function AuthRedirect({ onAuthChecked }) {
             const response = await axios.get(`${process.env.REACT_APP_BACKEND}/auth/check`);
             if (response.data.authenticated && response.data.user) {
               backendUser = response.data.user;
-              console.log('AuthRedirect: Backend user found:', backendUser.email);
+              // console.log('AuthRedirect: Backend user found:', backendUser.email);
             }
           } catch (error) {
             console.log('AuthRedirect: Backend check failed, user may need backend sync');
@@ -44,11 +44,11 @@ function AuthRedirect({ onAuthChecked }) {
               ...backendUser,
               id: backendUser._id || backendUser.id
             };
-            console.log('AuthRedirect: Setting complete user with backend data');
+            // console.log('AuthRedirect: Setting complete user with backend data');
             setUser(completeUser);
           } else {
             // No backend user found, try to sync Firebase user
-            console.log('AuthRedirect: No backend user found, attempting sync...');
+            // console.log('AuthRedirect: No backend user found, attempting sync...');
             try {
               const syncResponse = await axios.post(`${process.env.REACT_APP_BACKEND}/auth/sync-firebase-user`, {
                 email: firebaseUser.email,
@@ -62,10 +62,10 @@ function AuthRedirect({ onAuthChecked }) {
                   ...syncResponse.data.user,
                   id: syncResponse.data.user._id || syncResponse.data.user.id
                 };
-                console.log('AuthRedirect: Firebase user synced successfully');
+                // console.log('AuthRedirect: Firebase user synced successfully');
                 setUser(syncedUser);
               } else {
-                console.log('AuthRedirect: Sync failed, setting Firebase user only');
+                // console.log('AuthRedirect: Sync failed, setting Firebase user only');
                 setUser(firebaseUser);
               }
             } catch (syncError) {
@@ -80,7 +80,7 @@ function AuthRedirect({ onAuthChecked }) {
             navigate('/');
           }
         } else {
-          console.log('AuthRedirect: No Firebase user, clearing state');
+          // console.log('AuthRedirect: No Firebase user, clearing state');
           setUser(null);
           if (!['/login', '/signup'].includes(location.pathname)) {
             navigate('/login');
@@ -91,12 +91,12 @@ function AuthRedirect({ onAuthChecked }) {
         setUser(null);
       }
 
-      console.log('AuthRedirect: Calling onAuthChecked');
+      // console.log('AuthRedirect: Calling onAuthChecked');
       onAuthChecked();
     });
 
     return () => {
-      console.log('AuthRedirect: Unsubscribing from auth listener');
+      // console.log('AuthRedirect: Unsubscribing from auth listener');
       unsubscribe();
     };
   }, [navigate, location, setUser, onAuthChecked]);

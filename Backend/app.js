@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
+const path = require('path');
 
 const commercializationProjectRoutes = require('./routes/commercializationProjectRoutes');
 const eventRoutes = require('./routes/eventRoutes');
@@ -19,6 +20,7 @@ const collaborationRoutes = require('./routes/collaborationRoutes');
 const achievementRoutes = require('./routes/achievementRoutes');
 const competitionRoutes = require('./routes/competitionRoutes');
 const analyticsRoutes = require('./routes/analyticsRoutes');
+const fileRoutes = require('./routes/fileRoutes');
 
 // Load environment variables
 dotenv.config();
@@ -34,6 +36,12 @@ app.use(cors({
   origin: ['http://172.27.103.142:3000', 'http://localhost:3000'], 
   credentials: true
 }));
+
+// Serve static files from uploads directory with CORS headers
+app.use('/uploads', cors({
+  origin: ['http://172.27.103.142:3000', 'http://localhost:3000'],
+  credentials: true
+}), express.static(path.join(__dirname, 'uploads')));
 
 // Connect to MongoDB using the URI from .env file
 mongoose.connect(process.env.MONGODB_URI, {
@@ -62,9 +70,11 @@ app.use('/api/collaborations', collaborationRoutes);
 app.use('/api/achievements', achievementRoutes);
 app.use('/api/competitions', competitionRoutes);
 app.use('/api/analytics', analyticsRoutes);
+app.use('/api/files', fileRoutes);
 
 // Start the server
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
+  console.log(`File uploads served from: /uploads`);
 });

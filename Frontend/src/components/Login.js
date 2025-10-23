@@ -51,17 +51,17 @@ const Login = () => {
         // Step 1: Authenticate with Firebase
         const userCredential = await signInWithEmailAndPassword(auth, formData.email, formData.password);
         const firebaseUser = userCredential.user;
-        console.log('Firebase login successful:', firebaseUser.email);
+        // console.log('Firebase login successful:', firebaseUser.email);
 
         // Step 2: Authenticate with backend to get JWT token
-        console.log('Attempting backend login...');
+        // console.log('Attempting backend login...');
         let response;
         try {
           response = await axios.post(`${process.env.REACT_APP_BACKEND}/auth/login`, {
             email: formData.email,
             password: formData.password,
           });
-          console.log('Backend login successful');
+          // console.log('Backend login successful');
         } catch (loginError) {
           if (loginError.response?.status === 401 && loginError.response?.data?.error?.includes('User not found')) {
             console.log('User not found in backend, attempting to sync Firebase user...');
@@ -83,14 +83,14 @@ const Login = () => {
           }
         }
 
-        console.log('Backend login response:', response.data);
+        // console.log('Backend login response:', response.data);
 
         // Step 3: Check if we got user data from backend
         if (!response.data || !response.data.user) {
           throw new Error('Backend login failed - no user data returned');
         }
 
-        console.log('Backend user data received:', response.data.user.email);
+        // console.log('Backend user data received:', response.data.user.email);
 
         // Step 4: Merge Firebase user with backend user data
         const completeUser = {
@@ -100,7 +100,7 @@ const Login = () => {
           id: response.data.user._id || response.data.user.id
         };
 
-        console.log('Login successful, navigating to projects');
+        // console.log('Login successful, navigating to projects');
         setUser(completeUser);
         navigate('/projects');
       } catch (error) {

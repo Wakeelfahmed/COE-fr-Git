@@ -7,7 +7,7 @@ export const UserProvider = ({ children }) => {
   const [user, setUserState] = useState(null);
 
   const setUser = (newUser) => {
-    console.log('UserContext: Setting user:', newUser ? newUser.email : 'null');
+    // console.log('UserContext: Setting user:', newUser ? newUser.email : 'null');
     setUserState(newUser);
   };
 
