@@ -52,6 +52,18 @@ const CompetitionsPage = () => {
   const [excelData, setExcelData] = useState([]);
   const [uploadingExcel, setUploadingExcel] = useState(false);
 
+  const fetchCompetitions = useCallback(async () => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/competitions`, {
+        params: { onlyMine: showOnlyMine }
+      });
+      setCompetitions(response.data);
+    } catch (error) {
+      console.error('Error fetching competitions:', error);
+      alert('Error fetching competitions. Please try again.');
+    }
+  }, [showOnlyMine]);
+
   useEffect(() => {
     fetchCompetitions();
   }, [fetchCompetitions]);
@@ -71,19 +83,6 @@ const CompetitionsPage = () => {
       document.addEventListener('keydown', handleKeyDown);
       return () => document.removeEventListener('keydown', handleKeyDown);
     }, [showModal, showReportModal, showExcelModal]);
-
-
-  const fetchCompetitions = useCallback(async () => {
-    try {
-      const response = await axios.get(`${API_BASE_URL}/competitions`, {
-        params: { onlyMine: showOnlyMine }
-      });
-      setCompetitions(response.data);
-    } catch (error) {
-      console.error('Error fetching competitions:', error);
-      alert('Error fetching competitions. Please try again.');
-    }
-  }, [showOnlyMine]);
 
   const handleNewCompetition = () => {
     setIsEditMode(false);
