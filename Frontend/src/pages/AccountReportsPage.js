@@ -705,9 +705,9 @@ const AccountReportsPage = () => {
                         if (activity.type === 'Funding' && activity.fundingSource) details.push(`Source: ${activity.fundingSource}`);
                         if (activity.type === 'Funding Proposal' && activity.fundingSource) details.push(`Source: ${activity.fundingSource}`);
                         if (activity.type === 'Achievement' && activity.organizer) details.push(`Organizer: ${activity.organizer}`);
-                        if (activity.type === 'Training Conducted' && activity.resourcePersons) details.push(`Resource: ${activity.resourcePersons}`);
+                        if (activity.type === 'Training Conducted' && activity.resourcePersons) details.push(`Resource Person: ${activity.resourcePersons}`);
                         if (activity.type === 'Internship' && activity.centerName) details.push(`Center: ${activity.centerName}`);
-                        if (activity.type === 'TalkTrainingConference' && activity.resourcePerson) details.push(`Resource: ${activity.resourcePerson}`);
+                        if (activity.type === 'TalkTrainingConference' && activity.resourcePerson) details.push(`Resource Person: ${activity.resourcePerson}`);
                         if (activity.type === 'Competition' && activity.organizer) details.push(`Organizer: ${activity.organizer}`);
                         return details.length > 0 ? details.join(', ') : 'N/A';
                       })()}

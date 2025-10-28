@@ -298,6 +298,17 @@ const EventsView = () => {
     setExcelData([]);
   };
 
+  // Helper function to check if user can edit/delete an event
+  const canEditEvent = (event) => {
+    if (!user) return false;
+    // Director can edit/delete everything
+    if (user.role === 'director') return true;
+    // Creator can edit/delete their own events
+    const creatorId = event.createdBy?.id || event.createdBy;
+    // Compare with user.id (MongoDB _id) not user.uid (Firebase UID)
+    return creatorId?.toString() === user.id?.toString();
+  };
+
   // Helper function to format dates for display (dd-mm-year format)
   const formatDateForDisplay = (dateString) => {
     if (!dateString) return 'N/A';
@@ -655,38 +666,52 @@ const EventsView = () => {
                   {event.fileLink ? (
                     <div>
                       <a href={event.fileLink} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-900 mr-2">View File</a>
-                      <button onClick={() => handleFileDelete(event._id, event.fileLink.split('/').pop())} className="text-red-600 hover:text-red-900 mr-2">Delete</button>
-                      <input 
-                        type="file" 
-                        onChange={(e) => handleFileChange(e, event._id)} 
-                        accept=".pdf" 
-                        className="hidden" 
-                        id={`fileUpdate-${event._id}`} 
-                      />
-                      <label htmlFor={`fileUpdate-${event._id}`} className="text-green-600 hover:text-green-900 cursor-pointer">Update</label>
-                      {selectedFiles[event._id] && (
-                        <button onClick={() => handleFileUpload(event._id)} className="text-blue-600 hover:text-blue-900 ml-2">Confirm Update</button>
+                      {canEditEvent(event) && (
+                        <>
+                          <button onClick={() => handleFileDelete(event._id, event.fileLink.split('/').pop())} className="text-red-600 hover:text-red-900 mr-2">Delete</button>
+                          <input 
+                            type="file" 
+                            onChange={(e) => handleFileChange(e, event._id)} 
+                            accept=".pdf" 
+                            className="hidden" 
+                            id={`fileUpdate-${event._id}`} 
+                          />
+                          <label htmlFor={`fileUpdate-${event._id}`} className="text-green-600 hover:text-green-900 cursor-pointer">Update</label>
+                          {selectedFiles[event._id] && (
+                            <button onClick={() => handleFileUpload(event._id)} className="text-blue-600 hover:text-blue-900 ml-2">Confirm Update</button>
+                          )}
+                        </>
                       )}
                     </div>
                   ) : (
-                    <div>
-                      <input 
-                        type="file" 
-                        onChange={(e) => handleFileChange(e, event._id)} 
-                        accept=".pdf" 
-                        className="hidden" 
-                        id={`fileUpload-${event._id}`} 
-                      />
-                      <label htmlFor={`fileUpload-${event._id}`} className="text-blue-600 hover:text-blue-900 cursor-pointer mr-2">Select File</label>
-                      {selectedFiles[event._id] && (
-                        <button onClick={() => handleFileUpload(event._id)} className="text-green-600 hover:text-green-900">Upload</button>
+                    canEditEvent(event) ? (
+                      <div>
+                        <input 
+                          type="file" 
+                          onChange={(e) => handleFileChange(e, event._id)} 
+                          accept=".pdf" 
+                          className="hidden" 
+                          id={`fileUpload-${event._id}`} 
+                        />
+                        <label htmlFor={`fileUpload-${event._id}`} className="text-blue-600 hover:text-blue-900 cursor-pointer mr-2">Select File</label>
+                        {selectedFiles[event._id] && (
+                          <button onClick={() => handleFileUpload(event._id)} className="text-green-600 hover:text-green-900">Upload</button>
                         )}
                       </div>
-                    )}
+                    ) : (
+                      <span className="text-gray-400">No file</span>
+                    )
+                  )}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <button onClick={() => handleEditEvent(event)} className="text-blue-600 hover:text-blue-900 mr-2">Edit</button>
-                    <button onClick={() => handleDeleteEvent(event._id)} className="text-red-600 hover:text-red-900">Delete</button>
+                    {canEditEvent(event) ? (
+                      <>
+                        <button onClick={() => handleEditEvent(event)} className="text-blue-600 hover:text-blue-900 mr-2">Edit</button>
+                        <button onClick={() => handleDeleteEvent(event._id)} className="text-red-600 hover:text-red-900">Delete</button>
+                      </>
+                    ) : (
+                      <span className="text-gray-400">No access</span>
+                    )}
                   </td>
                 </tr>
               ))}

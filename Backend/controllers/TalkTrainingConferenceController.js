@@ -30,10 +30,8 @@ exports.getAllEvents = async (req, res) => {
 
   try {
     let events;
-    if (user.role === 'director' && req.query.onlyMine !== 'true') {
-      // console.log('Fetching all events (director mode)');
-      events = await TalkTrainingConference.find();
-    } else {
+    // Everyone can see all events
+    if (req.query.onlyMine === 'true') {
       // console.log('Fetching only user events');
       // Handle both old (simple ID) and new (object with id) createdBy structures
       events = await TalkTrainingConference.find({
@@ -42,6 +40,9 @@ exports.getAllEvents = async (req, res) => {
           { createdBy: user._id }
         ]
       });
+    } else {
+      // console.log('Fetching all events (visible to everyone)');
+      events = await TalkTrainingConference.find();
     }
     // console.log('Events found:', events.length);
     // console.log('Events:', events);
@@ -94,10 +95,7 @@ exports.getEventById = async (req, res) => {
     const event = await TalkTrainingConference.findById(req.params.id);
     if (!event) return res.status(404).json({ message: 'Event not found' });
 
-    if (!hasAccessToEvent(user, event)) {
-      return res.status(403).json({ message: 'Access denied' });
-    }
-
+    // Everyone can view event details
     res.json(event);
   } catch (error) {
     console.error('Error fetching event:', error);

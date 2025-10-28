@@ -169,9 +169,38 @@ exports.updateCollaboration = async (req, res) => {
       return res.status(403).json({ message: 'Access denied' });
     }
 
-    const updatedCollaboration = await Collaboration.findByIdAndUpdate(req.params.id, req.body, { new: true });
-    res.json(updatedCollaboration);
+    // console.log('=== UPDATE COLLABORATION (Backend) ===');
+    // console.log('Collaboration ID:', req.params.id);
+    // console.log('Request body:', req.body);
+    // console.log('Collaboration scope:', req.body.collaborationScope);
+
+    // If switching to local collaboration, explicitly remove the country field
+    if (req.body.collaborationScope === 'local') {
+      // console.log('Local collaboration detected - removing country field from database');
+      const updatedCollaboration = await Collaboration.findByIdAndUpdate(
+        req.params.id, 
+        { 
+          ...req.body,
+          $unset: { collaboratingCountry: "" } // Explicitly remove the field
+        }, 
+        { new: true }
+      );
+      // console.log('Updated collaboration (local):', updatedCollaboration);
+      res.json(updatedCollaboration);
+    } else {
+      // For foreign collaborations, update normally
+      // console.log('Foreign collaboration - updating normally');
+      const updatedCollaboration = await Collaboration.findByIdAndUpdate(
+        req.params.id, 
+        req.body, 
+        { new: true }
+      );
+      // console.log('Updated collaboration (foreign):', updatedCollaboration);
+      res.json(updatedCollaboration);
+    }
   } catch (error) {
+    console.error('=== ERROR UPDATING COLLABORATION (Backend) ===');
+    console.error('Error:', error);
     res.status(400).json({ message: error.message });
   }
 };

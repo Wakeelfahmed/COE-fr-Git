@@ -814,7 +814,7 @@ const EventsPage = () => {
                 <td className="px-6 py-4 whitespace-nowrap">{event.organizer}</td>
                 <td className="px-6 py-4 whitespace-nowrap">{event.resourcePerson}</td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  {event.role === 'other' ? event.otherRole : event.role}
+                  {event.role === 'other' ? `other: ${event.otherRole}` : event.role}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">{event.type}</td>
                 <td className="px-6 py-4 whitespace-nowrap">{event.participantsOfEvent}</td>

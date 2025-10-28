@@ -191,7 +191,7 @@ const CollaborationPage = () => {
     collaboratingForeignResearcher: '',
     foreignCollaboratingInstitute: '',
     collaboratingCountry: '',
-    collaborationScope: 'foreign', // Default to foreign since this is Foreign Collaboration page
+    collaborationScope: 'local',
     typeOfCollaboration: '',
     otherTypeDescription: '',
     durationStart: '',
@@ -284,7 +284,7 @@ const CollaborationPage = () => {
       collaboratingForeignResearcher: '',
       foreignCollaboratingInstitute: '',
       collaboratingCountry: '',
-      collaborationScope: 'foreign', // Default to foreign
+      collaborationScope: 'local', // Default to local
       typeOfCollaboration: '',
       otherTypeDescription: '',
       durationStart: '',
@@ -297,34 +297,56 @@ const CollaborationPage = () => {
   };
 
   const handleEditCollaboration = (collaboration) => {
+    console.log('=== EDIT COLLABORATION STARTED ===');
+    console.log('Original collaboration data:', collaboration);
+    console.log('Collaboration ID:', collaboration._id);
+    console.log('Collaboration scope:', collaboration.collaborationScope);
+    console.log('Collaborating country:', collaboration.collaboratingCountry);
+    console.log('Duration start:', collaboration.durationStart);
+    console.log('Duration end:', collaboration.durationEnd);
+    
     setIsEditMode(true);
-    setCurrentCollaboration({
+    
+    const formattedCollaboration = {
       ...collaboration,
       // Set default collaborationScope if not present (for backward compatibility)
       collaborationScope: collaboration.collaborationScope || 'foreign',
       durationStart: collaboration.durationStart ? new Date(collaboration.durationStart).toISOString().split('T')[0] : '',
       durationEnd: collaboration.durationEnd ? new Date(collaboration.durationEnd).toISOString().split('T')[0] : ''
-    });
+    };
+    
+    console.log('Formatted collaboration for editing:', formattedCollaboration);
+    setCurrentCollaboration(formattedCollaboration);
     setShowModal(true);
+    console.log('Edit modal opened');
   };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
+    console.log(`Field changed - ${name}:`, value);
 
     if (name === 'collaborationScope' && value === 'local') {
       // Clear country when switching to local
+      console.log('Switching to local collaboration - clearing country field');
       setCurrentCollaboration(prev => ({
         ...prev,
         [name]: value,
         collaboratingCountry: '' // Clear country field
       }));
     } else {
-      setCurrentCollaboration(prev => ({ ...prev, [name]: value }));
+      setCurrentCollaboration(prev => {
+        const updated = { ...prev, [name]: value };
+        console.log('Updated collaboration state:', updated);
+        return updated;
+      });
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    console.log('=== SUBMIT COLLABORATION ===');
+    console.log('Is Edit Mode:', isEditMode);
+    console.log('Current collaboration state:', currentCollaboration);
 
     // Prepare the data based on collaboration scope
     const submissionData = {
@@ -333,19 +355,36 @@ const CollaborationPage = () => {
 
     // Remove country field if it's a local collaboration
     if (currentCollaboration.collaborationScope === 'local') {
+      console.log('Local collaboration - removing country field');
       delete submissionData.collaboratingCountry;
     }
 
+    console.log('Submission data prepared:', submissionData);
+
     try {
       if (isEditMode) {
-        await axios.put(`${API_BASE_URL}/collaborations/${currentCollaboration._id}`, submissionData);
+        console.log('Updating collaboration with ID:', currentCollaboration._id);
+        console.log('API endpoint:', `${API_BASE_URL}/collaborations/${currentCollaboration._id}`);
+        const response = await axios.put(`${API_BASE_URL}/collaborations/${currentCollaboration._id}`, submissionData);
+        console.log('Update response:', response.data);
+        console.log('Collaboration updated successfully');
       } else {
-        await axios.post(`${API_BASE_URL}/collaborations`, submissionData);
+        console.log('Creating new collaboration');
+        console.log('API endpoint:', `${API_BASE_URL}/collaborations`);
+        const response = await axios.post(`${API_BASE_URL}/collaborations`, submissionData);
+        console.log('Create response:', response.data);
+        console.log('Collaboration created successfully');
       }
       setShowModal(false);
+      console.log('Modal closed, fetching updated collaborations...');
       fetchCollaborations();
     } catch (error) {
-      console.error('Error saving collaboration:', error);
+      console.error('=== ERROR SAVING COLLABORATION ===');
+      console.error('Error object:', error);
+      console.error('Error message:', error.message);
+      console.error('Error response:', error.response?.data);
+      console.error('Error status:', error.response?.status);
+      console.error('Error stack:', error.stack);
       alert('Error saving collaboration. Please try again.');
     }
   };

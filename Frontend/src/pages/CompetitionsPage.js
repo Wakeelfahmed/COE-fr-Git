@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { useUser } from '../context/UserContext';
 import AccountFilter from '../components/AccountFilter';
@@ -54,7 +54,7 @@ const CompetitionsPage = () => {
 
   useEffect(() => {
     fetchCompetitions();
-  }, [showOnlyMine]);
+  }, [fetchCompetitions]);
 
     // Keyboard shortcuts
   useEffect(() => {
@@ -73,7 +73,7 @@ const CompetitionsPage = () => {
     }, [showModal, showReportModal, showExcelModal]);
 
 
-  const fetchCompetitions = async () => {
+  const fetchCompetitions = useCallback(async () => {
     try {
       const response = await axios.get(`${API_BASE_URL}/competitions`, {
         params: { onlyMine: showOnlyMine }
@@ -83,7 +83,7 @@ const CompetitionsPage = () => {
       console.error('Error fetching competitions:', error);
       alert('Error fetching competitions. Please try again.');
     }
-  };
+  }, [showOnlyMine]);
 
   const handleNewCompetition = () => {
     setIsEditMode(false);

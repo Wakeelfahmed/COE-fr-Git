@@ -51,13 +51,10 @@ exports.getAllInternships = async (req, res) => {
   const user = getUserFromToken(req);
   if (!user) return res.status(401).json({ message: 'Unauthorized' });
 
-  
-
   try {
     let internships;
-    if (user.role === 'director' && req.query.onlyMine !== 'true') {
-      internships = await Internship.find();
-    } else {
+    // Everyone can see all internships
+    if (req.query.onlyMine === 'true') {
       // Handle both old (simple ID) and new (object with id) createdBy structures
       internships = await Internship.find({
         $or: [
@@ -65,6 +62,8 @@ exports.getAllInternships = async (req, res) => {
           { createdBy: user._id }
         ]
       });
+    } else {
+      internships = await Internship.find();
     }
     res.json(internships);
   } catch (error) {
@@ -80,10 +79,7 @@ exports.getInternshipById = async (req, res) => {
     const internship = await Internship.findById(req.params.id);
     if (!internship) return res.status(404).json({ message: 'Internship not found' });
 
-    if (!hasAccessToInternship(user, internship)) {
-      return res.status(403).json({ message: 'Access denied' });
-    }
-
+    // Everyone can view internship details
     res.json(internship);
   } catch (error) {
     res.status(500).json({ message: error.message });

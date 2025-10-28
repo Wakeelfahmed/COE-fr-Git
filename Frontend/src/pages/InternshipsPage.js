@@ -287,6 +287,17 @@ const InternshipView = () => {
 
 
 
+  // Helper function to check if user can edit/delete an internship
+  const canEditInternship = (internship) => {
+    if (!user) return false;
+    // Director can edit/delete everything
+    if (user.role === 'director') return true;
+    // Creator can edit/delete their own internships
+    const creatorId = internship.createdBy?.id || internship.createdBy;
+    // Compare with user.id (MongoDB _id) not user.uid (Firebase UID)
+    return creatorId?.toString() === user.id?.toString();
+  };
+
   const fetchInternships = useCallback(async () => {
     try {
       const response = await axios.get(`${API_BASE_URL}/internships`, {
@@ -594,38 +605,52 @@ const InternshipView = () => {
                   {internship.fileLink ? (
                     <div>
                       <a href={internship.fileLink} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-900 mr-2">View File</a>
-                      <button onClick={() => handleFileDelete(internship._id, internship.fileLink.split('/').pop())} className="text-red-600 hover:text-red-900 mr-2">Delete</button>
-                      <input
-                        type="file"
-                        onChange={(e) => handleFileChange(e, internship._id)}
-                        accept=".pdf"
-                        className="hidden"
-                        id={`fileUpdate-${internship._id}`}
-                      />
-                      <label htmlFor={`fileUpdate-${internship._id}`} className="text-green-600 hover:text-green-900 cursor-pointer">Update</label>
-                      {selectedFiles[internship._id] && (
-                        <button onClick={() => handleFileUpload(internship._id)} className="text-blue-600 hover:text-blue-900 ml-2">Confirm Update</button>
+                      {canEditInternship(internship) && (
+                        <>
+                          <button onClick={() => handleFileDelete(internship._id, internship.fileLink.split('/').pop())} className="text-red-600 hover:text-red-900 mr-2">Delete</button>
+                          <input
+                            type="file"
+                            onChange={(e) => handleFileChange(e, internship._id)}
+                            accept=".pdf"
+                            className="hidden"
+                            id={`fileUpdate-${internship._id}`}
+                          />
+                          <label htmlFor={`fileUpdate-${internship._id}`} className="text-green-600 hover:text-green-900 cursor-pointer">Update</label>
+                          {selectedFiles[internship._id] && (
+                            <button onClick={() => handleFileUpload(internship._id)} className="text-blue-600 hover:text-blue-900 ml-2">Confirm Update</button>
+                          )}
+                        </>
                       )}
                     </div>
                   ) : (
-                    <div>
-                      <input
-                        type="file"
-                        onChange={(e) => handleFileChange(e, internship._id)}
-                        accept=".pdf"
-                        className="hidden"
-                        id={`fileUpload-${internship._id}`}
-                      />
-                      <label htmlFor={`fileUpload-${internship._id}`} className="text-blue-600 hover:text-blue-900 cursor-pointer mr-2">Select File</label>
-                      {selectedFiles[internship._id] && (
-                        <button onClick={() => handleFileUpload(internship._id)} className="text-green-600 hover:text-green-900">Upload</button>
-                      )}
-                    </div>
+                    canEditInternship(internship) ? (
+                      <div>
+                        <input
+                          type="file"
+                          onChange={(e) => handleFileChange(e, internship._id)}
+                          accept=".pdf"
+                          className="hidden"
+                          id={`fileUpload-${internship._id}`}
+                        />
+                        <label htmlFor={`fileUpload-${internship._id}`} className="text-blue-600 hover:text-blue-900 cursor-pointer mr-2">Select File</label>
+                        {selectedFiles[internship._id] && (
+                          <button onClick={() => handleFileUpload(internship._id)} className="text-green-600 hover:text-green-900">Upload</button>
+                        )}
+                      </div>
+                    ) : (
+                      <span className="text-gray-400">No file</span>
+                    )
                   )}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <button onClick={() => handleEditInternship(internship)} className="text-blue-600 hover:text-blue-900 mr-2">Edit</button>
-                  <button onClick={() => handleDeleteInternship(internship._id)} className="text-red-600 hover:text-red-900">Delete</button>
+                  {canEditInternship(internship) ? (
+                    <>
+                      <button onClick={() => handleEditInternship(internship)} className="text-blue-600 hover:text-blue-900 mr-2">Edit</button>
+                      <button onClick={() => handleDeleteInternship(internship._id)} className="text-red-600 hover:text-red-900">Delete</button>
+                    </>
+                  ) : (
+                    <span className="text-gray-400">No access</span>
+                  )}
                 </td>
               </tr>
             ))}

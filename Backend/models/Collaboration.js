@@ -27,7 +27,7 @@ const collaborationSchema = new mongoose.Schema({
     type: String,
     required: true,
     enum: ['local', 'foreign'],
-    default: 'foreign'
+    default: 'local'
   },
   typeOfCollaboration: {
     type: String,
